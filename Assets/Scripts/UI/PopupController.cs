@@ -19,8 +19,11 @@ namespace UI
         public Image redFlashOverlay;
         public GameObject bombPlaceholderGo; // Procedural bomb card/symbol
 
+        public const float BOT_POPUP_AUTO_CLOSE_DELAY = 3f;
+
         private Action onContinueCallback;
         private Coroutine autoCloseCoroutine;
+        private bool isPopupOpen;
 
         private void Awake()
         {
@@ -42,6 +45,20 @@ namespace UI
 
         public void ShowPopup(string title, string message, Action callback, bool playExplosion = false)
         {
+            var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
+            bool autoClose = curPlayer != null && curPlayer.isBot;
+            ShowPopup(title, message, autoClose, BOT_POPUP_AUTO_CLOSE_DELAY, callback, playExplosion);
+        }
+
+        public void ShowPopup(
+            string title,
+            string message,
+            bool autoClose,
+            float autoCloseDelay,
+            Action onClose,
+            bool playExplosion = false
+        )
+        {
             if (autoCloseCoroutine != null)
             {
                 StopCoroutine(autoCloseCoroutine);
@@ -56,9 +73,16 @@ namespace UI
 
             labelTitle.text = title;
             labelMessage.text = message;
-            onContinueCallback = callback;
+            onContinueCallback = onClose;
 
+            isPopupOpen = true;
             popupPanel.SetActive(true);
+
+            // Hide/disable Continue button if autoClose is active
+            if (btnContinue != null)
+            {
+                btnContinue.gameObject.SetActive(!autoClose);
+            }
 
             // Pop animation (fade / scale)
             popupPanel.transform.localScale = Vector3.zero;
@@ -69,19 +93,26 @@ namespace UI
                 StartCoroutine(PlayBombExplosionCo());
             }
 
-            // Trigger bot auto-close if current player is a bot
             var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
-            if (curPlayer != null && curPlayer.isBot)
+            string botName = curPlayer != null ? curPlayer.playerName : "Bot";
+
+            if (autoClose)
             {
-                autoCloseCoroutine = StartCoroutine(AutoCloseCo(UnityEngine.Random.Range(0.8f, 1.5f), curPlayer.playerName));
+                Debug.Log($"Bot Player {botName} popup opened.");
+                Debug.Log($"Bot Player {botName} popup will auto close in {autoCloseDelay} seconds.");
+                autoCloseCoroutine = StartCoroutine(AutoCloseCo(autoCloseDelay, botName));
+            }
+            else
+            {
+                Debug.Log($"Human Player popup opened.");
             }
         }
 
         private IEnumerator AutoCloseCo(float delay, string botName)
         {
             yield return new WaitForSeconds(delay);
-            Debug.Log($"Bot Player {botName} auto closed popup");
-            OnContinueClicked();
+            Debug.Log($"Bot Player {botName} popup auto closed.");
+            ClosePopup();
         }
 
         private void OnContinueClicked()
@@ -90,12 +121,30 @@ namespace UI
             {
                 Audio.AudioManager.Instance.PlaySFX(Audio.AudioManager.Instance.clickClip);
             }
+            ClosePopup();
+        }
 
-            popupPanel.SetActive(false);
+        public void ClosePopup()
+        {
+            if (!isPopupOpen) return;
+            isPopupOpen = false;
+
+            if (autoCloseCoroutine != null)
+            {
+                StopCoroutine(autoCloseCoroutine);
+                autoCloseCoroutine = null;
+            }
+
+            if (popupPanel != null) popupPanel.SetActive(false);
             if (bombPlaceholderGo != null) bombPlaceholderGo.SetActive(false);
 
-            // Trigger callback
-            onContinueCallback?.Invoke();
+            // Reset scale if it was shaking or animating
+            if (popupPanel != null) popupPanel.transform.localPosition = Vector3.zero;
+
+            Action callback = onContinueCallback;
+            onContinueCallback = null;
+
+            callback?.Invoke();
         }
 
         private IEnumerator PopScaleCo(Transform trans, Vector3 targetScale, float duration)

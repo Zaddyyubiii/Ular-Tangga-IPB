@@ -35,6 +35,7 @@ namespace Core
         [Header("Active Game Status")]
         public List<PlayerData> players = new List<PlayerData>();
         public Dictionary<int, PlayerToken> playerTokens = new Dictionary<int, PlayerToken>();
+        private List<PlayerData> finishOrder = new List<PlayerData>();
 
         private void Awake()
         {
@@ -104,6 +105,7 @@ namespace Core
             // 2. Setup Players
             players.Clear();
             playerTokens.Clear();
+            finishOrder.Clear();
 
             // Clean active tokens from container
             if (tokenContainer != null)
@@ -344,11 +346,15 @@ namespace Core
             
             Debug.Log($"[Tile Resolution] Player {player.playerName} landed on Tile {tile} (Type: {def.type})");
 
+            if (player.isBot)
+            {
+                Debug.Log($"Bot Player {player.playerName} landed on {def.type} Tile.");
+            }
+
             switch (def.type)
             {
                 case TileType.Finish:
-                    // Win game
-                    DeclareWinner(player);
+                    RegisterPlayerFinish(player);
                     break;
 
                 case TileType.Question:
@@ -587,7 +593,7 @@ namespace Core
             PlayerData curPlayer = GetCurrentPlayer();
             if (curPlayer != null && curPlayer.isBot)
             {
-                Debug.Log($"Bot Player {curPlayer.playerName} ended turn");
+                Debug.Log($"Bot Player {curPlayer.playerName} turn ended.");
             }
 
             currentState = GameState.ChangingTurn;
@@ -603,6 +609,109 @@ namespace Core
             {
                 currentState = GameState.WaitingForInput;
                 TurnManager.Instance.StartNextTurn();
+            }
+        }
+
+        public bool AreAllActivePlayersFinished()
+        {
+            foreach (var player in players)
+            {
+                if (!player.isDroppedOut && !player.isFinished)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void RegisterPlayerFinish(PlayerData player)
+        {
+            if (player.isFinished) return;
+
+            player.isFinished = true;
+            player.finishRank = finishOrder.Count + 1;
+            player.finishTurnNumber = TurnManager.Instance != null ? TurnManager.Instance.currentTurnCount : 0;
+
+            if (player.finishRank == 1)
+            {
+                player.isWinner = true;
+            }
+
+            finishOrder.Add(player);
+            player.currentTile = 100;
+
+            // Logs
+            Debug.Log($"Player {player.playerName} reached tile 100.");
+            Debug.Log($"Player {player.playerName} registered as rank {player.finishRank}.");
+            Debug.Log($"Player {player.playerName} is finished and removed from turn queue.");
+
+            // Sync token visual to show exactly on tile 100
+            if (playerTokens.TryGetValue(player.id, out PlayerToken token))
+            {
+                token.UpdateVisuals();
+            }
+
+            // Refresh status display grid cards
+            if (GameplayUI.Instance != null)
+            {
+                GameplayUI.Instance.RefreshStatusGrid(players, player);
+            }
+
+            ShowFinishPopup(player);
+        }
+
+        private void ShowFinishPopup(PlayerData player)
+        {
+            string title = "FINISH!";
+            string rankStr = player.finishRank <= 3 ? $"Juara {player.finishRank}" : $"Posisi {player.finishRank}";
+            string message = $"Selamat, {player.playerName} berhasil mencapai petak 100 dan menjadi kandidat {rankStr}!";
+
+            if (PopupController.Instance != null)
+            {
+                bool autoClose = player.isBot;
+                float delay = PopupController.BOT_POPUP_AUTO_CLOSE_DELAY;
+
+                PopupController.Instance.ShowPopup(
+                    title,
+                    message,
+                    autoClose,
+                    delay,
+                    () => { OnFinishPopupClosed(); }
+                );
+            }
+            else
+            {
+                OnFinishPopupClosed();
+            }
+        }
+
+        private void OnFinishPopupClosed()
+        {
+            Debug.Log($"Checking all active players finished: {AreAllActivePlayersFinished()}");
+            if (AreAllActivePlayersFinished())
+            {
+                ShowFinalRanking();
+            }
+            else
+            {
+                TransitionToNextTurn();
+            }
+        }
+
+        public void ShowFinalRanking()
+        {
+            currentState = GameState.GameOver;
+
+            // Log
+            Debug.Log("Final ranking displayed.");
+
+            if (GameOverUI.Instance != null)
+            {
+                GameOverUI.Instance.ShowFinalRanking(players, finishOrder);
+            }
+            else
+            {
+                Debug.LogWarning("[GameManager] GameOverUI.Instance is null, could not display final ranking.");
             }
         }
     }

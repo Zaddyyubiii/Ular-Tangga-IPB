@@ -13,6 +13,9 @@ namespace Player
         public int skipTurns;
         public bool isDroppedOut;
         public bool isWinner;
+        public bool isFinished;
+        public int finishRank;
+        public int finishTurnNumber;
         public int currentEvolutionStage = 1; // 1 to 5
         public Sprite currentSprite;
         public Color playerColor;

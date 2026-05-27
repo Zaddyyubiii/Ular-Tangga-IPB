@@ -29,7 +29,15 @@ namespace UI
             // Tile position
             if (labelTile != null)
             {
-                labelTile.text = $"Tile: {data.currentTile}";
+                if (data.isFinished)
+                {
+                    string rankStr = data.finishRank <= 3 ? $"Juara {data.finishRank}" : $"Posisi {data.finishRank}";
+                    labelTile.text = $"Tile: 100/100 ({rankStr})";
+                }
+                else
+                {
+                    labelTile.text = $"Tile: {data.currentTile}";
+                }
             }
 
             // Evolution Label
@@ -56,7 +64,7 @@ namespace UI
             // Highlight border if active turn
             if (imageHighlightBorder != null)
             {
-                imageHighlightBorder.gameObject.SetActive(isActivePlayer);
+                imageHighlightBorder.gameObject.SetActive(isActivePlayer && !data.isFinished && !data.isDroppedOut);
             }
 
             // Status details
@@ -67,6 +75,11 @@ namespace UI
             {
                 statusStr = "DROP OUT";
                 statusColor = Color.red;
+            }
+            else if (data.isFinished)
+            {
+                statusStr = "FINISH";
+                statusColor = new Color(0.85f, 0.65f, 0.12f);
             }
             else if (data.isWinner)
             {

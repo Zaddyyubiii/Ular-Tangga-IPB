@@ -13,6 +13,7 @@ namespace Turn
         public float turnDuration = 10f;
         public float currentTimer = 10f;
         private bool timerActive = false;
+        public int currentTurnCount = 0;
 
         public int currentPlayerIndex = -1;
         private List<PlayerData> players = new List<PlayerData>();
@@ -31,6 +32,7 @@ namespace Turn
         {
             players = activePlayers;
             currentPlayerIndex = -1;
+            currentTurnCount = 0;
         }
 
         private void Update()
@@ -53,29 +55,11 @@ namespace Turn
         {
             if (players == null || players.Count == 0) return;
 
-            // Check if game is over (only 1 player not dropped out, or a player is winner)
-            if (Core.GameManager.Instance.currentState == Core.GameState.GameOver)
+            // Check if game is over (all active players finished)
+            if (Core.GameManager.Instance.AreAllActivePlayersFinished())
             {
                 timerActive = false;
-                return;
-            }
-
-            int activeCount = 0;
-            PlayerData singleActivePlayer = null;
-            foreach (var p in players)
-            {
-                if (!p.isDroppedOut)
-                {
-                    activeCount++;
-                    singleActivePlayer = p;
-                }
-            }
-
-            if (activeCount <= 1 && singleActivePlayer != null)
-            {
-                // Last standing player wins!
-                Debug.Log($"[Turn] Only 1 active player remains: {singleActivePlayer.playerName}");
-                Core.GameManager.Instance.DeclareWinner(singleActivePlayer);
+                Core.GameManager.Instance.ShowFinalRanking();
                 return;
             }
 
@@ -83,11 +67,20 @@ namespace Turn
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
             PlayerData activePlayer = players[currentPlayerIndex];
 
-            Debug.Log($"[Turn] Cycling turn. Player: {activePlayer.playerName}, Index: {currentPlayerIndex}, DroppedOut: {activePlayer.isDroppedOut}, SkipTurns: {activePlayer.skipTurns}");
+            Debug.Log($"[Turn] Cycling turn. Player: {activePlayer.playerName}, Index: {currentPlayerIndex}, DroppedOut: {activePlayer.isDroppedOut}, SkipTurns: {activePlayer.skipTurns}, Finished: {activePlayer.isFinished}");
 
             // If dropped out, skip immediately
             if (activePlayer.isDroppedOut)
             {
+                Debug.Log($"Skipping {activePlayer.playerName} because dropped out.");
+                StartNextTurn();
+                return;
+            }
+
+            // If already finished, skip immediately
+            if (activePlayer.isFinished)
+            {
+                Debug.Log($"Skipping {activePlayer.playerName} because already finished.");
                 StartNextTurn();
                 return;
             }
@@ -115,6 +108,7 @@ namespace Turn
             }
 
             // Valid active player, start turn
+            currentTurnCount++;
             currentTimer = turnDuration;
             timerActive = true;
             OnTurnStarted?.Invoke(activePlayer);

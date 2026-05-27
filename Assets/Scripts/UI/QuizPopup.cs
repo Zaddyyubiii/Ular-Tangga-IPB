@@ -161,7 +161,7 @@ namespace UI
             string botName = curPlayer != null ? curPlayer.playerName : "Bot";
 
             // Wait for dramatic effect (bot "thinking" / player reading the question)
-            yield return new WaitForSeconds(2.0f);
+            yield return new WaitForSeconds(UnityEngine.Random.Range(0.5f, 1.0f));
 
             // Choose an answer: bot has a 75% chance of answering correctly
             bool answerCorrectly = UnityEngine.Random.value < 0.75f;
@@ -172,16 +172,16 @@ namespace UI
             }
 
             // Trigger visual feedback and SFX via option selection
-            string choiceText = chosenIndex == 0 ? "A/True" : "B/False";
-            Debug.Log($"Bot Player {botName} answered quiz: {choiceText}");
+            string choiceChar = chosenIndex == 0 ? "A" : "B";
+            Debug.Log($"Bot Player {botName} quiz answered: {choiceChar}.");
             OnOptionSelected(chosenIndex);
 
-            // Wait for dramatic effect so the player can read the feedback explanation
-            yield return new WaitForSeconds(2.5f);
+            // Wait for feedback to be displayed for exactly 3 seconds
+            yield return new WaitForSeconds(PopupController.BOT_POPUP_AUTO_CLOSE_DELAY);
 
             // Enable close button and close the quiz automatically
             if (btnCloseQuiz != null) btnCloseQuiz.interactable = true;
-            Debug.Log($"Bot Player {botName} auto closed popup");
+            Debug.Log($"Bot Player {botName} quiz feedback auto closed.");
             OnCloseQuizClicked();
         }
     }
