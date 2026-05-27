@@ -26,16 +26,22 @@ namespace UI
         {
             this.playerData = player;
             Debug.Log($"Status card bound to Player {player.id} with color: {player.playerColor}");
-            ApplyPlayerColor(player.playerColor);
+            ApplyPlayerColor(player.playerColor, isActivePlayer);
             Refresh(player, isActivePlayer);
         }
 
-        private void ApplyPlayerColor(Color color)
+        private void ApplyPlayerColor(Color color, bool isActive)
         {
             if (imageAvatarBackground != null)
             {
-                // Soft background (darkened / soft version of player color)
-                imageAvatarBackground.color = new Color(color.r * 0.25f + 0.1f, color.g * 0.25f + 0.1f, color.b * 0.25f + 0.1f, 0.9f);
+                if (isActive)
+                {
+                    imageAvatarBackground.color = GetHighContrastColor(color);
+                }
+                else
+                {
+                    imageAvatarBackground.color = GetNormalCardColor(color);
+                }
             }
 
             // Ensure text color is highly readable against the card background color
@@ -44,6 +50,30 @@ namespace UI
             if (labelTile != null) labelTile.color = txtColor;
             if (labelEvolution != null) labelEvolution.color = txtColor;
             if (labelSkulls != null) labelSkulls.color = txtColor;
+        }
+
+        private Color GetNormalCardColor(Color baseColor)
+        {
+            // Soft background (darkened / soft version of player color)
+            return new Color(baseColor.r * 0.25f + 0.1f, baseColor.g * 0.25f + 0.1f, baseColor.b * 0.25f + 0.1f, 0.9f);
+        }
+
+        private Color GetHighContrastColor(Color baseColor)
+        {
+            float luminance = 
+                0.299f * baseColor.r +
+                0.587f * baseColor.g +
+                0.114f * baseColor.b;
+
+            // If color is relatively bright, make it much darker; if dark, make it brighter
+            if (luminance > 0.6f)
+            {
+                return Color.Lerp(baseColor, Color.black, 0.35f);
+            }
+            else
+            {
+                return Color.Lerp(baseColor, Color.white, 0.25f);
+            }
         }
 
         private Color GetReadableTextColor(Color backgroundColor)
@@ -103,11 +133,22 @@ namespace UI
                 labelSkulls.text = $"Sanksi: {data.skullHitCount}/3";
             }
 
-            // Highlight border if active turn
+            bool isCurrentlyActive = isActivePlayer && !data.isFinished && !data.isDroppedOut;
+
+            // Highlight border if active turn (using White for contrast outline instead of universal green)
             if (imageHighlightBorder != null)
             {
-                imageHighlightBorder.gameObject.SetActive(isActivePlayer && !data.isFinished && !data.isDroppedOut);
+                imageHighlightBorder.gameObject.SetActive(isCurrentlyActive);
+                if (isCurrentlyActive)
+                {
+                    imageHighlightBorder.color = Color.white;
+                }
             }
+
+            // Apply card scale (1.03x) when active
+            transform.localScale = isCurrentlyActive 
+                ? Vector3.one * 1.03f 
+                : Vector3.one;
 
             // Status details
             string statusStr = "Menunggu";
@@ -128,10 +169,10 @@ namespace UI
                 statusStr = "MENANG";
                 statusColor = new Color(0.85f, 0.65f, 0.12f);
             }
-            else if (isActivePlayer)
+            else if (isCurrentlyActive)
             {
                 statusStr = "GILIRAN AKTIF";
-                statusColor = new Color(0.12f, 0.73f, 0.35f);
+                statusColor = Color.white;
             }
             else if (data.skipTurns > 0)
             {
@@ -145,7 +186,8 @@ namespace UI
                 labelStatus.color = statusColor;
             }
 
-            ApplyPlayerColor(data.playerColor);
+            // Apply card background and text colors
+            ApplyPlayerColor(data.playerColor, isCurrentlyActive);
         }
     }
 }

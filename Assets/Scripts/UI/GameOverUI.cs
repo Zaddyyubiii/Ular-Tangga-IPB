@@ -105,7 +105,23 @@ namespace UI
             Player.PlayerData juara1 = finishOrder.Count > 0 ? finishOrder[0] : null;
             Player.PlayerData juara2 = finishOrder.Count > 1 ? finishOrder[1] : null;
             Player.PlayerData juara3 = finishOrder.Count > 2 ? finishOrder[2] : null;
-            Player.PlayerData posisi4 = finishOrder.Count > 3 ? finishOrder[3] : null;
+            
+            Player.PlayerData posisi4 = null;
+            if (finishOrder.Count > 3)
+            {
+                posisi4 = finishOrder[3];
+            }
+            else
+            {
+                foreach (var p in players)
+                {
+                    if (!p.isFinished && !p.isDroppedOut)
+                    {
+                        posisi4 = p;
+                        break;
+                    }
+                }
+            }
 
             // Gather dropped out players
             System.Collections.Generic.List<string> dropOuts = new System.Collections.Generic.List<string>();
@@ -120,12 +136,25 @@ namespace UI
             // Build large consolidated string inside labelMessage as a robust fallback
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             if (juara1 != null) sb.AppendLine($"🥇 Juara 1: {juara1.playerName}");
+            else sb.AppendLine($"🥇 Juara 1: -");
+            
             if (juara2 != null) sb.AppendLine($"🥈 Juara 2: {juara2.playerName}");
+            else sb.AppendLine($"🥈 Juara 2: -");
+
             if (juara3 != null) sb.AppendLine($"🥉 Juara 3: {juara3.playerName}");
+            else sb.AppendLine($"🥉 Juara 3: -");
+
             if (posisi4 != null)
             {
                 sb.AppendLine();
-                sb.AppendLine($"Posisi 4: {posisi4.playerName}");
+                if (posisi4.isFinished)
+                {
+                    sb.AppendLine($"Posisi 4: {posisi4.playerName}");
+                }
+                else
+                {
+                    sb.AppendLine($"Belum Finish: {posisi4.playerName}");
+                }
             }
 
             sb.AppendLine();
@@ -151,23 +180,28 @@ namespace UI
             // Set optional granular ranking labels if bound in the inspector
             if (labelJuara1 != null)
             {
-                labelJuara1.gameObject.SetActive(juara1 != null);
-                if (juara1 != null) labelJuara1.text = $"🥇 Juara 1: {juara1.playerName}";
+                labelJuara1.gameObject.SetActive(true);
+                labelJuara1.text = juara1 != null ? $"🥇 Juara 1: {juara1.playerName}" : "🥇 Juara 1: -";
             }
             if (labelJuara2 != null)
             {
-                labelJuara2.gameObject.SetActive(juara2 != null);
-                if (juara2 != null) labelJuara2.text = $"🥈 Juara 2: {juara2.playerName}";
+                labelJuara2.gameObject.SetActive(true);
+                labelJuara2.text = juara2 != null ? $"🥈 Juara 2: {juara2.playerName}" : "🥈 Juara 2: -";
             }
             if (labelJuara3 != null)
             {
-                labelJuara3.gameObject.SetActive(juara3 != null);
-                if (juara3 != null) labelJuara3.text = $"🥉 Juara 3: {juara3.playerName}";
+                labelJuara3.gameObject.SetActive(true);
+                labelJuara3.text = juara3 != null ? $"🥉 Juara 3: {juara3.playerName}" : "🥉 Juara 3: -";
             }
             if (labelPosisi4 != null)
             {
                 labelPosisi4.gameObject.SetActive(posisi4 != null);
-                if (posisi4 != null) labelPosisi4.text = $"Posisi 4: {posisi4.playerName}";
+                if (posisi4 != null)
+                {
+                    labelPosisi4.text = posisi4.isFinished 
+                        ? $"Posisi 4: {posisi4.playerName}" 
+                        : $"Belum Finish: {posisi4.playerName}";
+                }
             }
             if (labelDropOuts != null)
             {

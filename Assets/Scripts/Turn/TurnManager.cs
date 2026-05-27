@@ -55,8 +55,8 @@ namespace Turn
         {
             if (players == null || players.Count == 0) return;
 
-            // Check if game is over (all active players finished)
-            if (Core.GameManager.Instance.AreAllActivePlayersFinished())
+            // Check if game is over (e.g. 3 players finished, or drop out limits met)
+            if (Core.GameManager.Instance.ShouldEndGame())
             {
                 timerActive = false;
                 Core.GameManager.Instance.ShowFinalRanking();

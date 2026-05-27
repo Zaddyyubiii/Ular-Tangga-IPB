@@ -52,11 +52,33 @@ namespace Turn
                 yield break;
             }
 
-            float randomCharge = Random.Range(5f, 95f);
-            Debug.Log($"[Bot] {botData.playerName} rolling with {randomCharge:F1}% charge.");
+            float targetCharge = 50f;
+            if (botData.currentTile < 70)
+            {
+                targetCharge = Random.Range(55f, 100f);
+            }
+            else if (botData.currentTile <= 88)
+            {
+                targetCharge = Random.Range(35f, 85f);
+            }
+            else
+            {
+                int needed = 100 - botData.currentTile;
+                if (needed > 0 && needed <= 12)
+                {
+                    float baseCharge = DiceRollResolver.GetTargetChargeForValue(needed);
+                    targetCharge = Mathf.Clamp(baseCharge + Random.Range(-4f, 4f), 5f, 95f);
+                }
+                else
+                {
+                    targetCharge = Random.Range(5f, 25f);
+                }
+            }
+
+            Debug.Log($"[Bot] {botData.playerName} rolling with strategic {targetCharge:F1}% charge.");
 
             if (DiceGaugeController.Instance != null)
-                DiceGaugeController.Instance.ForceAutoRoll(randomCharge);
+                DiceGaugeController.Instance.ForceAutoRoll(targetCharge);
         }
     }
 }

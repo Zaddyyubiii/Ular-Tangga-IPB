@@ -128,13 +128,27 @@ namespace Core
                 new Color(0.95f, 0.75f, 0.15f) // Yellow/Gold
             };
 
+            // Read human player count from setup
+            numRealPlayers = GameSetup.HumanPlayerCount;
+
             for (int i = 1; i <= 4; i++)
             {
                 PlayerData p = new PlayerData();
                 p.id = i;
-                p.playerName = $"Mahasiswa {i}";
                 p.isBot = (i > numRealPlayers);
                 p.currentTile = 0; // Starts at petak 0 (start)
+
+                // Fetch custom name from GameSetup or PlayerPrefs fallback
+                string customName = "";
+                if (i - 1 < GameSetup.PlayerNames.Length && !string.IsNullOrEmpty(GameSetup.PlayerNames[i - 1]))
+                {
+                    customName = GameSetup.PlayerNames[i - 1];
+                }
+                else
+                {
+                    customName = PlayerPrefs.GetString($"PlayerName_{i - 1}", p.isBot ? $"Bot {i}" : $"Mahasiswa {i}");
+                }
+                p.playerName = customName;
 
                 // Set color from selected character set if available, otherwise fall back
                 Color pColor = colors[i - 1];
@@ -151,7 +165,7 @@ namespace Core
                     }
                 }
                 p.playerColor = pColor;
-                Debug.Log($"Player {p.id} assigned color: {p.playerColor}");
+                Debug.Log($"Player {p.id} ({p.playerName}) assigned color: {p.playerColor}");
 
                 // Initial evolution evaluation
                 if (PlayerEvolutionController.Instance != null)
@@ -292,38 +306,46 @@ namespace Core
 
             int startTile = curPlayer.currentTile;
             int targetTile = startTile + diceValue;
+            bool isBounce = targetTile > 100;
+            int bouncedTarget = targetTile;
+
+            if (isBounce)
+            {
+                int overflow = targetTile - 100;
+                bouncedTarget = 100 - overflow;
+                if (bouncedTarget < 1) bouncedTarget = 1;
+                Debug.Log($"Bounce back triggered: rawTarget={targetTile}, bouncedTarget={bouncedTarget}");
+            }
 
             yield return new WaitForSeconds(0.6f); // Wait for roll animation text display
 
-            // Edge Case 1: Overshoot finish tile 100
-            if (targetTile > 100)
-            {
-                Debug.Log($"[Overshoot] Player {curPlayer.playerName} rolled {diceValue} from tile {startTile}. Stays at tile.");
-                
-                if (PopupController.Instance != null)
-                {
-                    PopupController.Instance.ShowPopup(
-                        "Kelebihan Langkah!", 
-                        $"Kamu harus mendapatkan angka dadu yang tepat ({100 - startTile}) untuk mencapai petak 100. Lemparanmu ({diceValue}) melewati garis finish, kamu tetap di petak {startTile}.",
-                        () => { TransitionToNextTurn(); }
-                    );
-                }
-                else
-                {
-                    TransitionToNextTurn();
-                }
-                yield break;
-            }
-
-            // Normal Movement
+            // Normal & Bounce Movement
             currentState = GameState.Moving;
 
             // Generate path list of tile positions
             List<Vector2> pathPositions = new List<Vector2>();
-            for (int t = startTile + 1; t <= targetTile; t++)
+            if (!isBounce)
             {
-                Vector2 cellCenter = BoardManager.Instance.GetTilePosition(t);
-                pathPositions.Add(cellCenter + GetTokenOffset(curPlayer.id));
+                for (int t = startTile + 1; t <= targetTile; t++)
+                {
+                    Vector2 cellCenter = BoardManager.Instance.GetTilePosition(t);
+                    pathPositions.Add(cellCenter + GetTokenOffset(curPlayer.id));
+                }
+            }
+            else
+            {
+                // Move forward to 100
+                for (int t = startTile + 1; t <= 100; t++)
+                {
+                    Vector2 cellCenter = BoardManager.Instance.GetTilePosition(t);
+                    pathPositions.Add(cellCenter + GetTokenOffset(curPlayer.id));
+                }
+                // Then move backward from 99 down to bouncedTarget
+                for (int t = 99; t >= bouncedTarget; t--)
+                {
+                    Vector2 cellCenter = BoardManager.Instance.GetTilePosition(t);
+                    pathPositions.Add(cellCenter + GetTokenOffset(curPlayer.id));
+                }
             }
 
             // Animate token movement
@@ -332,7 +354,8 @@ namespace Core
                 yield return token.MoveTileByTile(pathPositions, 0.22f);
             }
 
-            curPlayer.currentTile = targetTile;
+            int finalTile = isBounce ? bouncedTarget : targetTile;
+            curPlayer.currentTile = finalTile;
             
             // Evaluate evolution after movement
             if (PlayerEvolutionController.Instance != null)
@@ -351,7 +374,29 @@ namespace Core
 
             // Tile Resolution
             currentState = GameState.ResolvingTile;
-            ResolveTileEffect(curPlayer, targetTile, diceValue);
+
+            if (isBounce)
+            {
+                if (PopupController.Instance != null)
+                {
+                    bool showContinue = !curPlayer.isBot;
+                    PopupController.Instance.ShowPopup(
+                        "Dadu Terlalu Besar!",
+                        $"{curPlayer.playerName} melewati petak 100, lalu mundur ke petak {bouncedTarget}.",
+                        () => { ResolveTileEffect(curPlayer, bouncedTarget, diceValue); },
+                        showContinueButton: showContinue,
+                        autoCloseDelay: PopupController.POPUP_AUTO_CLOSE_DELAY
+                    );
+                }
+                else
+                {
+                    ResolveTileEffect(curPlayer, bouncedTarget, diceValue);
+                }
+            }
+            else
+            {
+                ResolveTileEffect(curPlayer, targetTile, diceValue);
+            }
         }
 
         private void ResolveTileEffect(PlayerData player, int tile, int roll)
@@ -628,16 +673,42 @@ namespace Core
             }
         }
 
-        public bool AreAllActivePlayersFinished()
+        public int GetActiveUnfinishedPlayerCount()
         {
-            foreach (var player in players)
+            int count = 0;
+            foreach (var p in players)
             {
-                if (!player.isDroppedOut && !player.isFinished)
+                if (!p.isFinished && !p.isDroppedOut)
                 {
-                    return false;
+                    count++;
                 }
             }
-            return true;
+            return count;
+        }
+
+        public bool ShouldEndGame()
+        {
+            if (finishOrder.Count >= 3)
+            {
+                Debug.Log("Finish count >= 3. Ending game.");
+                return true;
+            }
+
+            int remainingActivePlayers = GetActiveUnfinishedPlayerCount();
+
+            // If the number of finished players + remaining active players is less than 3, the game should end
+            if (finishOrder.Count + remainingActivePlayers < 3)
+            {
+                Debug.Log($"Ending game because only {finishOrder.Count} players finished and {remainingActivePlayers} active remaining (cannot reach 3 ranking slots).");
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool AreAllActivePlayersFinished()
+        {
+            return ShouldEndGame();
         }
 
         private void RegisterPlayerFinish(PlayerData player)
@@ -700,8 +771,8 @@ namespace Core
 
         private void OnFinishPopupClosed()
         {
-            Debug.Log($"Checking all active players finished: {AreAllActivePlayersFinished()}");
-            if (AreAllActivePlayersFinished())
+            Debug.Log($"Checking if game should end: {ShouldEndGame()}");
+            if (ShouldEndGame())
             {
                 ShowFinalRanking();
             }

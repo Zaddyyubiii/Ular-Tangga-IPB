@@ -105,7 +105,17 @@ namespace Dice
             holdRegistered = false;
             DiceResult result = CalculateDiceRoll(currentCharge);
             if (labelResult != null) labelResult.text = result.value.ToString();
-            Debug.Log($"[Dice] Released at {currentCharge:F1}% -> Roll: {result.value}");
+            
+            // Set timing feedback
+            string feedback = "Normal Roll";
+            if (result.timingQuality == "Perfect") feedback = "Perfect Timing!";
+            else if (result.timingQuality == "Good") feedback = "Good Timing!";
+            
+            if (labelStatus != null) labelStatus.text = feedback;
+
+            // Logs matching section 7
+            Debug.Log($"Dice roll: charge={result.chargePercent:F1}%, quality={result.timingQuality}, zone={result.zoneName}, result={result.value}");
+            
             OnDiceResultRolled?.Invoke(result);
             OnDiceRolled?.Invoke(result.value);
         }
@@ -166,10 +176,11 @@ namespace Dice
                 gaugeSlider.value = currentCharge / 100f;
 
             string label, range;
-            if (currentCharge <= 25f)      { label = "Status Percobaan"; range = "2 - 3"; }
-            else if (currentCharge <= 50f) { label = "Mahasiswa Reguler"; range = "4 - 6"; }
-            else if (currentCharge <= 75f) { label = "Mahasiswa Teladan"; range = "7 - 9"; }
-            else                            { label = "Duta Tata Tertib";  range = "10 - 12"; }
+            if (currentCharge <= 20f)      { label = "Zona 1 (Status Percobaan)"; range = "1 - 3"; }
+            else if (currentCharge <= 40f) { label = "Zona 2 (Mahasiswa Reguler)"; range = "3 - 5"; }
+            else if (currentCharge <= 60f) { label = "Zona 3 (Mahasiswa Reguler)"; range = "5 - 8"; }
+            else if (currentCharge <= 80f) { label = "Zona 4 (Mahasiswa Teladan)"; range = "8 - 10"; }
+            else                            { label = "Zona 5 (Duta Tata Tertib)";  range = "10 - 12"; }
 
             if (Core.GameManager.Instance != null)
             {
@@ -181,33 +192,17 @@ namespace Dice
                 }
             }
 
-            if (labelStatus != null) labelStatus.text = label;
+            if (labelStatus != null && !isCharging) { /* Keep current timing feedback when not charging */ }
+            else if (labelStatus != null) { labelStatus.text = label; }
+
             if (labelRange != null) labelRange.text = $"Dadu: {range} ({currentCharge:F0}%)";
         }
 
         private DiceResult CalculateDiceRoll(float charge)
         {
-            List<int> possibilities = new List<int>();
-            string levelLabel, rangeLabel;
-
-            if (charge <= 25f)      { possibilities.AddRange(new[] {2,3});       levelLabel="Status Percobaan"; rangeLabel="2-3"; }
-            else if (charge <= 50f) { possibilities.AddRange(new[] {4,5,6});     levelLabel="Mahasiswa Reguler"; rangeLabel="4-6"; }
-            else if (charge <= 75f) { possibilities.AddRange(new[] {7,8,9});     levelLabel="Mahasiswa Teladan"; rangeLabel="7-9"; }
-            else                    { possibilities.AddRange(new[] {10,11,12});   levelLabel="Duta Tata Tertib"; rangeLabel="10-12"; }
-
-            if (Core.GameManager.Instance != null)
-            {
-                var p = Core.GameManager.Instance.GetCurrentPlayer();
-                if (p != null)
-                {
-                    int needed = 100 - p.currentTile;
-                    if (needed > 0 && needed <= 12 && !possibilities.Contains(needed))
-                        possibilities.Add(needed);
-                }
-            }
-
-            int idx = UnityEngine.Random.Range(0, possibilities.Count);
-            return new DiceResult(possibilities[idx], charge, levelLabel, rangeLabel);
+            var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
+            int currentTile = curPlayer != null ? curPlayer.currentTile : 0;
+            return DiceRollResolver.ResolveRoll(charge, currentTile);
         }
 
         private bool CanAcceptHumanInput()

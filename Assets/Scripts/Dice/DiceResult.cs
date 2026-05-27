@@ -7,15 +7,15 @@ namespace Dice
     {
         public int value;
         public float chargePercent;
-        public string levelLabel;
-        public string rangeLabel;
+        public string timingQuality; // "Perfect", "Good", "Normal"
+        public string zoneName;      // "Zona 1" to "Zona 5"
 
-        public DiceResult(int value, float chargePercent, string levelLabel, string rangeLabel)
+        public DiceResult(int value, float chargePercent, string timingQuality, string zoneName)
         {
             this.value = value;
             this.chargePercent = chargePercent;
-            this.levelLabel = levelLabel;
-            this.rangeLabel = rangeLabel;
+            this.timingQuality = timingQuality;
+            this.zoneName = zoneName;
         }
     }
 }
