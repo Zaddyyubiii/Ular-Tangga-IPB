@@ -78,42 +78,126 @@ namespace UI
 
         private void RefreshNameInputFields()
         {
-            if (nameInputsContainer != null)
+            Transform container = null;
+            if (btnStartGame != null)
             {
-                Destroy(nameInputsContainer);
+                container = btnStartGame.transform.parent;
+            }
+            if (container == null)
+            {
+                Canvas canvas = FindFirstObjectByType<Canvas>();
+                if (canvas != null)
+                {
+                    container = canvas.transform.Find("CenterCard");
+                }
+            }
+            if (container == null) return;
+
+            // 1. Clean up old container if it exists
+            Transform oldContainer = container.Find("NameInputsContainer");
+            if (oldContainer != null)
+            {
+                DestroyImmediate(oldContainer.gameObject);
             }
 
-            Canvas canvas = FindFirstObjectByType<Canvas>();
-            if (canvas == null) return;
-
+            // 2. Create the NameInputsContainer under CenterCard (container)
             nameInputsContainer = new GameObject("NameInputsContainer");
-            nameInputsContainer.transform.SetParent(canvas.transform, false);
-            RectTransform containerRect = nameInputsContainer.AddComponent<RectTransform>();
-            containerRect.anchoredPosition = new Vector2(0f, -40f);
-            containerRect.sizeDelta = new Vector2(350f, 150f);
+            nameInputsContainer.transform.SetParent(container, false);
+            
+            RectTransform panelRect = nameInputsContainer.AddComponent<RectTransform>();
+            panelRect.sizeDelta = new Vector2(350f, 100f);
+
+            // Add VerticalLayoutGroup to inputs panel for the text fields
+            VerticalLayoutGroup vPanel = nameInputsContainer.AddComponent<VerticalLayoutGroup>();
+            vPanel.spacing = 10f;
+            vPanel.childAlignment = TextAnchor.MiddleCenter;
+            vPanel.childControlWidth = false;
+            vPanel.childControlHeight = false;
+            vPanel.childForceExpandWidth = false;
+            vPanel.childForceExpandHeight = false;
+
+            // Add ContentSizeFitter so the inputs panel height grows/shrinks dynamically
+            ContentSizeFitter panelFitter = nameInputsContainer.AddComponent<ContentSizeFitter>();
+            panelFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            panelFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             nameInputFields.Clear();
 
-            float startY = (playerCountSelected - 1) * 17.5f; // Center inputs vertically
+            // 3. Spawn the custom name input fields (centered in VerticalLayoutGroup)
             for (int i = 0; i < playerCountSelected; i++)
             {
-                float yPos = startY - (i * 35f);
                 GameObject inputGo = CreateProceduralInputField(
                     nameInputsContainer.transform, 
                     $"Nama Pemain {i + 1}...", 
-                    new Vector2(0f, yPos), 
-                    new Vector2(250f, 30f)
+                    Vector2.zero, 
+                    new Vector2(350f, 42f) // Beautiful standard size for inputs
                 );
 
                 var inputField = inputGo.GetComponent<TMPro.TMP_InputField>();
                 nameInputFields.Add(inputField);
             }
 
-            // Adjust vertical positions of buttons dynamically to keep layout beautiful
-            float rowOffset = playerCountSelected * 17.5f;
-            MoveRect(canvas.transform.Find("PlayerSelectRow") as RectTransform, new Vector2(0f, 95f), new Vector2(300f, 44f));
-            MoveRect(canvas.transform.Find("ButtonStart") as RectTransform, new Vector2(0f, -45f - rowOffset), new Vector2(180f, 48f));
-            MoveRect(canvas.transform.Find("ButtonQuit") as RectTransform, new Vector2(0f, -105f - rowOffset), new Vector2(160f, 40f));
+            // 4. Ensure CenterCard (container) layout components are set up
+            VerticalLayoutGroup mainLayout = container.gameObject.GetComponent<VerticalLayoutGroup>();
+            if (mainLayout == null)
+            {
+                mainLayout = container.gameObject.AddComponent<VerticalLayoutGroup>();
+            }
+            mainLayout.childAlignment = TextAnchor.MiddleCenter;
+            mainLayout.spacing = 18f;
+            mainLayout.padding = new RectOffset(40, 40, 40, 40);
+            mainLayout.childControlWidth = false;
+            mainLayout.childControlHeight = false;
+            mainLayout.childForceExpandWidth = false;
+            mainLayout.childForceExpandHeight = false;
+
+            ContentSizeFitter mainFitter = container.gameObject.GetComponent<ContentSizeFitter>();
+            if (mainFitter == null)
+            {
+                mainFitter = container.gameObject.AddComponent<ContentSizeFitter>();
+            }
+            mainFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            mainFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            // 5. Exclude top decorative line from layout
+            Transform cardTopLine = container.Find("CardTopLine");
+            if (cardTopLine != null)
+            {
+                LayoutElement le = cardTopLine.gameObject.GetComponent<LayoutElement>();
+                if (le == null) le = cardTopLine.gameObject.AddComponent<LayoutElement>();
+                le.ignoreLayout = true;
+                
+                RectTransform lineRect = cardTopLine as RectTransform;
+                lineRect.anchorMin = new Vector2(0f, 1f);
+                lineRect.anchorMax = new Vector2(1f, 1f);
+                lineRect.pivot = new Vector2(0.5f, 1f);
+                lineRect.anchoredPosition = Vector2.zero;
+                lineRect.sizeDelta = new Vector2(0f, 4f);
+            }
+
+            // 6. Set Sibling Indices to enforce order from top to bottom
+            Transform ipbBadge = container.Find("IPBBadge");
+            Transform diceDecoration = container.Find("DiceDecoration");
+            Transform title = container.Find("Title");
+            Transform playerSelectRow = container.Find("PlayerSelectRow");
+            Transform btnQuit = btnQuitGame != null ? btnQuitGame.transform : null;
+
+            int siblingIdx = 0;
+            if (ipbBadge != null) ipbBadge.SetSiblingIndex(siblingIdx++);
+            if (diceDecoration != null) diceDecoration.SetSiblingIndex(siblingIdx++);
+            if (title != null) title.SetSiblingIndex(siblingIdx++);
+            if (playerSelectRow != null) playerSelectRow.SetSiblingIndex(siblingIdx++);
+            nameInputsContainer.transform.SetSiblingIndex(siblingIdx++);
+            if (btnStartGame != null) btnStartGame.transform.SetSiblingIndex(siblingIdx++);
+            if (btnQuit != null) btnQuit.SetSiblingIndex(siblingIdx++);
+
+            // 7. Rebuild layouts immediately
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(container as RectTransform);
+
+            Debug.Log($"Refreshing name inputs. Human player count: {playerCountSelected}");
+            Debug.Log("Main menu layout rebuilt after player name input refresh.");
         }
 
         private GameObject CreateProceduralInputField(Transform parent, string placeholderText, Vector2 pos, Vector2 size)
@@ -146,6 +230,7 @@ namespace UI
             placeholderTxt.color = new Color(0.6f, 0.6f, 0.6f, 0.5f);
             placeholderTxt.alignment = TMPro.TextAlignmentOptions.Left;
             placeholderTxt.raycastTarget = false;
+            placeholderTxt.enableWordWrapping = false;
 
             RectTransform placeholderRect = placeholderGo.GetComponent<RectTransform>();
             placeholderRect.anchorMin = Vector2.zero;
@@ -161,6 +246,7 @@ namespace UI
             textComponent.color = Color.white;
             textComponent.alignment = TMPro.TextAlignmentOptions.Left;
             textComponent.raycastTarget = false;
+            textComponent.enableWordWrapping = false;
 
             RectTransform textComponentRect = textGo.GetComponent<RectTransform>();
             textComponentRect.anchorMin = Vector2.zero;
@@ -255,45 +341,78 @@ namespace UI
                 text.raycastTarget = false;
             }
 
-            RectTransform title = canvas.transform.Find("Title") as RectTransform;
-            if (title != null)
+            Transform container = null;
+            if (btnStartGame != null)
             {
-                title.anchoredPosition = new Vector2(0f, 95f);
-                title.sizeDelta = new Vector2(620f, 105f);
-
-                TMPro.TextMeshProUGUI titleText = title.GetComponent<TMPro.TextMeshProUGUI>();
-                if (titleText != null)
-                {
-                    titleText.fontSize = 38f;
-                    titleText.enableWordWrapping = false;
-                }
+                container = btnStartGame.transform.parent;
+            }
+            if (container == null)
+            {
+                container = canvas.transform.Find("CenterCard");
             }
 
-            RectTransform dadu = canvas.transform.Find("DaduDecoration") as RectTransform;
-            if (dadu != null)
+            if (container != null)
             {
-                dadu.anchoredPosition = new Vector2(0f, 215f);
-                dadu.sizeDelta = new Vector2(260f, 80f);
-
-                TMPro.TextMeshProUGUI daduText = dadu.GetComponent<TMPro.TextMeshProUGUI>();
-                if (daduText != null)
+                // 1. Exclude top decorative line from layout
+                Transform cardTopLine = container.Find("CardTopLine");
+                if (cardTopLine != null)
                 {
-                    daduText.text = "DADU";
-                    daduText.fontSize = 42f;
-                    daduText.enableWordWrapping = false;
+                    LayoutElement le = cardTopLine.gameObject.GetComponent<LayoutElement>();
+                    if (le == null) le = cardTopLine.gameObject.AddComponent<LayoutElement>();
+                    le.ignoreLayout = true;
+                    
+                    RectTransform lineRect = cardTopLine as RectTransform;
+                    lineRect.anchorMin = new Vector2(0f, 1f);
+                    lineRect.anchorMax = new Vector2(1f, 1f);
+                    lineRect.pivot = new Vector2(0.5f, 1f);
+                    lineRect.anchoredPosition = Vector2.zero;
+                    lineRect.sizeDelta = new Vector2(0f, 4f);
+                }
+
+                // 2. Configure Title Text
+                Transform title = container.Find("Title");
+                if (title != null)
+                {
+                    TMPro.TextMeshProUGUI titleText = title.GetComponent<TMPro.TextMeshProUGUI>();
+                    if (titleText != null)
+                    {
+                        titleText.fontSize = 38f;
+                        titleText.enableWordWrapping = false;
+                        titleText.alignment = TMPro.TextAlignmentOptions.Center;
+                    }
+                    
+                    RectTransform titleRect = title as RectTransform;
+                    titleRect.sizeDelta = new Vector2(460f, 100f);
+                }
+
+                // 3. Configure DiceDecoration
+                Transform dadu = container.Find("DiceDecoration");
+                if (dadu != null)
+                {
+                    RectTransform daduRect = dadu as RectTransform;
+                    daduRect.sizeDelta = new Vector2(180f, 90f);
+                }
+
+                // 4. Configure select row size
+                Transform selectRow = container.Find("PlayerSelectRow");
+                if (selectRow != null)
+                {
+                    RectTransform selectRect = selectRow as RectTransform;
+                    selectRect.sizeDelta = new Vector2(300f, 44f);
+                }
+
+                // 5. Configure Button sizes
+                if (btnStartGame != null)
+                {
+                    RectTransform startRect = btnStartGame.GetComponent<RectTransform>();
+                    startRect.sizeDelta = new Vector2(240f, 48f);
+                }
+                if (btnQuitGame != null)
+                {
+                    RectTransform quitRect = btnQuitGame.GetComponent<RectTransform>();
+                    quitRect.sizeDelta = new Vector2(200f, 44f);
                 }
             }
-
-            MoveRect(canvas.transform.Find("ButtonStart") as RectTransform, new Vector2(0f, -25f), new Vector2(180f, 48f));
-            MoveRect(canvas.transform.Find("PlayerSelectRow") as RectTransform, new Vector2(0f, -92f), new Vector2(300f, 44f));
-            MoveRect(canvas.transform.Find("ButtonQuit") as RectTransform, new Vector2(0f, -160f), new Vector2(160f, 40f));
-        }
-
-        private void MoveRect(RectTransform rect, Vector2 position, Vector2 size)
-        {
-            if (rect == null) return;
-            rect.anchoredPosition = position;
-            rect.sizeDelta = size;
         }
     }
 }
