@@ -79,6 +79,9 @@ namespace Core
         {
             Debug.Log("[GameManager] Initializing Game Scene...");
             
+            // Load player count from PlayerPrefs (persists across scene loads)
+            numRealPlayers = PlayerPrefs.GetInt("NumRealPlayers", numRealPlayers);
+            
             // Create default data configurations if null
             if (boardConfig == null) boardConfig = ScriptableObject.CreateInstance<BoardConfig>();
             if (messageBank == null) messageBank = ScriptableObject.CreateInstance<MessageBank>();

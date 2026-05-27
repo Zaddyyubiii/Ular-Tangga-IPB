@@ -65,7 +65,7 @@ namespace UI
         {
             if (labelPlayerCount != null)
             {
-                labelPlayerCount.text = $"Player: {playerCountSelected}";
+                labelPlayerCount.text = playerCountSelected.ToString();
             }
         }
 
@@ -76,6 +76,8 @@ namespace UI
 
             // Store selection globally
             Core.GameManager.numRealPlayers = playerCountSelected;
+            PlayerPrefs.SetInt("NumRealPlayers", playerCountSelected);
+            PlayerPrefs.Save();
 
             // Load GameScene
             Core.SceneLoader.Instance.LoadScene("GameScene");

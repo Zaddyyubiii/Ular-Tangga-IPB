@@ -1,21 +1,23 @@
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace Dice
 {
-    public class DiceGaugeController : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+    public class DiceGaugeController : MonoBehaviour
     {
         public static DiceGaugeController Instance;
 
         [Header("Charging Settings")]
-        public float chargeSpeed = 100f; // Percent per second
+        public float chargeSpeed = 80f;
         public float currentCharge = 0f;
         private bool isCharging = false;
-        private int chargeDirection = 1; // 1 = up, -1 = down
-        private bool suppressNextClick = false;
+        private int chargeDirection = 1;
+        private bool holdRegistered = false; // true = button is held down
+        private Coroutine tapAutoReleaseCoroutine;
 
         [Header("UI References")]
         public Slider gaugeSlider;
@@ -24,7 +26,6 @@ namespace Dice
         public TMPro.TextMeshProUGUI labelResult;
         public Button rollButton;
 
-        // Callback when a roll completes
         public Action<int> OnDiceRolled;
         public Action<DiceResult> OnDiceResultRolled;
 
@@ -39,168 +40,144 @@ namespace Dice
             ResetGauge();
             if (rollButton != null)
             {
-                // Click remains a fallback; pointer events provide hold/release for mouse and touch.
-                rollButton.onClick.AddListener(OnRollButtonClicked);
-                RegisterPointerEvents(rollButton.gameObject);
+                RegisterPointerEventsOnButton(rollButton.gameObject);
             }
         }
 
         private void Update()
         {
-            // Only respond to spacebar if it's a human turn and we are waiting for input
+            // Space bar hold support
             if (CanAcceptHumanInput())
             {
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    StartCharging();
-                }
-                
-                if (Input.GetKeyUp(KeyCode.Space))
-                {
-                    ReleaseGauge();
-                }
+                if (Input.GetKeyDown(KeyCode.Space) && !isCharging)
+                    BeginCharge(true);
+                if (Input.GetKeyUp(KeyCode.Space) && isCharging && holdRegistered)
+                    EndCharge();
             }
 
             if (isCharging)
             {
-                // Oscillate charge between 0 and 100
                 currentCharge += chargeDirection * chargeSpeed * Time.deltaTime;
-                if (currentCharge >= 100f)
-                {
-                    currentCharge = 100f;
-                    chargeDirection = -1;
-                }
-                else if (currentCharge <= 0f)
-                {
-                    currentCharge = 0f;
-                    chargeDirection = 1;
-                }
-
+                if (currentCharge >= 100f) { currentCharge = 100f; chargeDirection = -1; }
+                else if (currentCharge <= 0f) { currentCharge = 0f; chargeDirection = 1; }
                 UpdateGaugeUI();
             }
         }
 
-        public void StartCharging()
+        // Called when pointer is pressed DOWN on the button
+        private void OnButtonPointerDown(BaseEventData data)
+        {
+            if (!CanAcceptHumanInput()) return;
+            holdRegistered = true;
+            if (tapAutoReleaseCoroutine != null) StopCoroutine(tapAutoReleaseCoroutine);
+            BeginCharge(true);
+        }
+
+        // Called when pointer is released UP from the button
+        private void OnButtonPointerUp(BaseEventData data)
+        {
+            if (!CanAcceptHumanInput()) return;
+            if (isCharging && holdRegistered)
+            {
+                holdRegistered = false;
+                EndCharge();
+            }
+        }
+
+        private void BeginCharge(bool fromHold)
         {
             if (!CanRollNow()) return;
             if (isCharging) return;
-            
+            holdRegistered = fromHold;
             isCharging = true;
             currentCharge = 0f;
             chargeDirection = 1;
-            
-            if (labelResult != null) labelResult.text = "Mengocok...";
-
-            if (Audio.AudioManager.Instance != null)
-            {
+            if (labelResult != null) labelResult.text = "...";
+            UpdateGaugeUI();
+            if (Audio.AudioManager.Instance != null && Audio.AudioManager.Instance.diceRollClip != null)
                 Audio.AudioManager.Instance.PlaySFX(Audio.AudioManager.Instance.diceRollClip);
-            }
         }
 
-        public void ReleaseGauge()
+        private void EndCharge()
         {
-            if (!CanRollNow()) return;
             if (!isCharging) return;
             isCharging = false;
-
+            holdRegistered = false;
             DiceResult result = CalculateDiceRoll(currentCharge);
-            
-            if (labelResult != null)
-            {
-                labelResult.text = result.value.ToString();
-            }
-
-            Debug.Log($"[Dice] Charged {currentCharge:F1}% ({result.levelLabel}) -> Rolled {result.value}");
+            if (labelResult != null) labelResult.text = result.value.ToString();
+            Debug.Log($"[Dice] Released at {currentCharge:F1}% -> Roll: {result.value}");
             OnDiceResultRolled?.Invoke(result);
             OnDiceRolled?.Invoke(result.value);
-        }
-
-        private void OnRollButtonClicked()
-        {
-            if (suppressNextClick)
-            {
-                suppressNextClick = false;
-                return;
-            }
-
-            // Simple click: if not charging, start charging. If charging, release it!
-            if (!isCharging)
-            {
-                StartCharging();
-            }
-            else
-            {
-                ReleaseGauge();
-            }
         }
 
         public void ResetGauge()
         {
             isCharging = false;
+            holdRegistered = false;
             currentCharge = 0f;
+            chargeDirection = 1;
             UpdateGaugeUI();
             if (labelResult != null) labelResult.text = "-";
         }
 
-        public void OnPointerDown(PointerEventData eventData)
+        public void TriggerAutoRoll(float targetCharge)
         {
-            suppressNextClick = true;
-            if (CanAcceptHumanInput())
-            {
-                StartCharging();
-            }
+            if (!CanRollNow()) return;
+            StartCoroutine(AutoRollCo(targetCharge));
         }
 
-        public void OnPointerUp(PointerEventData eventData)
+        private IEnumerator AutoRollCo(float targetCharge)
         {
-            if (CanAcceptHumanInput())
-            {
-                ReleaseGauge();
-            }
+            BeginCharge(false);
+            yield return new WaitForSeconds(0.15f);
+            currentCharge = Mathf.Clamp(targetCharge, 0f, 100f);
+            UpdateGaugeUI();
+            yield return new WaitForSeconds(0.2f);
+            EndCharge();
+        }
+
+        /// <summary>Called by bots - bypasses human-only check</summary>
+        public void ForceAutoRoll(float targetCharge)
+        {
+            if (Core.GameManager.Instance == null) return;
+            if (Core.GameManager.Instance.currentState != Core.GameState.WaitingForInput) return;
+            StartCoroutine(ForceAutoRollCo(targetCharge));
+        }
+
+        private IEnumerator ForceAutoRollCo(float targetCharge)
+        {
+            // Force start
+            isCharging = true;
+            holdRegistered = false;
+            currentCharge = 0f;
+            chargeDirection = 1;
+            if (labelResult != null) labelResult.text = "...";
+            UpdateGaugeUI();
+            yield return new WaitForSeconds(0.15f);
+            currentCharge = Mathf.Clamp(targetCharge, 0f, 100f);
+            UpdateGaugeUI();
+            yield return new WaitForSeconds(0.25f);
+            EndCharge();
         }
 
         private void UpdateGaugeUI()
         {
             if (gaugeSlider != null)
-            {
                 gaugeSlider.value = currentCharge / 100f;
-            }
 
-            string label = "Status Percobaan";
-            string range = "2 - 3";
+            string label, range;
+            if (currentCharge <= 25f)      { label = "Status Percobaan"; range = "2 - 3"; }
+            else if (currentCharge <= 50f) { label = "Mahasiswa Reguler"; range = "4 - 6"; }
+            else if (currentCharge <= 75f) { label = "Mahasiswa Teladan"; range = "7 - 9"; }
+            else                            { label = "Duta Tata Tertib";  range = "10 - 12"; }
 
-            if (currentCharge <= 25f)
-            {
-                label = "Status Percobaan";
-                range = "2 - 3";
-            }
-            else if (currentCharge <= 50f)
-            {
-                label = "Mahasiswa Reguler";
-                range = "4 - 6";
-            }
-            else if (currentCharge <= 75f)
-            {
-                label = "Mahasiswa Teladan";
-                range = "7 - 9";
-            }
-            else
-            {
-                label = "Duta Tata Tertib";
-                range = "10 - 12";
-            }
-
-            // Adjust range displays if near finish
             if (Core.GameManager.Instance != null)
             {
-                var curPlayer = Core.GameManager.Instance.GetCurrentPlayer();
-                if (curPlayer != null)
+                var p = Core.GameManager.Instance.GetCurrentPlayer();
+                if (p != null)
                 {
-                    int needed = 100 - curPlayer.currentTile;
-                    if (needed > 0 && needed < 12)
-                    {
-                        range += $" (Butuh {needed})";
-                    }
+                    int needed = 100 - p.currentTile;
+                    if (needed > 0 && needed < 12) range += $" (Butuh {needed})";
                 }
             }
 
@@ -211,79 +188,33 @@ namespace Dice
         private DiceResult CalculateDiceRoll(float charge)
         {
             List<int> possibilities = new List<int>();
-            string levelLabel;
-            string rangeLabel;
-            
-            // Map charge to specific ranges
-            if (charge <= 25f)
-            {
-                possibilities.AddRange(new int[] { 2, 3 });
-                levelLabel = "Status Percobaan";
-                rangeLabel = "2 - 3";
-            }
-            else if (charge <= 50f)
-            {
-                possibilities.AddRange(new int[] { 4, 5, 6 });
-                levelLabel = "Mahasiswa Reguler";
-                rangeLabel = "4 - 6";
-            }
-            else if (charge <= 75f)
-            {
-                possibilities.AddRange(new int[] { 7, 8, 9 });
-                levelLabel = "Mahasiswa Teladan";
-                rangeLabel = "7 - 9";
-            }
-            else
-            {
-                possibilities.AddRange(new int[] { 10, 11, 12 });
-                levelLabel = "Duta Tata Tertib";
-                rangeLabel = "10 - 12";
-            }
+            string levelLabel, rangeLabel;
 
-            // Handle near finish edge case override:
-            // If the player is near finish, they must be able to roll the exact value.
+            if (charge <= 25f)      { possibilities.AddRange(new[] {2,3});       levelLabel="Status Percobaan"; rangeLabel="2-3"; }
+            else if (charge <= 50f) { possibilities.AddRange(new[] {4,5,6});     levelLabel="Mahasiswa Reguler"; rangeLabel="4-6"; }
+            else if (charge <= 75f) { possibilities.AddRange(new[] {7,8,9});     levelLabel="Mahasiswa Teladan"; rangeLabel="7-9"; }
+            else                    { possibilities.AddRange(new[] {10,11,12});   levelLabel="Duta Tata Tertib"; rangeLabel="10-12"; }
+
             if (Core.GameManager.Instance != null)
             {
-                var curPlayer = Core.GameManager.Instance.GetCurrentPlayer();
-                if (curPlayer != null)
+                var p = Core.GameManager.Instance.GetCurrentPlayer();
+                if (p != null)
                 {
-                    int needed = 100 - curPlayer.currentTile;
-                    if (needed > 0 && needed <= 12)
-                    {
-                        // Dynamic Override: If the exact number needed is 1, let the lowest range contain 1.
-                        if (needed == 1 && charge <= 25f)
-                        {
-                            possibilities.Add(1);
-                        }
-                        // Otherwise, make sure the exact number needed is always added as a possibility to the rolled range
-                        else if (!possibilities.Contains(needed))
-                        {
-                            possibilities.Add(needed);
-                        }
-                    }
+                    int needed = 100 - p.currentTile;
+                    if (needed > 0 && needed <= 12 && !possibilities.Contains(needed))
+                        possibilities.Add(needed);
                 }
             }
 
-            // Select random value from possibilities
-            int index = UnityEngine.Random.Range(0, possibilities.Count);
-            return new DiceResult(possibilities[index], charge, levelLabel, rangeLabel);
-        }
-
-        // Automated charging for bots or auto-rolls
-        public void TriggerAutoRoll(float targetCharge)
-        {
-            if (!CanRollNow()) return;
-            StartCharging();
-            currentCharge = targetCharge;
-            UpdateGaugeUI();
-            Invoke(nameof(ReleaseGauge), 0.2f);
+            int idx = UnityEngine.Random.Range(0, possibilities.Count);
+            return new DiceResult(possibilities[idx], charge, levelLabel, rangeLabel);
         }
 
         private bool CanAcceptHumanInput()
         {
             if (!CanRollNow()) return false;
-            var currentPlayer = Core.GameManager.Instance.GetCurrentPlayer();
-            return currentPlayer != null && !currentPlayer.isBot;
+            var p = Core.GameManager.Instance.GetCurrentPlayer();
+            return p != null && !p.isBot;
         }
 
         private bool CanRollNow()
@@ -293,25 +224,21 @@ namespace Dice
                    Core.GameManager.Instance.GetCurrentPlayer() != null;
         }
 
-        private void RegisterPointerEvents(GameObject target)
+        private void RegisterPointerEventsOnButton(GameObject target)
         {
-            if (target == null) return;
-
             EventTrigger trigger = target.GetComponent<EventTrigger>();
-            if (trigger == null)
-            {
-                trigger = target.AddComponent<EventTrigger>();
-            }
+            if (trigger == null) trigger = target.AddComponent<EventTrigger>();
 
-            AddTrigger(trigger, EventTriggerType.PointerDown, eventData => OnPointerDown((PointerEventData)eventData));
-            AddTrigger(trigger, EventTriggerType.PointerUp, eventData => OnPointerUp((PointerEventData)eventData));
-        }
+            // Clear old entries
+            trigger.triggers.Clear();
 
-        private void AddTrigger(EventTrigger trigger, EventTriggerType type, UnityEngine.Events.UnityAction<BaseEventData> callback)
-        {
-            EventTrigger.Entry entry = new EventTrigger.Entry { eventID = type };
-            entry.callback.AddListener(callback);
-            trigger.triggers.Add(entry);
+            var downEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
+            downEntry.callback.AddListener(OnButtonPointerDown);
+            trigger.triggers.Add(downEntry);
+
+            var upEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
+            upEntry.callback.AddListener(OnButtonPointerUp);
+            trigger.triggers.Add(upEntry);
         }
     }
 }

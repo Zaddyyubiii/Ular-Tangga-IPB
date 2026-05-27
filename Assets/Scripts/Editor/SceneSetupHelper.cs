@@ -248,7 +248,11 @@ namespace UlarTangga.EditorSetup
             GameObject canvasGo = new GameObject("CanvasMainMenu");
             Canvas canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasGo.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            CanvasScaler mmScaler = canvasGo.AddComponent<CanvasScaler>();
+            mmScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            mmScaler.referenceResolution = new Vector2(1280f, 720f);
+            mmScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            mmScaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
             // Setup EventSystem
@@ -261,43 +265,102 @@ namespace UlarTangga.EditorSetup
             persistentGo.AddComponent<AudioManager>();
             persistentGo.AddComponent<SceneLoader>();
 
-            // Background Image
+            // ---- BACKGROUND: Dark green gradient-like ----
             GameObject bgGo = new GameObject("Background", typeof(RectTransform));
             bgGo.transform.SetParent(canvasGo.transform, false);
             Image bgImg = bgGo.AddComponent<Image>();
-            bgImg.color = new Color(0.95f, 0.66f, 0.18f); // Warm board-like placeholder
+            bgImg.color = new Color(0.05f, 0.12f, 0.08f); // deep forest green
             bgImg.raycastTarget = false;
             StretchRect(bgGo.GetComponent<RectTransform>());
 
-            GameObject boardBlurGo = new GameObject("BoardBlurPlaceholder", typeof(RectTransform));
-            boardBlurGo.transform.SetParent(canvasGo.transform, false);
-            Image boardBlur = boardBlurGo.AddComponent<Image>();
-            boardBlur.color = new Color(1f, 0.86f, 0.35f, 0.32f);
-            boardBlur.raycastTarget = false;
-            PositionRect(boardBlurGo.GetComponent<RectTransform>(), Vector2.zero, new Vector2(720f, 520f));
+            // Decorative side panels (left and right accent)
+            GameObject leftAccent = new GameObject("LeftAccent", typeof(RectTransform));
+            leftAccent.transform.SetParent(canvasGo.transform, false);
+            Image leftImg = leftAccent.AddComponent<Image>();
+            leftImg.color = new Color(0.08f, 0.25f, 0.14f, 0.6f);
+            leftImg.raycastTarget = false;
+            RectTransform leftRect = leftAccent.GetComponent<RectTransform>();
+            leftRect.anchorMin = new Vector2(0f, 0f);
+            leftRect.anchorMax = new Vector2(0.22f, 1f);
+            leftRect.offsetMin = Vector2.zero;
+            leftRect.offsetMax = Vector2.zero;
 
-            // Title
+            GameObject rightAccent = new GameObject("RightAccent", typeof(RectTransform));
+            rightAccent.transform.SetParent(canvasGo.transform, false);
+            Image rightImg = rightAccent.AddComponent<Image>();
+            rightImg.color = new Color(0.08f, 0.25f, 0.14f, 0.6f);
+            rightImg.raycastTarget = false;
+            RectTransform rightRect = rightAccent.GetComponent<RectTransform>();
+            rightRect.anchorMin = new Vector2(0.78f, 0f);
+            rightRect.anchorMax = new Vector2(1f, 1f);
+            rightRect.offsetMin = Vector2.zero;
+            rightRect.offsetMax = Vector2.zero;
+
+            // Center card panel
+            GameObject cardGo = new GameObject("CenterCard", typeof(RectTransform));
+            cardGo.transform.SetParent(canvasGo.transform, false);
+            Image cardImg = cardGo.AddComponent<Image>();
+            cardImg.color = new Color(0.08f, 0.16f, 0.11f, 0.92f);
+            cardImg.raycastTarget = false;
+            RectTransform cardRect = cardGo.GetComponent<RectTransform>();
+            cardRect.anchorMin = new Vector2(0.5f, 0.5f);
+            cardRect.anchorMax = new Vector2(0.5f, 0.5f);
+            cardRect.sizeDelta = new Vector2(520f, 560f);
+            cardRect.anchoredPosition = Vector2.zero;
+
+            // Top accent line on card
+            GameObject cardTopLine = new GameObject("CardTopLine", typeof(RectTransform));
+            cardTopLine.transform.SetParent(cardGo.transform, false);
+            Image lineImg = cardTopLine.AddComponent<Image>();
+            lineImg.color = new Color(0.15f, 0.75f, 0.35f);
+            lineImg.raycastTarget = false;
+            RectTransform lineRect = cardTopLine.GetComponent<RectTransform>();
+            lineRect.anchorMin = new Vector2(0f, 1f);
+            lineRect.anchorMax = new Vector2(1f, 1f);
+            lineRect.pivot = new Vector2(0.5f, 1f);
+            lineRect.anchoredPosition = Vector2.zero;
+            lineRect.sizeDelta = new Vector2(0f, 4f);
+
+            // IPB Logo-like badge text
+            GameObject badgeGo = new GameObject("IPBBadge", typeof(RectTransform));
+            badgeGo.transform.SetParent(cardGo.transform, false);
+            var badgeText = badgeGo.AddComponent<TMPro.TextMeshProUGUI>();
+            badgeText.text = "IPB UNIVERSITY";
+            badgeText.alignment = TMPro.TextAlignmentOptions.Center;
+            badgeText.fontSize = 11f;
+            badgeText.fontStyle = TMPro.FontStyles.Bold;
+            badgeText.color = new Color(0.15f, 0.75f, 0.35f);
+            badgeText.raycastTarget = false;
+            badgeText.characterSpacing = 4f;
+            RectTransform badgeRect = badgeGo.GetComponent<RectTransform>();
+            badgeRect.anchorMin = new Vector2(0.5f, 1f);
+            badgeRect.anchorMax = new Vector2(0.5f, 1f);
+            badgeRect.pivot = new Vector2(0.5f, 1f);
+            badgeRect.anchoredPosition = new Vector2(0f, -18f);
+            badgeRect.sizeDelta = new Vector2(400f, 20f);
+
+            // Dice decoration row
+            CreateDiceDecoration(cardGo.transform, new Vector2(0f, 150f));
+
+            // Title text
             GameObject titleGo = new GameObject("Title", typeof(RectTransform));
-            titleGo.transform.SetParent(canvasGo.transform, false);
+            titleGo.transform.SetParent(cardGo.transform, false);
             var titleText = titleGo.AddComponent<TMPro.TextMeshProUGUI>();
-            titleText.text = "Ular Tangga Tata Tertib\nIPB University";
+            titleText.text = "ULAR TANGGA\nTATA TERTIB";
             titleText.alignment = TMPro.TextAlignmentOptions.Center;
-            titleText.fontSize = 38f;
+            titleText.fontSize = 36f;
             titleText.fontStyle = TMPro.FontStyles.Bold;
             titleText.color = Color.white;
             titleText.raycastTarget = false;
-            titleText.enableWordWrapping = false;
-            PositionRect(titleGo.GetComponent<RectTransform>(), new Vector2(0f, 95f), new Vector2(620f, 105f));
-
-            CreateDiceDecoration(canvasGo.transform, new Vector2(0f, 215f));
-
-            // Start Button
-            GameObject btnStartGo = CreateStandardButton(canvasGo.transform, "ButtonStart", "Start Game", new Vector2(0f, -25f), new Vector2(180f, 48f));
+            PositionRect(titleGo.GetComponent<RectTransform>(), new Vector2(0f, 60f), new Vector2(460f, 100f));
             
+            // Start Button
+            GameObject btnStartGo = CreateStyledButton(cardGo.transform, "ButtonStart", "MULAI BERMAIN", new Vector2(0f, -40f), new Vector2(240f, 48f), new Color(0.12f, 0.73f, 0.35f));
+
             // Player Select Row
             GameObject selectRow = new GameObject("PlayerSelectRow", typeof(RectTransform));
-            selectRow.transform.SetParent(canvasGo.transform, false);
-            PositionRect(selectRow.GetComponent<RectTransform>(), new Vector2(0f, -92f), new Vector2(300f, 44f));
+            selectRow.transform.SetParent(cardGo.transform, false);
+            PositionRect(selectRow.GetComponent<RectTransform>(), new Vector2(0f, -110f), new Vector2(300f, 44f));
 
             GameObject btnDecGo = CreateStandardButton(selectRow.transform, "BtnDecrease", "<", new Vector2(-110f, 0f), new Vector2(40f, 40f));
             GameObject btnIncGo = CreateStandardButton(selectRow.transform, "BtnIncrease", ">", new Vector2(110f, 0f), new Vector2(40f, 40f));
@@ -313,7 +376,7 @@ namespace UlarTangga.EditorSetup
             PositionRect(playerLabelGo.GetComponent<RectTransform>(), Vector2.zero, new Vector2(160f, 40f));
 
             // Quit Button
-            GameObject btnQuitGo = CreateStandardButton(canvasGo.transform, "ButtonQuit", "Quit Game", new Vector2(0f, -160f));
+            GameObject btnQuitGo = CreateStyledButton(cardGo.transform, "ButtonQuit", "KELUAR GAME", new Vector2(0f, -180f), new Vector2(240f, 48f), new Color(0.75f, 0.2f, 0.15f));
 
             // Hook MainMenuUI
             GameObject mmUiGo = new GameObject("MainMenuUI");
@@ -331,7 +394,11 @@ namespace UlarTangga.EditorSetup
             GameObject canvasGo = new GameObject("CanvasGameplay");
             Canvas canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasGo.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            CanvasScaler gpScaler = canvasGo.AddComponent<CanvasScaler>();
+            gpScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            gpScaler.referenceResolution = new Vector2(1280f, 720f);
+            gpScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            gpScaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
             // Setup EventSystem
@@ -343,77 +410,144 @@ namespace UlarTangga.EditorSetup
             GameObject bgGo = new GameObject("Background", typeof(RectTransform));
             bgGo.transform.SetParent(canvasGo.transform, false);
             Image bgImg = bgGo.AddComponent<Image>();
-            bgImg.color = new Color(0.18f, 0.18f, 0.22f);
+            bgImg.color = new Color(0.13f, 0.13f, 0.18f);
             StretchRect(bgGo.GetComponent<RectTransform>());
 
-            // Board Panel
+            // ---- LEFT SIDE: Board Panel (anchor-stretched to fill left area) ----
+            // Sidebar is 280px on the right; board fills left side with small margin
             GameObject boardGo = new GameObject("BoardPanel", typeof(RectTransform));
             boardGo.transform.SetParent(canvasGo.transform, false);
             Image boardImg = boardGo.AddComponent<Image>();
-            boardImg.color = new Color(0.25f, 0.25f, 0.3f);
-            PositionRect(boardGo.GetComponent<RectTransform>(), new Vector2(-150f, 0f), new Vector2(600f, 600f));
+            boardImg.color = new Color(0.22f, 0.22f, 0.28f);
+            RectTransform boardRect = boardGo.GetComponent<RectTransform>();
+            boardRect.anchorMin = new Vector2(0f, 0f);
+            boardRect.anchorMax = new Vector2(1f, 1f);
+            boardRect.pivot = new Vector2(0.5f, 0.5f);
+            boardRect.offsetMin = new Vector2(8f, 8f);   // 8px from left & bottom
+            boardRect.offsetMax = new Vector2(-282f, -8f); // 282px from right (sidebar 270+12 gap)
 
-            // Status Card Container
+            // ---- RIGHT SIDE: Sidebar Panel ----
+            GameObject sidebarGo = new GameObject("SidebarPanel", typeof(RectTransform));
+            sidebarGo.transform.SetParent(canvasGo.transform, false);
+            Image sidebarImg = sidebarGo.AddComponent<Image>();
+            sidebarImg.color = new Color(0.15f, 0.15f, 0.20f, 0.95f);
+            // Anchor to right side
+            RectTransform sidebarRect = sidebarGo.GetComponent<RectTransform>();
+            sidebarRect.anchorMin = new Vector2(1f, 0f);
+            sidebarRect.anchorMax = new Vector2(1f, 1f);
+            sidebarRect.pivot = new Vector2(1f, 0.5f);
+            sidebarRect.anchoredPosition = new Vector2(0f, 0f);
+            sidebarRect.sizeDelta = new Vector2(270f, 0f); // 270px wide, full height
+
+            // ---- Status Card Container (inside sidebar, top area) ----
             GameObject statusGridGo = new GameObject("StatusCardGrid", typeof(RectTransform));
-            statusGridGo.transform.SetParent(canvasGo.transform, false);
-            PositionRect(statusGridGo.GetComponent<RectTransform>(), new Vector2(250f, 150f), new Vector2(180f, 420f));
-            
-            // Add grid layout
+            statusGridGo.transform.SetParent(sidebarGo.transform, false);
+            RectTransform statusGridRect = statusGridGo.GetComponent<RectTransform>();
+            statusGridRect.anchorMin = new Vector2(0f, 0.45f);
+            statusGridRect.anchorMax = new Vector2(1f, 1f);
+            statusGridRect.offsetMin = new Vector2(8f, 8f);
+            statusGridRect.offsetMax = new Vector2(-8f, -8f);
             var vGrid = statusGridGo.AddComponent<VerticalLayoutGroup>();
-            vGrid.spacing = 10f;
+            vGrid.spacing = 6f;
+            vGrid.padding = new RectOffset(4, 4, 4, 4);
             vGrid.childAlignment = TextAnchor.UpperCenter;
             vGrid.childForceExpandHeight = false;
+            vGrid.childForceExpandWidth = true;
+            vGrid.childControlWidth = true;
+            vGrid.childControlHeight = false;
 
-            // Active Turn HUD
+            // ---- Active Turn HUD (inside sidebar, middle area) ----
             GameObject turnHudGo = new GameObject("TurnHUD", typeof(RectTransform));
-            turnHudGo.transform.SetParent(canvasGo.transform, false);
-            PositionRect(turnHudGo.GetComponent<RectTransform>(), new Vector2(250f, -120f), new Vector2(180f, 100f));
+            turnHudGo.transform.SetParent(sidebarGo.transform, false);
             Image turnHudImg = turnHudGo.AddComponent<Image>();
-            turnHudImg.color = new Color(0.12f, 0.12f, 0.15f, 0.8f);
+            turnHudImg.color = new Color(0.10f, 0.10f, 0.14f, 0.95f);
+            RectTransform turnHudRect = turnHudGo.GetComponent<RectTransform>();
+            turnHudRect.anchorMin = new Vector2(0f, 0.27f);
+            turnHudRect.anchorMax = new Vector2(1f, 0.44f);
+            turnHudRect.offsetMin = new Vector2(8f, 4f);
+            turnHudRect.offsetMax = new Vector2(-8f, -4f);
 
             GameObject hudTitle = new GameObject("HudTitle", typeof(RectTransform));
             hudTitle.transform.SetParent(turnHudGo.transform, false);
             var hudTitleTxt = hudTitle.AddComponent<TMPro.TextMeshProUGUI>();
             hudTitleTxt.text = "GILIRAN AKTIF";
             hudTitleTxt.alignment = TMPro.TextAlignmentOptions.Center;
-            hudTitleTxt.fontSize = 12f;
+            hudTitleTxt.fontSize = 11f;
             hudTitleTxt.fontStyle = TMPro.FontStyles.Bold;
-            PositionRect(hudTitleTxt.GetComponent<RectTransform>(), new Vector2(0f, 35f), new Vector2(170f, 20f));
+            hudTitleTxt.color = new Color(0.8f, 0.8f, 0.8f);
+            RectTransform hudTitleRect = hudTitle.GetComponent<RectTransform>();
+            hudTitleRect.anchorMin = new Vector2(0f, 0.65f);
+            hudTitleRect.anchorMax = new Vector2(1f, 1f);
+            hudTitleRect.offsetMin = Vector2.zero;
+            hudTitleRect.offsetMax = Vector2.zero;
 
             GameObject hudName = new GameObject("HudName", typeof(RectTransform));
             hudName.transform.SetParent(turnHudGo.transform, false);
             var hudNameTxt = hudName.AddComponent<TMPro.TextMeshProUGUI>();
             hudNameTxt.text = "Mahasiswa 1";
             hudNameTxt.alignment = TMPro.TextAlignmentOptions.Center;
-            hudNameTxt.fontSize = 16f;
+            hudNameTxt.fontSize = 15f;
             hudNameTxt.fontStyle = TMPro.FontStyles.Bold;
             hudNameTxt.color = Color.green;
-            PositionRect(hudNameTxt.GetComponent<RectTransform>(), new Vector2(0f, 10f), new Vector2(170f, 25f));
+            RectTransform hudNameRect = hudName.GetComponent<RectTransform>();
+            hudNameRect.anchorMin = new Vector2(0f, 0.3f);
+            hudNameRect.anchorMax = new Vector2(1f, 0.65f);
+            hudNameRect.offsetMin = Vector2.zero;
+            hudNameRect.offsetMax = Vector2.zero;
 
             GameObject hudTimer = new GameObject("HudTimer", typeof(RectTransform));
             hudTimer.transform.SetParent(turnHudGo.transform, false);
             var hudTimerTxt = hudTimer.AddComponent<TMPro.TextMeshProUGUI>();
             hudTimerTxt.text = "Sisa Waktu: 10s";
             hudTimerTxt.alignment = TMPro.TextAlignmentOptions.Center;
-            hudTimerTxt.fontSize = 14f;
-            PositionRect(hudTimerTxt.GetComponent<RectTransform>(), new Vector2(0f, -20f), new Vector2(170f, 25f));
+            hudTimerTxt.fontSize = 12f;
+            hudTimerTxt.color = Color.white;
+            RectTransform hudTimerRect = hudTimer.GetComponent<RectTransform>();
+            hudTimerRect.anchorMin = new Vector2(0f, 0f);
+            hudTimerRect.anchorMax = new Vector2(1f, 0.3f);
+            hudTimerRect.offsetMin = Vector2.zero;
+            hudTimerRect.offsetMax = Vector2.zero;
 
-            // Dice Gauge UI Panel
+            // ---- Dice Gauge UI Panel (inside sidebar, bottom area) ----
             GameObject gaugePanelGo = new GameObject("DiceGaugePanel", typeof(RectTransform));
-            gaugePanelGo.transform.SetParent(canvasGo.transform, false);
-            PositionRect(gaugePanelGo.GetComponent<RectTransform>(), new Vector2(250f, -240f), new Vector2(180f, 120f));
+            gaugePanelGo.transform.SetParent(sidebarGo.transform, false);
             Image gaugeImg = gaugePanelGo.AddComponent<Image>();
-            gaugeImg.color = new Color(0.12f, 0.12f, 0.15f, 0.8f);
+            gaugeImg.color = new Color(0.10f, 0.10f, 0.14f, 0.95f);
+            RectTransform gaugeRect = gaugePanelGo.GetComponent<RectTransform>();
+            gaugeRect.anchorMin = new Vector2(0f, 0f);
+            gaugeRect.anchorMax = new Vector2(1f, 0.26f);
+            gaugeRect.offsetMin = new Vector2(8f, 8f);
+            gaugeRect.offsetMax = new Vector2(-8f, -4f);
+
+            // Gauge panel layout: Title row, slider row, result+button row
+            // Title label at top
+            GameObject gaugeTitleGo = new GameObject("GaugeTitle", typeof(RectTransform));
+            gaugeTitleGo.transform.SetParent(gaugePanelGo.transform, false);
+            var gaugeTitle = gaugeTitleGo.AddComponent<TMPro.TextMeshProUGUI>();
+            gaugeTitle.text = "LEMPAR DADU";
+            gaugeTitle.alignment = TMPro.TextAlignmentOptions.Center;
+            gaugeTitle.fontSize = 11f;
+            gaugeTitle.fontStyle = TMPro.FontStyles.Bold;
+            gaugeTitle.color = new Color(0.8f, 0.8f, 0.8f);
+            RectTransform gaugeTitleRect = gaugeTitleGo.GetComponent<RectTransform>();
+            gaugeTitleRect.anchorMin = new Vector2(0f, 0.78f);
+            gaugeTitleRect.anchorMax = new Vector2(1f, 1f);
+            gaugeTitleRect.offsetMin = new Vector2(4f, 0f);
+            gaugeTitleRect.offsetMax = new Vector2(-4f, 0f);
 
             // Slider
             GameObject sliderGo = new GameObject("GaugeSlider", typeof(RectTransform));
             sliderGo.transform.SetParent(gaugePanelGo.transform, false);
             Slider slider = sliderGo.AddComponent<Slider>();
-            PositionRect(sliderGo.GetComponent<RectTransform>(), new Vector2(0f, 35f), new Vector2(160f, 15f));
+            RectTransform sliderRect = sliderGo.GetComponent<RectTransform>();
+            sliderRect.anchorMin = new Vector2(0f, 0.58f);
+            sliderRect.anchorMax = new Vector2(1f, 0.76f);
+            sliderRect.offsetMin = new Vector2(8f, 0f);
+            sliderRect.offsetMax = new Vector2(-8f, 0f);
 
             GameObject sliderBg = new GameObject("Bg", typeof(RectTransform));
             sliderBg.transform.SetParent(sliderGo.transform, false);
-            sliderBg.AddComponent<Image>().color = Color.grey;
+            sliderBg.AddComponent<Image>().color = new Color(0.3f, 0.3f, 0.35f);
             StretchRect(sliderBg.GetComponent<RectTransform>());
 
             GameObject sliderFillArea = new GameObject("Fill Area", typeof(RectTransform));
@@ -423,51 +557,90 @@ namespace UlarTangga.EditorSetup
             GameObject sliderFill = new GameObject("Fill", typeof(RectTransform));
             sliderFill.transform.SetParent(sliderFillArea.transform, false);
             var fillImg = sliderFill.AddComponent<Image>();
-            fillImg.color = new Color(0.9f, 0.2f, 0.2f);
+            fillImg.color = new Color(0.95f, 0.35f, 0.15f);
             StretchRect(sliderFill.GetComponent<RectTransform>());
 
             slider.fillRect = sliderFill.GetComponent<RectTransform>();
             slider.value = 0f;
 
-            // Labels
-            GameObject labelStGo = new GameObject("StatusLabel", typeof(RectTransform));
-            labelStGo.transform.SetParent(gaugePanelGo.transform, false);
-            var labelSt = labelStGo.AddComponent<TMPro.TextMeshProUGUI>();
-            labelSt.text = "Status Percobaan";
-            labelSt.alignment = TMPro.TextAlignmentOptions.Center;
-            labelSt.fontSize = 10f;
-            PositionRect(labelStGo.GetComponent<RectTransform>(), new Vector2(0f, 15f), new Vector2(170f, 15f));
-
+            // Range label
             GameObject labelRngGo = new GameObject("RangeLabel", typeof(RectTransform));
             labelRngGo.transform.SetParent(gaugePanelGo.transform, false);
             var labelRng = labelRngGo.AddComponent<TMPro.TextMeshProUGUI>();
-            labelRng.text = "Dadu: 2 - 3 (0%)";
+            labelRng.text = "Dadu: 2 - 12";
             labelRng.alignment = TMPro.TextAlignmentOptions.Center;
-            labelRng.fontSize = 10f;
+            labelRng.fontSize = 9f;
             labelRng.color = Color.cyan;
-            PositionRect(labelRngGo.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(170f, 15f));
+            RectTransform labelRngRect = labelRngGo.GetComponent<RectTransform>();
+            labelRngRect.anchorMin = new Vector2(0f, 0.42f);
+            labelRngRect.anchorMax = new Vector2(1f, 0.57f);
+            labelRngRect.offsetMin = new Vector2(4f, 0f);
+            labelRngRect.offsetMax = new Vector2(-4f, 0f);
 
+            // Status label
+            GameObject labelStGo = new GameObject("StatusLabel", typeof(RectTransform));
+            labelStGo.transform.SetParent(gaugePanelGo.transform, false);
+            var labelSt = labelStGo.AddComponent<TMPro.TextMeshProUGUI>();
+            labelSt.text = "Siap";
+            labelSt.alignment = TMPro.TextAlignmentOptions.Center;
+            labelSt.fontSize = 9f;
+            labelSt.color = Color.white;
+            RectTransform labelStRect = labelStGo.GetComponent<RectTransform>();
+            labelStRect.anchorMin = new Vector2(0f, 0.27f);
+            labelStRect.anchorMax = new Vector2(0.55f, 0.41f);
+            labelStRect.offsetMin = new Vector2(4f, 0f);
+            labelStRect.offsetMax = new Vector2(0f, 0f);
+
+            // Result label (dice number)
             GameObject labelResGo = new GameObject("ResultLabel", typeof(RectTransform));
             labelResGo.transform.SetParent(gaugePanelGo.transform, false);
             var labelRes = labelResGo.AddComponent<TMPro.TextMeshProUGUI>();
             labelRes.text = "-";
             labelRes.alignment = TMPro.TextAlignmentOptions.Center;
-            labelRes.fontSize = 18f;
+            labelRes.fontSize = 22f;
             labelRes.fontStyle = TMPro.FontStyles.Bold;
             labelRes.color = Color.yellow;
-            PositionRect(labelResGo.GetComponent<RectTransform>(), new Vector2(-45f, -35f), new Vector2(60f, 40f));
+            RectTransform labelResRect = labelResGo.GetComponent<RectTransform>();
+            labelResRect.anchorMin = new Vector2(0f, 0f);
+            labelResRect.anchorMax = new Vector2(0.42f, 0.26f);
+            labelResRect.offsetMin = new Vector2(4f, 4f);
+            labelResRect.offsetMax = new Vector2(0f, 0f);
 
-            // Roll Button
-            GameObject rollBtnGo = CreateStandardButton(gaugePanelGo.transform, "BtnRoll", "ROLL", new Vector2(40f, -35f), new Vector2(80f, 35f));
+            // Roll Button (right side, bottom)
+            GameObject rollBtnGo = new GameObject("BtnRoll");
+            rollBtnGo.transform.SetParent(gaugePanelGo.transform, false);
+            Image rollBtnImg = rollBtnGo.AddComponent<Image>();
+            rollBtnImg.color = new Color(0.9f, 0.3f, 0.15f);
+            Button rollBtn = rollBtnGo.AddComponent<Button>();
+            RectTransform rollBtnRect = rollBtnGo.GetComponent<RectTransform>();
+            rollBtnRect.anchorMin = new Vector2(0.44f, 0f);
+            rollBtnRect.anchorMax = new Vector2(1f, 0.41f);
+            rollBtnRect.offsetMin = new Vector2(4f, 4f);
+            rollBtnRect.offsetMax = new Vector2(-4f, 0f);
+            GameObject rollTxtGo = new GameObject("Text");
+            rollTxtGo.transform.SetParent(rollBtnGo.transform, false);
+            var rollTxt = rollTxtGo.AddComponent<TMPro.TextMeshProUGUI>();
+            rollTxt.text = "ROLL";
+            rollTxt.fontSize = 14f;
+            rollTxt.fontStyle = TMPro.FontStyles.Bold;
+            rollTxt.alignment = TMPro.TextAlignmentOptions.Center;
+            rollTxt.color = Color.white;
+            rollTxt.raycastTarget = false;
+            StretchRect(rollTxtGo.GetComponent<RectTransform>());
 
-            // Bottom Instruction Bar
+            // Bottom Instruction Bar (below board panel)
             GameObject instructGo = new GameObject("InstructionHUD", typeof(RectTransform));
             instructGo.transform.SetParent(canvasGo.transform, false);
-            PositionRect(instructGo.GetComponent<RectTransform>(), new Vector2(-150f, -270f), new Vector2(600f, 40f));
+            RectTransform instructRect = instructGo.GetComponent<RectTransform>();
+            instructRect.anchorMin = new Vector2(0f, 0f);
+            instructRect.anchorMax = new Vector2(1f, 0f);
+            instructRect.pivot = new Vector2(0.5f, 0f);
+            instructRect.anchoredPosition = new Vector2(0f, 4f);
+            instructRect.sizeDelta = new Vector2(-280f, 32f); // leave sidebar width
             var instructText = instructGo.AddComponent<TMPro.TextMeshProUGUI>();
             instructText.text = "Menunggu Giliran Mulai...";
             instructText.alignment = TMPro.TextAlignmentOptions.Center;
-            instructText.fontSize = 14f;
+            instructText.fontSize = 12f;
             instructText.color = Color.white;
 
             // Setup Overlay Panels
@@ -497,6 +670,12 @@ namespace UlarTangga.EditorSetup
             bManager.boardConfig = board;
             bManager.boardPanel = boardGo.GetComponent<RectTransform>();
             bManager.tilePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Board/Tile.prefab");
+            // With reference 1280x720, board area is approx 990x704px at ref size
+            // We use 64x64 tiles for clean 10x10 = 640px grid, startX/Y at -288
+            bManager.tileWidth = 64f;
+            bManager.tileHeight = 64f;
+            bManager.startX = -288f;
+            bManager.startY = -288f;
 
             var evolution = managersGo.AddComponent<PlayerEvolutionController>();
             var turn = managersGo.AddComponent<TurnManager>();
@@ -507,7 +686,7 @@ namespace UlarTangga.EditorSetup
             dice.labelStatus = labelSt;
             dice.labelRange = labelRng;
             dice.labelResult = labelRes;
-            dice.rollButton = rollBtnGo.GetComponent<Button>();
+            dice.rollButton = rollBtn;
 
             var gameplayUI = managersGo.AddComponent<GameplayUI>();
             gameplayUI.labelActiveTurn = hudNameTxt;
@@ -564,6 +743,8 @@ namespace UlarTangga.EditorSetup
             Button btn = btnGo.AddComponent<Button>();
 
             RectTransform rTrans = btnGo.GetComponent<RectTransform>();
+            rTrans.anchorMin = new Vector2(0.5f, 0.5f);
+            rTrans.anchorMax = new Vector2(0.5f, 0.5f);
             rTrans.anchoredPosition = pos;
             rTrans.sizeDelta = size ?? new Vector2(160f, 40f);
 
@@ -575,6 +756,48 @@ namespace UlarTangga.EditorSetup
             text.alignment = TMPro.TextAlignmentOptions.Center;
             text.color = Color.white;
             text.raycastTarget = false;
+            text.enableWordWrapping = false;
+
+            RectTransform txtRect = txtGo.GetComponent<RectTransform>();
+            txtRect.anchorMin = Vector2.zero;
+            txtRect.anchorMax = Vector2.one;
+            txtRect.offsetMin = Vector2.zero;
+            txtRect.offsetMax = Vector2.zero;
+
+            return btnGo;
+        }
+
+        private static GameObject CreateStyledButton(Transform parent, string name, string label, Vector2 pos, Vector2 size, Color bgColor)
+        {
+            GameObject btnGo = new GameObject(name);
+            btnGo.transform.SetParent(parent, false);
+            Image img = btnGo.AddComponent<Image>();
+            img.color = bgColor;
+
+            Button btn = btnGo.AddComponent<Button>();
+            ColorBlock cb = btn.colors;
+            cb.normalColor = bgColor;
+            cb.highlightedColor = bgColor * 1.25f;
+            cb.pressedColor = bgColor * 0.75f;
+            cb.selectedColor = bgColor;
+            btn.colors = cb;
+
+            RectTransform rTrans = btnGo.GetComponent<RectTransform>();
+            rTrans.anchorMin = new Vector2(0.5f, 0.5f);
+            rTrans.anchorMax = new Vector2(0.5f, 0.5f);
+            rTrans.anchoredPosition = pos;
+            rTrans.sizeDelta = size;
+
+            GameObject txtGo = new GameObject("Text");
+            txtGo.transform.SetParent(btnGo.transform, false);
+            var text = txtGo.AddComponent<TMPro.TextMeshProUGUI>();
+            text.text = label;
+            text.fontSize = 14f;
+            text.fontStyle = TMPro.FontStyles.Bold;
+            text.alignment = TMPro.TextAlignmentOptions.Center;
+            text.color = Color.white;
+            text.raycastTarget = false;
+            text.characterSpacing = 1f;
             text.enableWordWrapping = false;
 
             RectTransform txtRect = txtGo.GetComponent<RectTransform>();
