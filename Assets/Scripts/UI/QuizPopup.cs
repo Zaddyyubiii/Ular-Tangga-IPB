@@ -157,6 +157,9 @@ namespace UI
             if (btnOptionB != null) btnOptionB.interactable = false;
             if (btnCloseQuiz != null) btnCloseQuiz.interactable = false;
 
+            var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
+            string botName = curPlayer != null ? curPlayer.playerName : "Bot";
+
             // Wait for dramatic effect (bot "thinking" / player reading the question)
             yield return new WaitForSeconds(2.0f);
 
@@ -169,6 +172,8 @@ namespace UI
             }
 
             // Trigger visual feedback and SFX via option selection
+            string choiceText = chosenIndex == 0 ? "A/True" : "B/False";
+            Debug.Log($"Bot Player {botName} answered quiz: {choiceText}");
             OnOptionSelected(chosenIndex);
 
             // Wait for dramatic effect so the player can read the feedback explanation
@@ -176,6 +181,7 @@ namespace UI
 
             // Enable close button and close the quiz automatically
             if (btnCloseQuiz != null) btnCloseQuiz.interactable = true;
+            Debug.Log($"Bot Player {botName} auto closed popup");
             OnCloseQuizClicked();
         }
     }

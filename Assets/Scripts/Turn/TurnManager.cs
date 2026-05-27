@@ -122,6 +122,7 @@ namespace Turn
             // Handle Bot AI trigger
             if (activePlayer.isBot)
             {
+                Debug.Log($"Bot Player {activePlayer.playerName} started turn");
                 if (BotController.Instance != null)
                 {
                     BotController.Instance.TriggerBotTurn(activePlayer);

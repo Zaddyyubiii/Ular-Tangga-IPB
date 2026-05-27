@@ -20,6 +20,7 @@ namespace UI
         public GameObject bombPlaceholderGo; // Procedural bomb card/symbol
 
         private Action onContinueCallback;
+        private Coroutine autoCloseCoroutine;
 
         private void Awake()
         {
@@ -41,6 +42,12 @@ namespace UI
 
         public void ShowPopup(string title, string message, Action callback, bool playExplosion = false)
         {
+            if (autoCloseCoroutine != null)
+            {
+                StopCoroutine(autoCloseCoroutine);
+                autoCloseCoroutine = null;
+            }
+
             // Pause turn timer during popup
             if (Turn.TurnManager.Instance != null)
             {
@@ -61,6 +68,20 @@ namespace UI
             {
                 StartCoroutine(PlayBombExplosionCo());
             }
+
+            // Trigger bot auto-close if current player is a bot
+            var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
+            if (curPlayer != null && curPlayer.isBot)
+            {
+                autoCloseCoroutine = StartCoroutine(AutoCloseCo(UnityEngine.Random.Range(0.8f, 1.5f), curPlayer.playerName));
+            }
+        }
+
+        private IEnumerator AutoCloseCo(float delay, string botName)
+        {
+            yield return new WaitForSeconds(delay);
+            Debug.Log($"Bot Player {botName} auto closed popup");
+            OnContinueClicked();
         }
 
         private void OnContinueClicked()

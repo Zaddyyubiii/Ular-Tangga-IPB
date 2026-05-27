@@ -89,7 +89,7 @@ namespace Core
 
             currentState = GameState.Prologue;
 
-            // 1. Generate Board Grid serpentine mapping
+            // 1. Generate Board Grid serpentine mapping with a randomized seed
             if (BoardManager.Instance != null)
             {
                 if (BoardManager.Instance.boardPanel == null && boardContainer != null)
@@ -97,7 +97,8 @@ namespace Core
                     BoardManager.Instance.boardPanel = boardContainer.GetComponent<RectTransform>();
                 }
                 BoardManager.Instance.boardConfig = boardConfig;
-                BoardManager.Instance.GenerateBoard();
+                int seed = UnityEngine.Random.Range(1, 1000000);
+                BoardManager.Instance.GenerateBoardWithSeed(seed);
             }
 
             // 2. Setup Players
@@ -266,6 +267,11 @@ namespace Core
             PlayerData curPlayer = GetCurrentPlayer();
             if (curPlayer == null) yield break;
 
+            if (curPlayer.isBot)
+            {
+                Debug.Log($"Bot Player {curPlayer.playerName} rolled {diceValue}");
+            }
+
             int startTile = curPlayer.currentTile;
             int targetTile = startTile + diceValue;
 
@@ -332,7 +338,9 @@ namespace Core
 
         private void ResolveTileEffect(PlayerData player, int tile, int roll)
         {
-            TileDefinition def = boardConfig.GetTileDefinition(tile);
+            TileDefinition def = BoardManager.Instance != null && BoardManager.Instance.runtimeBoardConfig != null
+                ? BoardManager.Instance.runtimeBoardConfig.GetTileDefinition(tile)
+                : boardConfig.GetTileDefinition(tile);
             
             Debug.Log($"[Tile Resolution] Player {player.playerName} landed on Tile {tile} (Type: {def.type})");
 
@@ -576,6 +584,12 @@ namespace Core
 
         private void TransitionToNextTurn()
         {
+            PlayerData curPlayer = GetCurrentPlayer();
+            if (curPlayer != null && curPlayer.isBot)
+            {
+                Debug.Log($"Bot Player {curPlayer.playerName} ended turn");
+            }
+
             currentState = GameState.ChangingTurn;
             
             // Clean up dice controller visuals

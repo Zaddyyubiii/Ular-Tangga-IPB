@@ -10,6 +10,10 @@ namespace Board
 
         [Header("Board Configuration")]
         public BoardConfig boardConfig;
+        
+        [Header("Runtime Configurations")]
+        public RuntimeBoardConfig runtimeBoardConfig;
+        public int currentSeed;
 
         [Header("Grid Layout")]
         public RectTransform boardPanel;
@@ -33,6 +37,7 @@ namespace Board
         public void GenerateBoard()
         {
             if (boardConfig == null) boardConfig = ScriptableObject.CreateInstance<BoardConfig>();
+            if (runtimeBoardConfig == null) runtimeBoardConfig = ConvertToRuntimeConfig(boardConfig);
             if (boardPanel == null) return;
 
             for (int i = boardPanel.childCount - 1; i >= 0; i--)
@@ -60,6 +65,34 @@ namespace Board
 
             // Draw snakes and ladders on top
             DrawSnakesAndLadders();
+        }
+
+        public void GenerateBoardWithSeed(int seed)
+        {
+            currentSeed = seed;
+            Debug.Log("Generated Board Seed: " + seed);
+            runtimeBoardConfig = BoardRandomizer.GenerateBoard(boardConfig, seed, Core.GameManager.Instance != null ? Core.GameManager.Instance.messageBank : null);
+            GenerateBoard();
+        }
+
+        private RuntimeBoardConfig ConvertToRuntimeConfig(BoardConfig config)
+        {
+            RuntimeBoardConfig runtime = new RuntimeBoardConfig();
+            if (config == null) return runtime;
+
+            runtime.snakes = new List<TileDefinition>(config.snakes);
+            runtime.ladders = new List<TileDefinition>(config.ladders);
+
+            for (int i = 1; i <= 99; i++)
+            {
+                TileDefinition def = config.GetTileDefinition(i);
+                if (def.type != TileType.Normal)
+                {
+                    runtime.tiles[i] = def;
+                }
+            }
+
+            return runtime;
         }
 
         public Vector2 GetTilePosition(int n)
@@ -153,7 +186,7 @@ namespace Board
             iconRect.offsetMax = Vector2.zero;
 
             // Apply tile style
-            TileDefinition def = boardConfig.GetTileDefinition(number);
+            TileDefinition def = runtimeBoardConfig.GetTileDefinition(number);
             ApplyTileStyle(number, def, inner, numText, iconText);
 
             TileView view = tileGo.GetComponent<TileView>();
@@ -244,14 +277,14 @@ namespace Board
         {
             if (boardPanel == null) return;
 
-            foreach (var ladder in boardConfig.ladders)
+            foreach (var ladder in runtimeBoardConfig.ladders)
             {
                 Vector2 s = GetTilePosition(ladder.tileIndex);
                 Vector2 e = GetTilePosition(ladder.targetTileIndex);
                 DrawLadder(s, e);
             }
 
-            foreach (var snake in boardConfig.snakes)
+            foreach (var snake in runtimeBoardConfig.snakes)
             {
                 Vector2 s = GetTilePosition(snake.tileIndex);
                 Vector2 e = GetTilePosition(snake.targetTileIndex);
