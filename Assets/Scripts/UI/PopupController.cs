@@ -54,7 +54,7 @@ namespace UI
             string title,
             string message,
             Action onClose,
-            bool showContinueButton = true,
+            bool showContinueButton,
             float autoCloseDelay = -1f,
             bool playExplosion = false
         )
