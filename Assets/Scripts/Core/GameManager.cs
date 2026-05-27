@@ -138,7 +138,7 @@ namespace Core
 
                 // Set color from selected character set if available, otherwise fall back
                 Color pColor = colors[i - 1];
-                if (PlayerEvolutionController.Instance != null && PlayerEvolutionController.Instance.characterSets != null)
+                if (PlayerEvolutionController.Instance != null && PlayerEvolutionController.Instance.characterSets != null && PlayerEvolutionController.Instance.characterSets.Count > 0)
                 {
                     int setIndex = (i - 1) % PlayerEvolutionController.Instance.characterSets.Count;
                     if (setIndex >= 0 && setIndex < PlayerEvolutionController.Instance.characterSets.Count)
