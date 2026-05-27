@@ -306,11 +306,14 @@ namespace Board
             CreateArrow(end, -tailDir, new Color(0.2f, 0.8f, 0.2f, 0.9f));
         }
 
-        private void CreateThickLine(Vector2 start, Vector2 end, Color color, float thickness, string label)
+        private void CreateThickLine(Vector2 start, Vector2 end, Color color, float thickness, string label, bool drawOnTop = true)
         {
             GameObject go = new GameObject(label);
             go.transform.SetParent(boardPanel, false);
-            go.transform.SetAsFirstSibling();
+            if (!drawOnTop)
+            {
+                go.transform.SetAsFirstSibling();
+            }
 
             Image img = go.AddComponent<Image>();
             img.color = color;
@@ -330,14 +333,17 @@ namespace Board
 
         private void CreateLine(Vector2 start, Vector2 end, Color color, float thickness)
         {
-            CreateThickLine(start, end, color, thickness, "GridLine");
+            CreateThickLine(start, end, color, thickness, "GridLine", false);
         }
 
-        private void CreateCircle(Vector2 center, float radius, Color color, string label)
+        private void CreateCircle(Vector2 center, float radius, Color color, string label, bool drawOnTop = true)
         {
             GameObject go = new GameObject(label);
             go.transform.SetParent(boardPanel, false);
-            go.transform.SetAsFirstSibling();
+            if (!drawOnTop)
+            {
+                go.transform.SetAsFirstSibling();
+            }
 
             Image img = go.AddComponent<Image>();
             img.color = color;
@@ -350,11 +356,14 @@ namespace Board
             rt.anchoredPosition = center;
         }
 
-        private void CreateArrow(Vector2 tip, Vector2 direction, Color color)
+        private void CreateArrow(Vector2 tip, Vector2 direction, Color color, bool drawOnTop = true)
         {
             GameObject go = new GameObject("Arrow");
             go.transform.SetParent(boardPanel, false);
-            go.transform.SetAsFirstSibling();
+            if (!drawOnTop)
+            {
+                go.transform.SetAsFirstSibling();
+            }
 
             Image img = go.AddComponent<Image>();
             img.color = color;
