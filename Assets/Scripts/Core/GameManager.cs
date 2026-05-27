@@ -684,15 +684,12 @@ namespace Core
 
             if (PopupController.Instance != null)
             {
-                bool autoClose = player.isBot;
-                float delay = PopupController.BOT_POPUP_AUTO_CLOSE_DELAY;
-
                 PopupController.Instance.ShowPopup(
                     title,
                     message,
-                    autoClose,
-                    delay,
-                    () => { OnFinishPopupClosed(); }
+                    () => { OnFinishPopupClosed(); },
+                    showContinueButton: !player.isBot,
+                    autoCloseDelay: PopupController.POPUP_AUTO_CLOSE_DELAY
                 );
             }
             else

@@ -19,7 +19,7 @@ namespace UI
         public Image redFlashOverlay;
         public GameObject bombPlaceholderGo; // Procedural bomb card/symbol
 
-        public const float BOT_POPUP_AUTO_CLOSE_DELAY = 3f;
+        public const float POPUP_AUTO_CLOSE_DELAY = 5f;
 
         private Action onContinueCallback;
         private Coroutine autoCloseCoroutine;
@@ -46,19 +46,24 @@ namespace UI
         public void ShowPopup(string title, string message, Action callback, bool playExplosion = false)
         {
             var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
-            bool autoClose = curPlayer != null && curPlayer.isBot;
-            ShowPopup(title, message, autoClose, BOT_POPUP_AUTO_CLOSE_DELAY, callback, playExplosion);
+            bool showContinue = curPlayer == null || !curPlayer.isBot;
+            ShowPopup(title, message, callback, showContinue, POPUP_AUTO_CLOSE_DELAY, playExplosion);
         }
 
         public void ShowPopup(
             string title,
             string message,
-            bool autoClose,
-            float autoCloseDelay,
             Action onClose,
+            bool showContinueButton = true,
+            float autoCloseDelay = -1f,
             bool playExplosion = false
         )
         {
+            if (autoCloseDelay <= 0f)
+            {
+                autoCloseDelay = POPUP_AUTO_CLOSE_DELAY;
+            }
+
             if (autoCloseCoroutine != null)
             {
                 StopCoroutine(autoCloseCoroutine);
@@ -78,10 +83,10 @@ namespace UI
             isPopupOpen = true;
             popupPanel.SetActive(true);
 
-            // Hide/disable Continue button if autoClose is active
+            // Toggle Continue button based on parameters
             if (btnContinue != null)
             {
-                btnContinue.gameObject.SetActive(!autoClose);
+                btnContinue.gameObject.SetActive(showContinueButton);
             }
 
             // Pop animation (fade / scale)
@@ -94,29 +99,28 @@ namespace UI
             }
 
             var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
-            string botName = curPlayer != null ? curPlayer.playerName : "Bot";
+            bool isBot = curPlayer != null && curPlayer.isBot;
 
-            if (autoClose)
+            // Logs matching section 11
+            Debug.Log($"Popup opened: {title}. Auto close in {autoCloseDelay} seconds.");
+            if (isBot)
             {
-                Debug.Log($"Bot Player {botName} popup opened.");
-                Debug.Log($"Bot Player {botName} popup will auto close in {autoCloseDelay} seconds.");
-                autoCloseCoroutine = StartCoroutine(AutoCloseCo(autoCloseDelay, botName));
+                Debug.Log("Bot popup will auto close in 5 seconds.");
             }
-            else
-            {
-                Debug.Log($"Human Player popup opened.");
-            }
+
+            autoCloseCoroutine = StartCoroutine(AutoCloseRoutine(autoCloseDelay));
         }
 
-        private IEnumerator AutoCloseCo(float delay, string botName)
+        private IEnumerator AutoCloseRoutine(float delay)
         {
             yield return new WaitForSeconds(delay);
-            Debug.Log($"Bot Player {botName} popup auto closed.");
+            Debug.Log("Popup auto closed after 5 seconds.");
             ClosePopup();
         }
 
         private void OnContinueClicked()
         {
+            Debug.Log("Popup closed manually before auto close.");
             if (Audio.AudioManager.Instance != null)
             {
                 Audio.AudioManager.Instance.PlaySFX(Audio.AudioManager.Instance.clickClip);
@@ -144,6 +148,7 @@ namespace UI
             Action callback = onContinueCallback;
             onContinueCallback = null;
 
+            Debug.Log("Popup onClose callback executed.");
             callback?.Invoke();
         }
 

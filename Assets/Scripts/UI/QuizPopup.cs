@@ -24,6 +24,8 @@ namespace UI
 
         private QuizQuestion currentQuestion;
         private Action onQuizFinishedCallback;
+        private Coroutine autoCloseCoroutine;
+        private bool isQuizOpen;
 
         private void Awake()
         {
@@ -50,6 +52,13 @@ namespace UI
 
             currentQuestion = question;
             onQuizFinishedCallback = callback;
+            isQuizOpen = true;
+
+            if (autoCloseCoroutine != null)
+            {
+                StopCoroutine(autoCloseCoroutine);
+                autoCloseCoroutine = null;
+            }
 
             labelQuestion.text = question.questionText;
 
@@ -125,17 +134,53 @@ namespace UI
             }
 
             Debug.Log($"[Quiz] Answered correct: {isCorrect}");
+
+            // Start auto close timer for human players
+            var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
+            bool isBot = curPlayer != null && curPlayer.isBot;
+            if (!isBot)
+            {
+                if (autoCloseCoroutine != null) StopCoroutine(autoCloseCoroutine);
+                autoCloseCoroutine = StartCoroutine(AutoCloseQuizCo(PopupController.POPUP_AUTO_CLOSE_DELAY));
+            }
+        }
+
+        private IEnumerator AutoCloseQuizCo(float delay)
+        {
+            Debug.Log($"Quiz feedback opened. Auto close in {delay} seconds.");
+            yield return new WaitForSeconds(delay);
+            Debug.Log("Quiz feedback auto closed after 5 seconds.");
+            CloseQuiz();
         }
 
         private void OnCloseQuizClicked()
         {
+            Debug.Log("Popup closed manually before auto close.");
             if (Audio.AudioManager.Instance != null)
             {
                 Audio.AudioManager.Instance.PlaySFX(Audio.AudioManager.Instance.clickClip);
             }
+            CloseQuiz();
+        }
 
-            quizPanel.SetActive(false);
-            onQuizFinishedCallback?.Invoke();
+        public void CloseQuiz()
+        {
+            if (!isQuizOpen) return;
+            isQuizOpen = false;
+
+            if (autoCloseCoroutine != null)
+            {
+                StopCoroutine(autoCloseCoroutine);
+                autoCloseCoroutine = null;
+            }
+
+            if (quizPanel != null) quizPanel.SetActive(false);
+
+            Action callback = onQuizFinishedCallback;
+            onQuizFinishedCallback = null;
+
+            Debug.Log("Popup onClose callback executed.");
+            callback?.Invoke();
         }
 
         private IEnumerator PopScaleCo(Transform trans, Vector3 targetScale, float duration)
@@ -176,13 +221,13 @@ namespace UI
             Debug.Log($"Bot Player {botName} quiz answered: {choiceChar}.");
             OnOptionSelected(chosenIndex);
 
-            // Wait for feedback to be displayed for exactly 3 seconds
-            yield return new WaitForSeconds(PopupController.BOT_POPUP_AUTO_CLOSE_DELAY);
+            // Wait for feedback to be displayed for exactly 5 seconds
+            yield return new WaitForSeconds(PopupController.POPUP_AUTO_CLOSE_DELAY);
 
             // Enable close button and close the quiz automatically
             if (btnCloseQuiz != null) btnCloseQuiz.interactable = true;
             Debug.Log($"Bot Player {botName} quiz feedback auto closed.");
-            OnCloseQuizClicked();
+            CloseQuiz();
         }
     }
 }
