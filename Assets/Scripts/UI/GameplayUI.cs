@@ -102,6 +102,9 @@ namespace UI
 
         private void HandleTurnStarted(PlayerData activePlayer)
         {
+            // Log turn transition (Section 11)
+            Debug.Log($"Current turn: {activePlayer.playerName}. Applying bright version of player color.");
+
             if (labelActiveTurn != null)
             {
                 labelActiveTurn.text = $"GILIRAN: {activePlayer.playerName.ToUpper()}";

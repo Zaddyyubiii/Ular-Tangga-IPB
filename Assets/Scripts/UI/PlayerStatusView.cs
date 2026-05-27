@@ -36,11 +36,11 @@ namespace UI
             {
                 if (isActive)
                 {
-                    imageAvatarBackground.color = GetHighContrastColor(color);
+                    imageAvatarBackground.color = GetActiveCardColor(color);
                 }
                 else
                 {
-                    imageAvatarBackground.color = GetNormalCardColor(color);
+                    imageAvatarBackground.color = GetInactiveCardColor(color);
                 }
             }
 
@@ -50,30 +50,21 @@ namespace UI
             if (labelTile != null) labelTile.color = txtColor;
             if (labelEvolution != null) labelEvolution.color = txtColor;
             if (labelSkulls != null) labelSkulls.color = txtColor;
+            if (labelStatus != null) labelStatus.color = txtColor;
         }
 
-        private Color GetNormalCardColor(Color baseColor)
+        private Color GetInactiveCardColor(Color baseColor)
         {
-            // Soft background (darkened / soft version of player color)
-            return new Color(baseColor.r * 0.25f + 0.1f, baseColor.g * 0.25f + 0.1f, baseColor.b * 0.25f + 0.1f, 0.9f);
+            return Color.Lerp(baseColor, Color.black, 0.45f);
         }
 
-        private Color GetHighContrastColor(Color baseColor)
+        private Color GetActiveCardColor(Color baseColor)
         {
-            float luminance = 
-                0.299f * baseColor.r +
-                0.587f * baseColor.g +
-                0.114f * baseColor.b;
-
-            // If color is relatively bright, make it much darker; if dark, make it brighter
-            if (luminance > 0.6f)
-            {
-                return Color.Lerp(baseColor, Color.black, 0.35f);
-            }
-            else
-            {
-                return Color.Lerp(baseColor, Color.white, 0.25f);
-            }
+            Color brightColor = Color.Lerp(baseColor, Color.white, 0.18f);
+            Color.RGBToHSV(brightColor, out float h, out float s, out float v);
+            s = Mathf.Clamp01(s + 0.15f);
+            v = Mathf.Clamp01(v + 0.20f);
+            return Color.HSVToRGB(h, s, v);
         }
 
         private Color GetReadableTextColor(Color backgroundColor)
@@ -188,6 +179,12 @@ namespace UI
 
             // Apply card background and text colors
             ApplyPlayerColor(data.playerColor, isCurrentlyActive);
+
+            // Log active state change (Section 11)
+            if (imageAvatarBackground != null)
+            {
+                Debug.Log($"Player {data.playerName} status card active={isCurrentlyActive}, color={imageAvatarBackground.color}");
+            }
         }
     }
 }
