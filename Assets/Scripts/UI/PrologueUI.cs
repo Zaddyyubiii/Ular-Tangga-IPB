@@ -18,11 +18,12 @@ namespace UI
         {
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
+
+            if (prologuePanel != null) prologuePanel.SetActive(false);
         }
 
         private void Start()
         {
-            if (prologuePanel != null) prologuePanel.SetActive(false);
             if (btnStartJourney != null)
             {
                 btnStartJourney.onClick.AddListener(OnStartJourneyClicked);

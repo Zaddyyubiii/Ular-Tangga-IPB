@@ -34,6 +34,16 @@ namespace UI
             {
                 TurnManager.Instance.OnTurnStarted += HandleTurnStarted;
                 TurnManager.Instance.OnTimerUpdated += HandleTimerUpdated;
+
+                // Sync current state immediately in case it was missed due to start order
+                if (Core.GameManager.Instance != null)
+                {
+                    PlayerData active = Core.GameManager.Instance.GetCurrentPlayer();
+                    if (active != null)
+                    {
+                        HandleTurnStarted(active);
+                    }
+                }
             }
         }
 
