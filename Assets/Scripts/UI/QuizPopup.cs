@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using Quiz;
@@ -71,7 +72,17 @@ namespace UI
             // Hide feedback originally
             if (feedbackContainer != null) feedbackContainer.SetActive(false);
 
+            // Animate main quiz panel entry
             quizPanel.SetActive(true);
+            quizPanel.transform.localScale = Vector3.zero;
+            StartCoroutine(PopScaleCo(quizPanel.transform, Vector3.one, 0.25f));
+
+            // Trigger bot auto-solve if current player is a bot
+            var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
+            if (curPlayer != null && curPlayer.isBot)
+            {
+                StartCoroutine(ExecuteBotQuizTurnCo());
+            }
         }
 
         private void OnOptionSelected(int selectedIndex)
@@ -82,10 +93,12 @@ namespace UI
 
             bool isCorrect = (selectedIndex == currentQuestion.correctAnswerIndex);
 
-            // Display feedback
+            // Display feedback with smooth animation
             if (feedbackContainer != null)
             {
                 feedbackContainer.SetActive(true);
+                feedbackContainer.transform.localScale = Vector3.zero;
+                StartCoroutine(PopScaleCo(feedbackContainer.transform, Vector3.one, 0.2f));
             }
 
             if (isCorrect)
@@ -123,6 +136,47 @@ namespace UI
 
             quizPanel.SetActive(false);
             onQuizFinishedCallback?.Invoke();
+        }
+
+        private IEnumerator PopScaleCo(Transform trans, Vector3 targetScale, float duration)
+        {
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                trans.localScale = Vector3.Lerp(Vector3.zero, targetScale, elapsed / duration);
+                yield return null;
+            }
+            trans.localScale = targetScale;
+        }
+
+        private IEnumerator ExecuteBotQuizTurnCo()
+        {
+            // Disable buttons for bot turn so the human player cannot click them
+            if (btnOptionA != null) btnOptionA.interactable = false;
+            if (btnOptionB != null) btnOptionB.interactable = false;
+            if (btnCloseQuiz != null) btnCloseQuiz.interactable = false;
+
+            // Wait for dramatic effect (bot "thinking" / player reading the question)
+            yield return new WaitForSeconds(2.0f);
+
+            // Choose an answer: bot has a 75% chance of answering correctly
+            bool answerCorrectly = UnityEngine.Random.value < 0.75f;
+            int chosenIndex = currentQuestion.correctAnswerIndex;
+            if (!answerCorrectly)
+            {
+                chosenIndex = 1 - currentQuestion.correctAnswerIndex;
+            }
+
+            // Trigger visual feedback and SFX via option selection
+            OnOptionSelected(chosenIndex);
+
+            // Wait for dramatic effect so the player can read the feedback explanation
+            yield return new WaitForSeconds(2.5f);
+
+            // Enable close button and close the quiz automatically
+            if (btnCloseQuiz != null) btnCloseQuiz.interactable = true;
+            OnCloseQuizClicked();
         }
     }
 }

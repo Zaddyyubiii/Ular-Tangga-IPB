@@ -348,7 +348,27 @@ namespace Core
                     QuizQuestion question = quizBank.GetRandomQuestion();
                     if (QuizPopup.Instance != null && question != null)
                     {
-                        QuizPopup.Instance.ShowQuiz(question, () => { TransitionToNextTurn(); });
+                        if (player.isBot)
+                        {
+                            QuizPopup.Instance.ShowQuiz(question, () => { TransitionToNextTurn(); });
+                        }
+                        else
+                        {
+                            if (PopupController.Instance != null)
+                            {
+                                PopupController.Instance.ShowPopup(
+                                    "Evaluasi Tata Tertib Kampus!",
+                                    "Anda mendarat di petak Kuis! Jawablah pertanyaan kuis tata tertib berikut dengan benar untuk melanjutkan perjalanan.",
+                                    () => {
+                                        QuizPopup.Instance.ShowQuiz(question, () => { TransitionToNextTurn(); });
+                                    }
+                                );
+                            }
+                            else
+                            {
+                                QuizPopup.Instance.ShowQuiz(question, () => { TransitionToNextTurn(); });
+                            }
+                        }
                     }
                     else
                     {
