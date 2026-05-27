@@ -94,3 +94,17 @@ Masukkan BGM ke `Assets/Audio/BGM/` dan SFX ke `Assets/Audio/SFX/`, lalu isi fie
 5. Klik `Build`.
 
 Canvas sudah memakai `Scale With Screen Size`, dan input memakai UI pointer sehingga nyaman untuk mouse maupun touch.
+
+## Publish GitHub Pages
+
+Build WebGL siap-host ada di folder `docs/`.
+
+Di GitHub, buka `Settings > Pages`, lalu pilih:
+
+- Source: `Deploy from a branch`
+- Branch: `main`
+- Folder: `/docs`
+
+Setelah deploy selesai, game bisa dibuka di:
+
+`https://zaddyyubiii.github.io/Ular-Tangga-IPB/`
