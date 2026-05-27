@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae1dc2a7a66029e4cb631d17c3e5f5e2, type: 3}
+  m_Name: QuizBank
+  m_EditorClassIdentifier: Assembly-CSharp::Quiz.QuizBank
+  questions:
+  - questionText: Menurut Peraturan Akademik, mahasiswa diperbolehkan memakai kaos
+      oblong tak berkerah dan sandal jepit saat mengikuti UTS.
+    isTrueFalse: 1
+    choices:
+    - Benar
+    - Salah
+    correctAnswerIndex: 1
+    correctFeedback: Benar. Saat kegiatan akademik resmi, mahasiswa harus berpakaian
+      sopan dan sesuai ketentuan.
+    incorrectFeedback: Kurang tepat. Pakaian saat kegiatan akademik resmi harus mengikuti
+      aturan yang berlaku (berkerah dan bersepatu).
+    rewardTiles: 0
+    penaltyTiles: 0
+  - questionText: Apa nama masa persiapan untuk mahasiswa baru pada tahun pertama
+      di IPB?
+    isTrueFalse: 0
+    choices:
+    - PPKU
+    - TPB
+    correctAnswerIndex: 0
+    correctFeedback: Benar. PPKU (Program Pendidikan Kompetensi Umum) adalah masa
+      persiapan awal mahasiswa IPB.
+    incorrectFeedback: Kurang tepat. Jawaban yang benar adalah PPKU (Program Pendidikan
+      Kompetensi Umum).
+    rewardTiles: 0
+    penaltyTiles: 0
+  - questionText: Berapa batas waktu maksimal masa studi untuk program Sarjana (S1)
+      reguler di IPB?
+    isTrueFalse: 0
+    choices:
+    - 8 Semester
+    - 14 Semester
+    correctAnswerIndex: 1
+    correctFeedback: Benar. Batas maksimal masa studi S1 reguler adalah 14 semester.
+    incorrectFeedback: Kurang tepat. Jawaban yang benar adalah 14 semester (7 tahun).
+    rewardTiles: 0
+    penaltyTiles: 0

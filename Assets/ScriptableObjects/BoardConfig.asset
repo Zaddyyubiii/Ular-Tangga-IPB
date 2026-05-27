@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f39208edd0d726046a2cdc6da790aa93, type: 3}
+  m_Name: BoardConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Board.BoardConfig
+  questionTiles: 0600000014000000220000002e0000004000000055000000
+  skullTiles: 0f0000003b00000048000000
+  snakes:
+  - tileIndex: 35
+    type: 3
+    targetTileIndex: 25
+    customMessage: Pelanggaran Ringan! Anda parkir sembarangan. Turun 1 baris.
+    severity: 0
+  - tileIndex: 45
+    type: 3
+    targetTileIndex: 35
+    customMessage: Pelanggaran Ringan! Anda parkir sembarangan. Turun 1 baris.
+    severity: 0
+  - tileIndex: 63
+    type: 3
+    targetTileIndex: 43
+    customMessage: Pelanggaran Sedang! Anda merusak fasilitas IPB. Turun 2 baris.
+    severity: 1
+  - tileIndex: 88
+    type: 3
+    targetTileIndex: 68
+    customMessage: Pelanggaran Sedang! Anda merusak fasilitas IPB. Turun 2 baris.
+    severity: 1
+  - tileIndex: 93
+    type: 3
+    targetTileIndex: 73
+    customMessage: Pelanggaran Sedang! Anda merusak fasilitas IPB. Turun 2 baris.
+    severity: 1
+  ladders:
+  - tileIndex: 8
+    type: 4
+    targetTileIndex: 28
+    customMessage: Karya tulis ilmiahmu memenangkan kompetisi tingkat nasional. Naik
+      2 baris.
+    severity: 1
+  - tileIndex: 18
+    type: 4
+    targetTileIndex: 38
+    customMessage: Kamu diterima magang karena konsisten membangun portofolio. Naik
+      2 baris.
+    severity: 1
+  - tileIndex: 21
+    type: 4
+    targetTileIndex: 41
+    customMessage: Kamu diterima magang karena konsisten membangun portofolio. Naik
+      2 baris.
+    severity: 1
+  - tileIndex: 48
+    type: 4
+    targetTileIndex: 68
+    customMessage: Kamu diterima magang karena konsisten membangun portofolio. Naik
+      2 baris.
+    severity: 1
+  - tileIndex: 65
+    type: 4
+    targetTileIndex: 85
+    customMessage: Kamu diterima magang karena konsisten membangun portofolio. Naik
+      2 baris.
+    severity: 1
