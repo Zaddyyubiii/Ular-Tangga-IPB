@@ -25,6 +25,7 @@ namespace Player
         {
             this.data = playerData;
             name = "Token_" + data.playerName;
+            Debug.Log($"Token initialized for Player {playerData.id} with color: {playerData.playerColor}");
             UpdateVisuals();
         }
 
@@ -32,13 +33,19 @@ namespace Player
         {
             if (data == null) return;
 
-            // Apply player color
+            // Apply player color to border/marker first
+            if (borderImage != null)
+            {
+                borderImage.color = data.playerColor;
+            }
+
+            // Apply player color to token background
             if (tokenImage != null)
             {
                 tokenImage.color = data.playerColor;
             }
 
-            // Apply evolution sprite if available, otherwise keep default color
+            // Apply evolution sprite if available, keeping sprite original colors
             if (data.currentSprite != null && tokenImage != null)
             {
                 tokenImage.sprite = data.currentSprite;

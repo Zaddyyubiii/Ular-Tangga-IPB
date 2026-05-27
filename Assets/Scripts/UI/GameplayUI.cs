@@ -82,7 +82,7 @@ namespace UI
                 PlayerStatusView statusView = cardGo.GetComponent<PlayerStatusView>();
                 if (statusView != null)
                 {
-                    statusView.Refresh(players[i], false);
+                    statusView.Bind(players[i], false);
                     statusCardViews.Add(statusView);
                 }
             }

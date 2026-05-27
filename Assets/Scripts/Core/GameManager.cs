@@ -135,7 +135,23 @@ namespace Core
                 p.playerName = $"Mahasiswa {i}";
                 p.isBot = (i > numRealPlayers);
                 p.currentTile = 0; // Starts at petak 0 (start)
-                p.playerColor = colors[i - 1];
+
+                // Set color from selected character set if available, otherwise fall back
+                Color pColor = colors[i - 1];
+                if (PlayerEvolutionController.Instance != null && PlayerEvolutionController.Instance.characterSets != null)
+                {
+                    int setIndex = (i - 1) % PlayerEvolutionController.Instance.characterSets.Count;
+                    if (setIndex >= 0 && setIndex < PlayerEvolutionController.Instance.characterSets.Count)
+                    {
+                        var spriteSet = PlayerEvolutionController.Instance.characterSets[setIndex];
+                        if (spriteSet != null && spriteSet.identityColor != Color.clear && spriteSet.identityColor != new Color(0, 0, 0, 0))
+                        {
+                            pColor = spriteSet.identityColor;
+                        }
+                    }
+                }
+                p.playerColor = pColor;
+                Debug.Log($"Player {p.id} assigned color: {p.playerColor}");
 
                 // Initial evolution evaluation
                 if (PlayerEvolutionController.Instance != null)
