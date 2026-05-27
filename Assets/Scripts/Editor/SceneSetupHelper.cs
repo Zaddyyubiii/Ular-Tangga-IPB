@@ -196,14 +196,28 @@ namespace UlarTangga.EditorSetup
             GameObject card = new GameObject("PlayerStatusCard", typeof(RectTransform));
             RectTransform cardRect = card.GetComponent<RectTransform>();
             cardRect.sizeDelta = new Vector2(170f, 100f);
-            Image bg = card.AddComponent<Image>();
-            bg.color = new Color(0.2f, 0.2f, 0.2f, 0.85f);
 
+            // 1. Highlight border child (first sibling, drawn behind background)
             GameObject borderGo = new GameObject("HighlightBorder", typeof(RectTransform));
             borderGo.transform.SetParent(card.transform, false);
             Image border = borderGo.AddComponent<Image>();
             border.color = new Color(0.12f, 0.73f, 0.35f);
-            StretchRect(borderGo.GetComponent<RectTransform>());
+            RectTransform borderRect = borderGo.GetComponent<RectTransform>();
+            borderRect.anchorMin = Vector2.zero;
+            borderRect.anchorMax = Vector2.one;
+            borderRect.offsetMin = new Vector2(-2, -2);
+            borderRect.offsetMax = new Vector2(2, 2);
+
+            // 2. Background child (second sibling, drawn on top of border to cover center)
+            GameObject bgGo = new GameObject("Background", typeof(RectTransform));
+            bgGo.transform.SetParent(card.transform, false);
+            Image bg = bgGo.AddComponent<Image>();
+            bg.color = new Color(0.2f, 0.2f, 0.2f, 0.85f);
+            RectTransform bgRect = bgGo.GetComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.offsetMin = Vector2.zero;
+            bgRect.offsetMax = Vector2.zero;
 
             GameObject content = new GameObject("ContentLayout", typeof(RectTransform));
             content.transform.SetParent(card.transform, false);

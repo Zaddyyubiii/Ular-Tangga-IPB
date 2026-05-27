@@ -157,10 +157,7 @@ namespace UI
             RectTransform rTrans = cardGo.AddComponent<RectTransform>();
             rTrans.sizeDelta = new Vector2(170f, 100f);
 
-            Image bgImg = cardGo.AddComponent<Image>();
-            bgImg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-
-            // Highlight border child
+            // 1. Highlight border child (first sibling, drawn behind background)
             GameObject borderGo = new GameObject("HighlightBorder");
             borderGo.transform.SetParent(cardGo.transform, false);
             Image borderImg = borderGo.AddComponent<Image>();
@@ -171,6 +168,18 @@ namespace UI
             borderRect.anchorMax = Vector2.one;
             borderRect.offsetMin = new Vector2(-2, -2);
             borderRect.offsetMax = new Vector2(2, 2);
+
+            // 2. Background child (second sibling, drawn on top of border to cover center)
+            GameObject bgGo = new GameObject("Background");
+            bgGo.transform.SetParent(cardGo.transform, false);
+            Image bgImg = bgGo.AddComponent<Image>();
+            bgImg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+            
+            RectTransform bgRect = bgGo.GetComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.offsetMin = Vector2.zero;
+            bgRect.offsetMax = Vector2.zero;
             
             // Text values vertically stacked inside
             GameObject contentGo = new GameObject("ContentLayout");

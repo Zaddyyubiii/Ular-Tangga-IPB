@@ -16,6 +16,21 @@ namespace UI
         public Image imageHighlightBorder;
 
         private PlayerData playerData;
+        private Outline cardOutline;
+
+        private void EnsureOutlineComponent()
+        {
+            if (cardOutline == null && imageAvatarBackground != null)
+            {
+                cardOutline = imageAvatarBackground.GetComponent<Outline>();
+                if (cardOutline == null)
+                {
+                    cardOutline = imageAvatarBackground.gameObject.AddComponent<Outline>();
+                }
+                cardOutline.effectDistance = new Vector2(3f, 3f);
+                cardOutline.useGraphicAlpha = true;
+            }
+        }
 
         public void Bind(PlayerData player)
         {
@@ -126,13 +141,39 @@ namespace UI
 
             bool isCurrentlyActive = isActivePlayer && !data.isFinished && !data.isDroppedOut;
 
-            // Highlight border if active turn (using White for contrast outline instead of universal green)
+            // Highlight border if active turn (using Outline component if child covers card to prevent solid white blocking background)
             if (imageHighlightBorder != null)
             {
-                imageHighlightBorder.gameObject.SetActive(isCurrentlyActive);
-                if (isCurrentlyActive)
+                // If highlight border is configured as a child of the root card or background (old layout),
+                // use the dynamic Outline component to avoid solid color overlay completely masking the background.
+                if (imageHighlightBorder.transform.parent == transform || imageHighlightBorder.transform.parent == imageAvatarBackground.transform)
                 {
-                    imageHighlightBorder.color = Color.white;
+                    EnsureOutlineComponent();
+                    if (cardOutline != null)
+                    {
+                        cardOutline.enabled = isCurrentlyActive;
+                        cardOutline.effectColor = Color.white;
+                    }
+                    imageHighlightBorder.gameObject.SetActive(false);
+                }
+                else
+                {
+                    // Sibling order layout: safe to use border directly as it is behind background
+                    imageHighlightBorder.gameObject.SetActive(isCurrentlyActive);
+                    if (isCurrentlyActive)
+                    {
+                        imageHighlightBorder.color = Color.white;
+                    }
+                }
+            }
+            else
+            {
+                // Fallback to Outline if border image reference is null
+                EnsureOutlineComponent();
+                if (cardOutline != null)
+                {
+                    cardOutline.enabled = isCurrentlyActive;
+                    cardOutline.effectColor = Color.white;
                 }
             }
 
@@ -162,12 +203,12 @@ namespace UI
             }
             else if (isCurrentlyActive)
             {
-                statusStr = "GILIRAN AKTIF";
+                statusStr = "SEDANG BERJALAN";
                 statusColor = Color.white;
             }
             else if (data.skipTurns > 0)
             {
-                statusStr = $"DITANGGUHKAN ({data.skipTurns})";
+                statusStr = $"DISKORS ({data.skipTurns})";
                 statusColor = Color.orange;
             }
 
