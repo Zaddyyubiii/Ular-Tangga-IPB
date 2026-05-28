@@ -51,9 +51,10 @@ Penyimpanan data statis berbasis ScriptableObject untuk memudahkan penyeimbangan
 *   `file_desc.md`: Dokumen deskripsi file ini (wajib di-update berkala).
 *   `rules.md`: Peraturan resmi permainan ular tangga tata tertib IPB.
 
-### 8. Berkas Server Lokal di Root
+### 8. Berkas Server & Script Otomatisasi di Root
 *   `server.js`: Skrip server lokal menggunakan Node.js (tanpa dependensi eksternal) untuk memuat berkas WebGL game secara instan dengan header MIME type `.wasm` dan `.data` yang tepat.
 *   `server.py`: Skrip server lokal menggunakan Python (tanpa dependensi eksternal) dengan dukungan *multithreading* dan konfigurasi MIME type lengkap.
+*   `build.ps1`: Skrip otomatisasi PowerShell untuk membangun ulang WebGL menggunakan batchmode headless Unity.exe secara langsung, dan otomatis menjalankan server Node.js saat kompilasi selesai sukses.
 
 ---
 

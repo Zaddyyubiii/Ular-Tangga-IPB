@@ -12,7 +12,7 @@ namespace Dice
         public static DiceGaugeController Instance;
 
         [Header("Charging Settings")]
-        public float chargeSpeed = 80f;
+        public float chargeSpeed = 280f; // Fast and highly challenging reflex-based LINE Let's Get Rich charging bar!
         public float currentCharge = 0f;
         private bool isCharging = false;
         private int chargeDirection = 1;
@@ -98,6 +98,45 @@ namespace Dice
                 Audio.AudioManager.Instance.PlaySFX(Audio.AudioManager.Instance.diceRollClip);
         }
 
+        private Coroutine feedbackAnimCo;
+
+        private void AnimateTimingFeedback(string quality)
+        {
+            if (labelStatus == null) return;
+            if (feedbackAnimCo != null) StopCoroutine(feedbackAnimCo);
+            feedbackAnimCo = StartCoroutine(FeedbackAnimCo(quality));
+        }
+
+        private IEnumerator FeedbackAnimCo(string quality)
+        {
+            float duration = 0.5f;
+            float elapsed = 0f;
+            Color startColor = Color.white;
+
+            if (quality == "Perfect") startColor = new Color(1f, 0.85f, 0.15f); // Gold glow
+            else if (quality == "Good") startColor = new Color(0.2f, 0.95f, 0.4f); // Neon green glow
+            else startColor = new Color(0.85f, 0.85f, 0.85f); // Translucent gray
+
+            if (labelStatus != null) labelStatus.color = startColor;
+
+            Vector3 originalScale = Vector3.one;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+                // Beautiful bounce/punch scale curves
+                float scaleValue = 1f + Mathf.Sin(t * Mathf.PI) * 0.35f * (1f - t);
+                if (labelStatus != null) labelStatus.transform.localScale = originalScale * scaleValue;
+                yield return null;
+            }
+
+            if (labelStatus != null)
+            {
+                labelStatus.transform.localScale = originalScale;
+            }
+        }
+
         private void EndCharge()
         {
             if (!isCharging) return;
@@ -112,6 +151,7 @@ namespace Dice
             else if (result.timingQuality == "Good") feedback = "Good Timing!";
             
             if (labelStatus != null) labelStatus.text = feedback;
+            AnimateTimingFeedback(result.timingQuality);
 
             // Logs matching section 7
             Debug.Log($"Dice roll: charge={result.chargePercent:F1}%, quality={result.timingQuality}, zone={result.zoneName}, result={result.value}");

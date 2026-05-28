@@ -135,9 +135,9 @@ namespace Board
             GameObject tileGo = new GameObject($"Tile_{number}");
             tileGo.transform.SetParent(boardPanel, false);
 
-            // Outer frame (slightly larger, acts as border)
+            // Outer frame (acts as subtle shadow/border)
             Image frame = tileGo.AddComponent<Image>();
-            frame.color = new Color(0f, 0f, 0f, 0.35f);
+            frame.color = new Color(0f, 0f, 0f, 0.22f);
             frame.raycastTarget = false;
 
             RectTransform rTrans = tileGo.GetComponent<RectTransform>();
@@ -152,24 +152,37 @@ namespace Board
             Image inner = innerGo.AddComponent<Image>();
             inner.raycastTarget = false;
             RectTransform innerRect = innerGo.GetComponent<RectTransform>();
-            innerRect.anchorMin = new Vector2(0f, 0f);
-            innerRect.anchorMax = new Vector2(1f, 1f);
+            innerRect.anchorMin = Vector2.zero;
+            innerRect.anchorMax = Vector2.one;
             innerRect.offsetMin = new Vector2(2f, 2f);
             innerRect.offsetMax = new Vector2(-2f, -2f);
 
+            // White circular backdrop for number overlay (looks like a physical retro board game!)
+            GameObject numBgGo = new GameObject("NumBg");
+            numBgGo.transform.SetParent(tileGo.transform, false);
+            Image numBg = numBgGo.AddComponent<Image>();
+            numBg.color = new Color(1f, 1f, 1f, 0.55f); // Semi-transparent white
+            
+            RectTransform numBgRt = numBgGo.GetComponent<RectTransform>();
+            numBgRt.anchorMin = new Vector2(0f, 1f);
+            numBgRt.anchorMax = new Vector2(0f, 1f);
+            numBgRt.pivot = new Vector2(0f, 1f);
+            numBgRt.anchoredPosition = new Vector2(4f, -4f);
+            numBgRt.sizeDelta = new Vector2(16f, 16f); // Clean circular-card shape
+
             // Number text
             GameObject numGo = new GameObject("Num");
-            numGo.transform.SetParent(tileGo.transform, false);
+            numGo.transform.SetParent(numBgGo.transform, false);
             TMPro.TextMeshProUGUI numText = numGo.AddComponent<TMPro.TextMeshProUGUI>();
-            numText.alignment = TMPro.TextAlignmentOptions.TopLeft;
-            numText.fontSize = 8f;
+            numText.alignment = TMPro.TextAlignmentOptions.Center;
+            numText.fontSize = 9f;
             numText.fontStyle = TMPro.FontStyles.Bold;
             numText.raycastTarget = false;
-            RectTransform numRect = numGo.GetComponent<RectTransform>();
+            RectTransform numRect = numText.GetComponent<RectTransform>();
             numRect.anchorMin = Vector2.zero;
             numRect.anchorMax = Vector2.one;
-            numRect.offsetMin = new Vector2(3f, 0f);
-            numRect.offsetMax = new Vector2(-1f, -2f);
+            numRect.offsetMin = Vector2.zero;
+            numRect.offsetMax = Vector2.zero;
 
             // Center icon text
             GameObject iconGo = new GameObject("Icon");
@@ -189,6 +202,12 @@ namespace Board
             TileDefinition def = runtimeBoardConfig.GetTileDefinition(number);
             ApplyTileStyle(number, def, inner, numText, iconText);
 
+            // Hide number circle backdrop on START and DUTA for aesthetic reasons
+            if (number == 0 || number == 100)
+            {
+                numBgGo.SetActive(false);
+            }
+
             TileView view = tileGo.GetComponent<TileView>();
             if (view == null) view = tileGo.AddComponent<TileView>();
             view.Initialize(number, def);
@@ -198,26 +217,36 @@ namespace Board
             tileObjects[number] = tileGo;
         }
 
+        private static readonly Color[] PastelRainbowColors = new Color[]
+        {
+            new Color(0.965f, 0.824f, 0.824f), // Soft Red/Pink
+            new Color(0.980f, 0.886f, 0.749f), // Soft Peach/Orange
+            new Color(0.976f, 0.965f, 0.765f), // Soft Yellow
+            new Color(0.824f, 0.949f, 0.843f), // Soft Mint Green
+            new Color(0.824f, 0.882f, 0.965f), // Soft Sky Blue
+            new Color(0.890f, 0.824f, 0.965f)  // Soft Lavender
+        };
+
         private void ApplyTileStyle(int number, TileDefinition def, Image bg, TMPro.TextMeshProUGUI numText, TMPro.TextMeshProUGUI iconText)
         {
-            // Number text color
-            numText.color = new Color(1f, 1f, 1f, 0.9f);
+            // Crisp dark-gray number text on light backdrop
+            numText.color = new Color(0.12f, 0.12f, 0.12f, 0.85f);
 
             if (number == 0)
             {
-                bg.color = new Color(0.08f, 0.55f, 0.25f);
+                bg.color = new Color(0.1f, 0.52f, 0.28f); // Soft Vibrant Forest Green
                 numText.text = "";
                 iconText.text = "START";
-                iconText.fontSize = 9f;
+                iconText.fontSize = 8.5f;
                 iconText.color = Color.white;
                 return;
             }
             if (number == 100)
             {
-                bg.color = new Color(0.85f, 0.65f, 0.05f);
+                bg.color = new Color(0.92f, 0.75f, 0.15f); // Luxurious Gold
                 numText.text = "";
-                iconText.text = "DUTA";
-                iconText.fontSize = 9f;
+                iconText.text = "HOME";
+                iconText.fontSize = 8.5f;
                 iconText.color = Color.white;
                 return;
             }
@@ -227,48 +256,37 @@ namespace Board
             switch (def.type)
             {
                 case TileType.Question:
-                    bg.color = new Color(0.08f, 0.45f, 0.85f);
+                    bg.color = new Color(0.2f, 0.55f, 0.9f); // Radiant Soft Blue
                     iconText.text = "?";
                     iconText.fontSize = 22f;
-                    iconText.color = new Color(1f, 1f, 0.5f);
-                    numText.color = new Color(1f, 1f, 1f, 0.7f);
+                    iconText.color = new Color(1f, 0.95f, 0.4f); // Golden yellow "?"
                     break;
 
                 case TileType.Skull:
-                    bg.color = new Color(0.55f, 0.05f, 0.05f);
-                    iconText.text = "X";
-                    iconText.fontSize = 20f;
-                    iconText.color = new Color(1f, 0.3f, 0.3f);
-                    numText.color = new Color(1f, 0.7f, 0.7f, 0.8f);
+                    bg.color = new Color(0.8f, 0.15f, 0.15f); // Soft Deep Crimson
+                    iconText.text = "☠️"; // Proper high-quality warning icon
+                    iconText.fontSize = 18f;
+                    iconText.color = Color.white;
                     break;
 
                 case TileType.Snake:
-                    bg.color = new Color(0.75f, 0.15f, 0.05f);
-                    iconText.text = "v";
-                    iconText.fontSize = 18f;
-                    iconText.color = new Color(1f, 0.85f, 0.2f);
-                    numText.color = new Color(1f, 0.9f, 0.9f, 0.8f);
+                    bg.color = new Color(0.85f, 0.32f, 0.25f); // Warning orange-red
+                    iconText.text = "";
                     break;
 
                 case TileType.Ladder:
-                    bg.color = new Color(0.6f, 0.42f, 0.05f);
-                    iconText.text = "^";
-                    iconText.fontSize = 18f;
-                    iconText.color = new Color(1f, 0.95f, 0.5f);
-                    numText.color = new Color(1f, 0.97f, 0.8f, 0.8f);
+                    bg.color = new Color(0.88f, 0.55f, 0.15f); // Soft gold
+                    iconText.text = "";
                     break;
 
                 default:
-                    // Checkerboard alternating colors - warm board feel
+                    // Diagonal pastel rainbow wave - warm physical board feel
                     int z = number - 1;
                     int r = z / 10;
                     int c = z % 10;
-                    bool evenCell = (r + c) % 2 == 0;
-                    bg.color = evenCell
-                        ? new Color(0.88f, 0.72f, 0.38f)   // warm tan
-                        : new Color(0.72f, 0.55f, 0.22f);  // darker tan
+                    int waveIndex = (r + c) % PastelRainbowColors.Length;
+                    bg.color = PastelRainbowColors[waveIndex];
                     iconText.text = "";
-                    numText.color = new Color(0.15f, 0.1f, 0.05f, 0.9f);
                     break;
             }
         }
@@ -281,33 +299,51 @@ namespace Board
             {
                 Vector2 s = GetTilePosition(ladder.tileIndex);
                 Vector2 e = GetTilePosition(ladder.targetTileIndex);
-                DrawLadder(s, e);
+                DrawLadder(s, e, ladder.severity);
             }
 
             foreach (var snake in runtimeBoardConfig.snakes)
             {
                 Vector2 s = GetTilePosition(snake.tileIndex);
                 Vector2 e = GetTilePosition(snake.targetTileIndex);
-                DrawSnake(s, e);
+                DrawSnake(s, e, snake.severity);
             }
         }
 
-        private void DrawLadder(Vector2 start, Vector2 end)
+        private void DrawLadder(Vector2 start, Vector2 end, int severity)
         {
             Vector2 dir = (end - start).normalized;
             Vector2 perp = new Vector2(-dir.y, dir.x);
             float dist = Vector2.Distance(start, end);
-            float railOffset = 5f;
-            Color railColor = new Color(0.75f, 0.55f, 0.1f, 0.92f);
-            Color rungColor = new Color(0.6f, 0.42f, 0.05f, 0.92f);
+            float railOffset = 6f;
+
+            Color railColor;
+            Color rungColor;
+
+            // Choose beautiful dynamic rail/rung colors based on severity
+            if (severity == 0) // Light / Short
+            {
+                railColor = new Color(0.25f, 0.72f, 0.35f, 0.95f); // Soft Vibrant Green
+                rungColor = new Color(0.15f, 0.58f, 0.22f, 0.95f);
+            }
+            else if (severity == 1) // Medium
+            {
+                railColor = new Color(0.2f, 0.5f, 0.9f, 0.95f); // Soft Vibrant Blue
+                rungColor = new Color(0.12f, 0.35f, 0.75f, 0.95f);
+            }
+            else // Severe / Long
+            {
+                railColor = new Color(0.92f, 0.32f, 0.25f, 0.95f); // Soft Vibrant Coral Red
+                rungColor = new Color(0.78f, 0.2f, 0.15f, 0.95f);
+            }
 
             // Left rail
-            CreateThickLine(start + perp * railOffset, end + perp * railOffset, railColor, 4f, "LadderRail");
+            CreateThickLine(start + perp * railOffset, end + perp * railOffset, railColor, 4.5f, "LadderRail");
             // Right rail
-            CreateThickLine(start - perp * railOffset, end - perp * railOffset, railColor, 4f, "LadderRail");
+            CreateThickLine(start - perp * railOffset, end - perp * railOffset, railColor, 4.5f, "LadderRail");
 
             // Rungs
-            int rungs = Mathf.Max(2, Mathf.RoundToInt(dist / 28f));
+            int rungs = Mathf.Max(2, Mathf.RoundToInt(dist / 26f));
             for (int i = 1; i < rungs; i++)
             {
                 float t = (float)i / rungs;
@@ -316,27 +352,64 @@ namespace Board
             }
 
             // Arrow indicator at top
-            CreateArrow(end, dir, new Color(1f, 0.9f, 0.2f, 0.95f));
+            CreateArrow(end, dir, new Color(1f, 0.95f, 0.35f, 0.95f));
         }
 
-        private void DrawSnake(Vector2 start, Vector2 end)
+        private void DrawSnake(Vector2 start, Vector2 end, int severity)
         {
-            // Draw 3-segment bezier-like snake with multiple lines
-            Color snakeColor = new Color(0.15f, 0.6f, 0.15f, 0.92f);
-            Color snakeDark  = new Color(0.08f, 0.4f, 0.08f, 0.92f);
+            Vector2 dir = end - start;
+            float dist = dir.magnitude;
+            Vector2 perp = new Vector2(-dir.y, dir.x).normalized;
 
-            Vector2 mid = (start + end) * 0.5f + new Vector2(tileWidth * 1.5f, 0f);
+            // Winding snake using high-resolution segmented sine wave rendering
+            int segments = Mathf.Max(18, Mathf.RoundToInt(dist / 7f));
+            Vector2 prevPt = start;
 
-            // Draw body (3 segments) of the snake
-            CreateThickLine(start, mid, snakeColor, 7f, "SnakeBody");
-            CreateThickLine(mid, end, snakeDark, 7f, "SnakeBody");
+            // Choose beautiful primary/secondary colors based on severity
+            Color primaryColor = new Color(0.08f, 0.55f, 0.15f, 0.95f); // Vibrant Green
+            Color secondaryColor = new Color(0.18f, 0.78f, 0.22f, 0.95f);
 
-            // Head circle at start
-            CreateCircle(start, 9f, new Color(0.05f, 0.5f, 0.05f, 1f), "SnakeHead");
+            if (severity == 1) // Medium
+            {
+                primaryColor = new Color(0.12f, 0.45f, 0.75f, 0.95f); // Vibrant Blue
+                secondaryColor = new Color(0.25f, 0.7f, 0.95f, 0.95f);
+            }
+            else if (severity >= 2) // Long
+            {
+                primaryColor = new Color(0.8f, 0.12f, 0.12f, 0.95f); // Vibrant Crimson
+                secondaryColor = new Color(0.95f, 0.65f, 0.15f, 0.95f);
+            }
 
-            // Tail arrow at end
-            Vector2 tailDir = (end - start).normalized;
-            CreateArrow(end, -tailDir, new Color(0.2f, 0.8f, 0.2f, 0.9f));
+            for (int i = 1; i <= segments; i++)
+            {
+                float t = (float)i / segments;
+                // Linear base position
+                Vector2 basePt = Vector2.Lerp(start, end, t);
+                // Winding sine-wave perpendicular offset (tapered towards the tail)
+                float wave = Mathf.Sin(t * Mathf.PI * 3f) * 16f * (1f - t * 0.45f);
+                Vector2 pt = basePt + perp * wave;
+
+                // Tapered body thickness from head (11f) to tail (3.5f)
+                float thickness = Mathf.Lerp(11f, 3.5f, t);
+                Color segmentColor = (i % 2 == 0) ? primaryColor : secondaryColor;
+
+                CreateThickLine(prevPt, pt, segmentColor, thickness, "SnakeSegment");
+                prevPt = pt;
+            }
+
+            // Head circle at start tile
+            CreateCircle(start, 9.5f, primaryColor, "SnakeHead");
+
+            // Forked red tongue facing backwards (direction of body slope)
+            Vector2 headForward = -dir.normalized;
+            Vector2 tongueRight = new Vector2(-headForward.y, headForward.x).normalized;
+
+            CreateThickLine(start, start + headForward * 9f + tongueRight * 3f, new Color(0.9f, 0.1f, 0.1f, 0.95f), 2.5f, "SnakeTongue");
+            CreateThickLine(start, start + headForward * 9f - tongueRight * 3f, new Color(0.9f, 0.1f, 0.1f, 0.95f), 2.5f, "SnakeTongue");
+
+            // Tail indicator at the end tile
+            Vector2 tailDir = (end - prevPt).normalized;
+            CreateArrow(end, -tailDir, secondaryColor);
         }
 
         private void CreateThickLine(Vector2 start, Vector2 end, Color color, float thickness, string label, bool drawOnTop = true)

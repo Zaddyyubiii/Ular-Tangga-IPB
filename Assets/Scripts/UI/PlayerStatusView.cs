@@ -49,6 +49,7 @@ namespace UI
         {
             if (imageAvatarBackground != null)
             {
+                imageAvatarBackground.material = null; // Remove any material override
                 if (isActive)
                 {
                     imageAvatarBackground.color = GetActiveCardColor(color);
@@ -70,26 +71,20 @@ namespace UI
 
         private Color GetInactiveCardColor(Color baseColor)
         {
-            return Color.Lerp(baseColor, Color.black, 0.45f);
+            // Transparent glassmorphic inactive card color
+            return new Color(baseColor.r, baseColor.g, baseColor.b, 0.32f);
         }
 
         private Color GetActiveCardColor(Color baseColor)
         {
-            Color brightColor = Color.Lerp(baseColor, Color.white, 0.18f);
-            Color.RGBToHSV(brightColor, out float h, out float s, out float v);
-            s = Mathf.Clamp01(s + 0.15f);
-            v = Mathf.Clamp01(v + 0.20f);
-            return Color.HSVToRGB(h, s, v);
+            // Translucent glowing active card color
+            return new Color(baseColor.r, baseColor.g, baseColor.b, 0.78f);
         }
 
         private Color GetReadableTextColor(Color backgroundColor)
         {
-            float luminance = 
-                0.299f * backgroundColor.r +
-                0.587f * backgroundColor.g +
-                0.114f * backgroundColor.b;
-
-            return luminance > 0.6f ? Color.black : Color.white;
+            // Pure white text looks best on translucent glassmorphism
+            return Color.white;
         }
 
         public void Refresh(PlayerData data, bool isActivePlayer)
@@ -133,10 +128,13 @@ namespace UI
                 labelEvolution.text = evoLabel;
             }
 
-            // Skull hits
+            // Skull hits with visual rich indicators
             if (labelSkulls != null)
             {
-                labelSkulls.text = $"Sanksi: {data.skullHitCount}/3";
+                string skullsVisual = "";
+                for (int s = 0; s < data.skullHitCount; s++) skullsVisual += "☠️";
+                if (data.skullHitCount == 0) skullsVisual = "Aman";
+                labelSkulls.text = $"Sanksi: {data.skullHitCount}/3 ({skullsVisual})";
             }
 
             bool isCurrentlyActive = isActivePlayer && !data.isFinished && !data.isDroppedOut;

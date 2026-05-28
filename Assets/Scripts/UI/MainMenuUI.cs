@@ -85,7 +85,7 @@ namespace UI
             }
             if (container == null)
             {
-                Canvas canvas = FindFirstObjectByType<Canvas>();
+                Canvas canvas = FindAnyObjectByType<Canvas>();
                 if (canvas != null)
                 {
                     container = canvas.transform.Find("CenterCard");
@@ -230,7 +230,7 @@ namespace UI
             placeholderTxt.color = new Color(0.6f, 0.6f, 0.6f, 0.5f);
             placeholderTxt.alignment = TMPro.TextAlignmentOptions.Left;
             placeholderTxt.raycastTarget = false;
-            placeholderTxt.enableWordWrapping = false;
+            placeholderTxt.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
 
             RectTransform placeholderRect = placeholderGo.GetComponent<RectTransform>();
             placeholderRect.anchorMin = Vector2.zero;
@@ -246,7 +246,7 @@ namespace UI
             textComponent.color = Color.white;
             textComponent.alignment = TMPro.TextAlignmentOptions.Left;
             textComponent.raycastTarget = false;
-            textComponent.enableWordWrapping = false;
+            textComponent.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
 
             RectTransform textComponentRect = textGo.GetComponent<RectTransform>();
             textComponentRect.anchorMin = Vector2.zero;
@@ -332,7 +332,7 @@ namespace UI
 
         private void RepairGeneratedLayout()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = FindAnyObjectByType<Canvas>();
             if (canvas == null) return;
 
             foreach (TMPro.TextMeshProUGUI text in canvas.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
@@ -377,7 +377,7 @@ namespace UI
                     if (titleText != null)
                     {
                         titleText.fontSize = 38f;
-                        titleText.enableWordWrapping = false;
+                        titleText.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
                         titleText.alignment = TMPro.TextAlignmentOptions.Center;
                     }
                     
