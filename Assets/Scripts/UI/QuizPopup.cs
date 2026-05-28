@@ -6,9 +6,26 @@ using Quiz;
 
 namespace UI
 {
+    [System.Serializable]
+    public class ReactQuizState
+    {
+        public string questionText;
+        public string[] choices;
+        public int correctAnswerIndex;
+        public string correctFeedback;
+        public string incorrectFeedback;
+    }
+
     public class QuizPopup : MonoBehaviour
     {
         public static QuizPopup Instance;
+
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void ShowQuizToReact(string quizJson);
+        #else
+        private static void ShowQuizToReact(string quizJson) { }
+        #endif
 
         [Header("UI Component Bindings")]
         public GameObject quizPanel;
@@ -54,6 +71,15 @@ namespace UI
             onQuizFinishedCallback = callback;
             isQuizOpen = true;
 
+            // Notify React of the Quiz
+            ReactQuizState rQuiz = new ReactQuizState();
+            rQuiz.questionText = question.questionText;
+            rQuiz.choices = question.choices;
+            rQuiz.correctAnswerIndex = question.correctAnswerIndex;
+            rQuiz.correctFeedback = question.correctFeedback;
+            rQuiz.incorrectFeedback = question.incorrectFeedback;
+            ShowQuizToReact(JsonUtility.ToJson(rQuiz));
+
             if (autoCloseCoroutine != null)
             {
                 StopCoroutine(autoCloseCoroutine);
@@ -82,9 +108,13 @@ namespace UI
             if (feedbackContainer != null) feedbackContainer.SetActive(false);
 
             // Animate main quiz panel entry
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            // React handles the display
+            #else
             quizPanel.SetActive(true);
             quizPanel.transform.localScale = Vector3.zero;
             StartCoroutine(PopScaleCo(quizPanel.transform, Vector3.one, 0.25f));
+            #endif
 
             // Trigger bot auto-solve if current player is a bot
             var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
@@ -103,12 +133,16 @@ namespace UI
             bool isCorrect = (selectedIndex == currentQuestion.correctAnswerIndex);
 
             // Display feedback with smooth animation
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            // React handles feedback panel
+            #else
             if (feedbackContainer != null)
             {
                 feedbackContainer.SetActive(true);
                 feedbackContainer.transform.localScale = Vector3.zero;
                 StartCoroutine(PopScaleCo(feedbackContainer.transform, Vector3.one, 0.2f));
             }
+            #endif
 
             if (isCorrect)
             {
@@ -181,6 +215,13 @@ namespace UI
 
             Debug.Log("Popup onClose callback executed.");
             callback?.Invoke();
+        }
+
+        public void SubmitAnswerFromReact(string answer)
+        {
+            int selectedIndex = 0;
+            if (answer.ToUpper() == "B" || answer == "1") selectedIndex = 1;
+            OnOptionSelected(selectedIndex);
         }
 
         private IEnumerator PopScaleCo(Transform trans, Vector3 targetScale, float duration)

@@ -259,6 +259,14 @@ namespace Dice
                    Core.GameManager.Instance.GetCurrentPlayer() != null;
         }
 
+        public void TriggerRollFromReact(float chargePower)
+        {
+            if (!CanRollNow()) return;
+            currentCharge = Mathf.Clamp(chargePower, 0f, 100f);
+            isCharging = true;
+            EndCharge();
+        }
+
         private void RegisterPointerEventsOnButton(GameObject target)
         {
             EventTrigger trigger = target.GetComponent<EventTrigger>();

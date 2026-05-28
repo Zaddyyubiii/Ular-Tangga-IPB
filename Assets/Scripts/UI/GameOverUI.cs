@@ -3,9 +3,24 @@ using UnityEngine.UI;
 
 namespace UI
 {
+    [System.Serializable]
+    public class ReactGameOverState
+    {
+        public string winnerName;
+        public string winnerColorHex;
+        public string messageText;
+    }
+
     public class GameOverUI : MonoBehaviour
     {
         public static GameOverUI Instance;
+
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void ShowGameOverToReact(string gameOverJson);
+        #else
+        private static void ShowGameOverToReact(string gameOverJson) { }
+        #endif
 
         [Header("UI Component Bindings")]
         public GameObject gameOverPanel;
@@ -72,13 +87,23 @@ namespace UI
                 labelMessage.text = "Selamat! Kamu berhasil melewati semua tantangan, mematuhi tata tertib, dan dinobatkan menjadi Duta Tata Tertib IPB University!";
             }
 
+            ReactGameOverState rGameOver = new ReactGameOverState();
+            rGameOver.winnerName = winner.playerName;
+            rGameOver.winnerColorHex = "#" + ColorUtility.ToHtmlStringRGB(winner.playerColor);
+            rGameOver.messageText = labelMessage != null ? labelMessage.text : "Selamat! Kamu berhasil melewati semua tantangan, mematuhi tata tertib, dan dinobatkan menjadi Duta Tata Tertib IPB University!";
+            ShowGameOverToReact(JsonUtility.ToJson(rGameOver));
+
             // Play victory tune (safe check)
             if (Audio.AudioManager.Instance != null)
             {
                 Audio.AudioManager.Instance.PlaySFX(Audio.AudioManager.Instance.winClip);
             }
 
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            // React handles winner gameover screen overlay
+            #else
             gameOverPanel.SetActive(true);
+            #endif
             Debug.Log($"[GameOver] Declared winner: {winner.playerName}");
         }
 
@@ -230,13 +255,13 @@ namespace UI
             Debug.Log("Final ranking displayed.");
         }
 
-        private void RestartGame()
+        public void RestartGame()
         {
             PlayClickSound();
             Core.SceneLoader.Instance.LoadScene("GameScene");
         }
 
-        private void ReturnToMainMenu()
+        public void ReturnToMainMenu()
         {
             PlayClickSound();
             Core.SceneLoader.Instance.LoadScene("MainMenuScene");

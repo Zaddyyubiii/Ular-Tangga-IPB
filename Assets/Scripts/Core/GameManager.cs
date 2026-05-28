@@ -351,7 +351,7 @@ namespace Core
             // Animate token movement
             if (playerTokens.TryGetValue(curPlayer.id, out PlayerToken token))
             {
-                yield return token.MoveTileByTile(pathPositions, 0.22f);
+                yield return token.MoveTileByTile(pathPositions, 0.18f);
             }
 
             int finalTile = isBounce ? bouncedTarget : targetTile;

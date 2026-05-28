@@ -45,17 +45,32 @@ Penyimpanan data statis berbasis ScriptableObject untuk memudahkan penyeimbangan
 *   `MessageBank.asset`: Kumpulan teks cerita prolog, pesan positif di petak biasa, pesan ular, sanksi tengkorak, dan pesan tangga.
 
 ### 6. `docs/` (WebGL Deployment)
-*   Berisi berkas hasil *build* WebGL permainan yang siap di-host menggunakan GitHub Pages sehingga game dapat dimainkan langsung melalui browser web.
+*   Berisi berkas hasil *build* WebGL permainan yang di-overlay oleh bundle web produksi React yang siap di-host menggunakan GitHub Pages.
 
-### 7. `agent_docs/` (Dokumentasi Agent)
+### 7. `web-ui/` (Aplikasi React HUD Overlay)
+*   Aplikasi frontend berbasis Vite + React + Tailwind CSS v4 + Framer Motion yang melayang di atas Canvas Unity.
+*   **src/components/**: Komponen-komponen UI game yang playful:
+    *   `PlayerCards.jsx`: 4 kartu pojok status pemain, menampilkan nama, bot tag, ubin aktif, pelanggaran tatib, tahapan evolusi (MABA s.d Duta Tatib), serta efek denyut gilirannya.
+    *   `TopHUD.jsx`: Kapsul giliran aktif di bagian atas-tengah dengan timer lingkaran yang bergetar (*shake*) memerah jika sisa waktu kritis.
+    *   `RollDiceBar.jsx`: Meteran dadu datar horizontal di bawah-tengah dengan reflex-charging 280%/detik dan label range/kebutuhan ubin.
+    *   `QuizModal.jsx`: Pop-up kuis bubble dengan pilihan ganda dan feedback akademik edukatif instan.
+    *   `PrologueModal.jsx`: Pop-up prolog pembuka bergaya lembaran buku dongeng petualangan.
+    *   `GameOverModal.jsx`: Pop-up penobatan Duta Tata Tertib IPB University dan tombol navigasi akhir.
+*   `index.html`: Pembungkus terpadu yang memuat Canvas WebGL Unity dan menumpangkan React Overlay `#root` di atasnya.
+*   `vite.config.js`: Konfigurasi build Vite yang otomatis mengekspor bundle produksi ke folder `/docs/` tanpa mengganggu file `.wasm` Unity.
+*   `src/index.css`: Konfigurasi theme modern Tailwind v4 `@theme` (font Outfit, game-dark/blue/cyan palette, rounded-cartoon, shadow-bubble).
+
+### 8. `agent_docs/` (Dokumentasi Agent)
 *   `file_desc.md`: Dokumen deskripsi file ini (wajib di-update berkala).
 *   `rules.md`: Peraturan resmi permainan ular tangga tata tertib IPB.
+*   `ui_architecture.md`: Dokumen arsitektur dan kontrak pertukaran data JSON antara Unity C# dan React JS.
 
-### 8. Berkas Server & Script Otomatisasi di Root
-*   `server.js`: Skrip server lokal menggunakan Node.js (tanpa dependensi eksternal) untuk memuat berkas WebGL game secara instan dengan header MIME type `.wasm` dan `.data` yang tepat.
+### 9. Berkas Server & Script Otomatisasi di Root
+*   `server.js`: Skrip server lokal menggunakan Node.js (tanpa dependensi eksternal) untuk memuat berkas WebGL game secara instan pada Port 3000 dengan header MIME type `.wasm` dan `.data` yang tepat.
+*   `server-log.js`: Skrip server log pengembang independen menggunakan Node.js (tanpa dependensi eksternal) pada Port 3001 untuk menangkap, memfilter, dan melihat aliran log game secara terpisah secara real-time.
 *   `server.py`: Skrip server lokal menggunakan Python (tanpa dependensi eksternal) dengan dukungan *multithreading* dan konfigurasi MIME type lengkap.
 *   `build.ps1`: Skrip otomatisasi PowerShell untuk membangun ulang WebGL menggunakan batchmode headless Unity.exe secara langsung, dan otomatis menjalankan server Node.js saat kompilasi selesai sukses.
 
 ---
 
-*Catatan: Selalu perbarui deskripsi berkas ini jika Anda menambahkan berkas C# baru atau memindahkan letak aset.*
+*Catatan: Selalu perbarui deskripsi berkas ini jika Anda menambahkan berkas baru atau memindahkan letak aset.*

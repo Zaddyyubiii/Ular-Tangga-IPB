@@ -7,9 +7,43 @@ using Dice;
 
 namespace UI
 {
+    [System.Serializable]
+    public class ReactPlayerState
+
+    {
+        public int id;
+        public string playerName;
+        public bool isBot;
+        public int currentTile;
+        public int skullHitCount;
+        public int skipTurns;
+        public bool isDroppedOut;
+        public bool isFinished;
+        public int currentEvolutionStage;
+        public string playerColorHex;
+        public string status;
+        public bool isActive;
+    }
+
+    [System.Serializable]
+    public class ReactGameState
+    {
+        public int activePlayerId;
+        public float timerRemaining;
+        public string instructionText;
+        public ReactPlayerState[] players;
+    }
+
     public class GameplayUI : MonoBehaviour
     {
         public static GameplayUI Instance;
+
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void SendStateToReact(string stateJson);
+        #else
+        private static void SendStateToReact(string stateJson) { }
+        #endif
 
         [Header("General HUD References")]
         public TMPro.TextMeshProUGUI labelActiveTurn;
@@ -30,6 +64,10 @@ namespace UI
 
         private void Start()
         {
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            DeactivateLocalUGUI();
+            #endif
+
             // Subscribe to TurnManager events
             if (TurnManager.Instance != null)
             {
@@ -47,6 +85,27 @@ namespace UI
                 }
             }
         }
+
+        private void DeactivateLocalUGUI()
+        {
+            GameObject sidebar = GameObject.Find("SidebarPanel");
+            if (sidebar != null) sidebar.SetActive(false);
+            
+            GameObject right = GameObject.Find("RightPanel");
+            if (right != null) right.SetActive(false);
+            
+            GameObject dice = GameObject.Find("DiceGaugePanel");
+            if (dice != null) dice.SetActive(false);
+            
+            GameObject top = GameObject.Find("TopHUDCapsule");
+            if (top != null) top.SetActive(false);
+
+            if (statusCardGridContainer != null) statusCardGridContainer.gameObject.SetActive(false);
+            if (labelInstruction != null) labelInstruction.gameObject.SetActive(false);
+            if (labelActiveTurn != null) labelActiveTurn.gameObject.SetActive(false);
+            if (labelTimer != null) labelTimer.gameObject.SetActive(false);
+        }
+
 
         private void OnDestroy()
         {
@@ -416,6 +475,7 @@ namespace UI
                     statusCardViews[i].Refresh(players[i], isActive);
                 }
             }
+            SyncStateToReact();
         }
 
         private void HandleTurnStarted(PlayerData activePlayer)
@@ -446,6 +506,7 @@ namespace UI
             {
                 RefreshStatusGrid(Core.GameManager.Instance.players, activePlayer);
             }
+            SyncStateToReact();
         }
 
         private void HandleTimerUpdated(float timeRemaining)
@@ -464,6 +525,51 @@ namespace UI
                     labelTimer.color = Color.white;
                 }
             }
+            SyncStateToReact(timeRemaining);
+        }
+
+        public void SyncStateToReact(float timeRemaining = -1f)
+        {
+            if (Core.GameManager.Instance == null) return;
+
+            var activePlayer = Core.GameManager.Instance.GetCurrentPlayer();
+            var managerPlayers = Core.GameManager.Instance.players;
+
+            ReactGameState state = new ReactGameState();
+            state.activePlayerId = activePlayer != null ? activePlayer.id : 0;
+            state.timerRemaining = timeRemaining >= 0f ? timeRemaining : (TurnManager.Instance != null ? TurnManager.Instance.currentTimer : 10f);
+            state.instructionText = labelInstruction != null ? labelInstruction.text : "";
+
+            state.players = new ReactPlayerState[managerPlayers.Count];
+            for (int i = 0; i < managerPlayers.Count; i++)
+            {
+                var p = managerPlayers[i];
+                ReactPlayerState ps = new ReactPlayerState();
+                ps.id = p.id;
+                ps.playerName = p.playerName;
+                ps.isBot = p.isBot;
+                ps.currentTile = p.currentTile;
+                ps.skullHitCount = p.skullHitCount;
+                ps.skipTurns = p.skipTurns;
+                ps.isDroppedOut = p.isDroppedOut;
+                ps.isFinished = p.isFinished;
+                ps.currentEvolutionStage = p.currentEvolutionStage;
+                ps.playerColorHex = "#" + ColorUtility.ToHtmlStringRGB(p.playerColor);
+                ps.isActive = (activePlayer != null && p.id == activePlayer.id);
+
+                // Get status string
+                string statusStr = "Menunggu";
+                if (p.isDroppedOut) statusStr = "DROP OUT";
+                else if (p.isFinished) statusStr = $"FINISH ({p.finishRank})";
+                else if (ps.isActive) statusStr = "SEDANG BERJALAN";
+                else if (p.skipTurns > 0) statusStr = $"DISKORS ({p.skipTurns})";
+                ps.status = statusStr;
+
+                state.players[i] = ps;
+            }
+
+            string json = JsonUtility.ToJson(state);
+            SendStateToReact(json);
         }
 
         private GameObject CreateProceduralStatusCard(PlayerData data)
