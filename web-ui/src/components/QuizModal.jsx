@@ -1,9 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function QuizModal({ quiz, onAnswer, onClose }) {
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [hasAnswered, setHasAnswered] = useState(false);
+
+  // Synchronize Bot Answers automatically
+  useEffect(() => {
+    const handleBotAnswer = (e) => {
+      const idx = e.detail.selectedIndex;
+      console.log("[React QuizModal] Bot answer received:", idx);
+      setSelectedIdx(idx);
+      setHasAnswered(true);
+    };
+    window.addEventListener("UnityQuizAnswered", handleBotAnswer);
+    return () => {
+      window.removeEventListener("UnityQuizAnswered", handleBotAnswer);
+    };
+  }, []);
 
   if (!quiz) return null;
 

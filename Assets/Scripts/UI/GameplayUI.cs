@@ -32,11 +32,25 @@ namespace UI
         public float timerRemaining;
         public string instructionText;
         public ReactPlayerState[] players;
+        
+        // Synchronized Dice Result Overlay Data
+        public bool showDiceResult;
+        public string diceRollerName;
+        public int diceValue;
+        public string diceTimingQuality;
+        public float diceChargePercent;
     }
 
     public class GameplayUI : MonoBehaviour
     {
         public static GameplayUI Instance;
+
+        // Private fields for React sync
+        private bool showDiceResult;
+        private string diceRollerName;
+        private int diceValue;
+        private string diceTimingQuality;
+        private float diceChargePercent;
 
         #if UNITY_WEBGL && !UNITY_EDITOR
         [System.Runtime.InteropServices.DllImport("__Internal")]
@@ -44,6 +58,13 @@ namespace UI
         #else
         private static void SendStateToReact(string stateJson) { }
         #endif
+
+        [Header("Dice Result UI Overlay")]
+        public GameObject diceResultPanel;
+        public TMPro.TextMeshProUGUI dicePlayerText;
+        public TMPro.TextMeshProUGUI diceResultText;
+        public TMPro.TextMeshProUGUI diceTimingText;
+        public TMPro.TextMeshProUGUI diceChargeText;
 
         [Header("General HUD References")]
         public TMPro.TextMeshProUGUI labelActiveTurn;
@@ -58,8 +79,33 @@ namespace UI
 
         private void Awake()
         {
-            if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            if (Instance == null)
+            {
+                Instance = this;
+                ValidateDiceUIReferences();
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        private void ValidateDiceUIReferences()
+        {
+            if (diceResultPanel == null)
+                Debug.LogError("DiceResultPanel is not assigned.");
+
+            if (dicePlayerText == null)
+                Debug.LogError("DicePlayerText is not assigned.");
+
+            if (diceResultText == null)
+                Debug.LogError("DiceResultText is not assigned.");
+
+            if (diceTimingText == null)
+                Debug.LogWarning("DiceTimingText is not assigned.");
+
+            if (diceChargeText == null)
+                Debug.LogWarning("DiceChargeText is not assigned.");
         }
 
         private void Start()
@@ -114,6 +160,109 @@ namespace UI
                 TurnManager.Instance.OnTurnStarted -= HandleTurnStarted;
                 TurnManager.Instance.OnTimerUpdated -= HandleTimerUpdated;
             }
+        }
+
+        public void ShowDiceRollingIndicator(PlayerData player)
+        {
+            if (diceResultPanel != null)
+            {
+                diceResultPanel.SetActive(true);
+            }
+
+            if (dicePlayerText != null)
+            {
+                dicePlayerText.text = player != null ? player.playerName : "";
+            }
+
+            if (diceResultText != null)
+            {
+                diceResultText.text = player != null ? $"{player.playerName} sedang melempar dadu..." : "Sedang melempar dadu...";
+            }
+
+            if (diceTimingText != null)
+            {
+                diceTimingText.text = "";
+            }
+
+            if (diceChargeText != null)
+            {
+                diceChargeText.text = "";
+            }
+
+            // Sync to React overlay
+            showDiceResult = true;
+            diceRollerName = player != null ? player.playerName : "Pemain";
+            diceValue = 0; // 0 indicates rolling
+            diceTimingQuality = "Sedang melempar dadu...";
+            diceChargePercent = 0f;
+            SyncStateToReact();
+
+            Debug.Log($"Showing dice rolling indicator for {(player != null ? player.playerName : "unknown")}");
+        }
+
+        public void ShowDiceResult(PlayerData player, int val, string timing, float charge)
+        {
+            if (diceResultPanel != null)
+            {
+                diceResultPanel.SetActive(true);
+            }
+
+            if (dicePlayerText != null)
+            {
+                dicePlayerText.text = player != null ? player.playerName : "";
+            }
+
+            if (diceResultText != null)
+            {
+                diceResultText.text = player != null ? $"{player.playerName} mendapatkan dadu: {val}" : $"Hasil dadu: {val}";
+            }
+
+            if (diceTimingText != null)
+            {
+                diceTimingText.text = string.IsNullOrEmpty(timing) ? "" : timing;
+                if (timing.Contains("Perfect")) diceTimingText.color = new Color(1f, 0.85f, 0.15f);
+                else if (timing.Contains("Good")) diceTimingText.color = new Color(0.2f, 0.95f, 0.4f);
+                else diceTimingText.color = Color.white;
+            }
+
+            if (diceChargeText != null)
+            {
+                diceChargeText.text = $"Charge: {Mathf.RoundToInt(charge)}%";
+            }
+
+            // Sync to React overlay
+            showDiceResult = true;
+            diceRollerName = player != null ? player.playerName : "Pemain";
+            diceValue = val;
+            diceTimingQuality = timing;
+            diceChargePercent = charge;
+            SyncStateToReact();
+
+            Debug.Log($"Dice result UI shown for {(player != null ? player.playerName : "unknown")}: {val}");
+        }
+
+        public void ShowDiceResult(PlayerData player, int diceValue)
+        {
+            ShowDiceResult(player, diceValue, "", 0f);
+        }
+
+        public void ClearDiceResult()
+        {
+            if (diceResultPanel != null)
+            {
+                diceResultPanel.SetActive(false);
+            }
+
+            if (dicePlayerText != null) dicePlayerText.text = "";
+            if (diceResultText != null) diceResultText.text = "";
+            if (diceTimingText != null) diceTimingText.text = "";
+            if (diceChargeText != null) diceChargeText.text = "";
+
+            // Reset React sync state
+            showDiceResult = false;
+            SyncStateToReact();
+
+            Debug.Log("Dice result UI cleared.");
         }
 
         public void InitializeStatusGrid(List<PlayerData> players)
@@ -539,6 +688,13 @@ namespace UI
             state.activePlayerId = activePlayer != null ? activePlayer.id : 0;
             state.timerRemaining = timeRemaining >= 0f ? timeRemaining : (TurnManager.Instance != null ? TurnManager.Instance.currentTimer : 10f);
             state.instructionText = labelInstruction != null ? labelInstruction.text : "";
+            
+            // Populate synchronized dice results
+            state.showDiceResult = showDiceResult;
+            state.diceRollerName = diceRollerName;
+            state.diceValue = diceValue;
+            state.diceTimingQuality = diceTimingQuality;
+            state.diceChargePercent = diceChargePercent;
 
             state.players = new ReactPlayerState[managerPlayers.Count];
             for (int i = 0; i < managerPlayers.Count; i++)

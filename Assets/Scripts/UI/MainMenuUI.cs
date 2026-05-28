@@ -18,6 +18,13 @@ namespace UI
         private GameObject nameInputsContainer;
         private System.Collections.Generic.List<TMPro.TMP_InputField> nameInputFields = new System.Collections.Generic.List<TMPro.TMP_InputField>();
 
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void LoadedMainMenuToReact();
+        #else
+        private static void LoadedMainMenuToReact() { }
+        #endif
+
         private void Awake()
         {
             RepairGeneratedLayout();
@@ -25,6 +32,10 @@ namespace UI
 
         private void Start()
         {
+            // Reset player setup configuration and clear React overlays
+            GameSetup.Reset();
+            LoadedMainMenuToReact();
+
             // Bind buttons
             if (btnDecreasePlayers != null) btnDecreasePlayers.onClick.AddListener(DecreasePlayers);
             if (btnIncreasePlayers != null) btnIncreasePlayers.onClick.AddListener(IncreasePlayers);

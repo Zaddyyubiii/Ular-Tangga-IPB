@@ -5,6 +5,7 @@ import RollDiceBar from './components/RollDiceBar';
 import QuizModal from './components/QuizModal';
 import PrologueModal from './components/PrologueModal';
 import GameOverModal from './components/GameOverModal';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const [gameState, setGameState] = useState(null);
@@ -34,16 +35,33 @@ function App() {
       setGameOver(e.detail);
     };
 
+    const handleCloseQuiz = () => {
+      console.log("React received CloseQuiz");
+      setQuiz(null);
+    };
+
+    const handleMainMenuLoaded = () => {
+      console.log("React received MainMenuLoaded. Resetting all state.");
+      setGameState(null);
+      setQuiz(null);
+      setPrologue(null);
+      setGameOver(null);
+    };
+
     window.addEventListener("UnityStateUpdated", handleStateUpdate);
     window.addEventListener("UnityShowQuiz", handleShowQuiz);
     window.addEventListener("UnityShowPrologue", handleShowPrologue);
     window.addEventListener("UnityShowGameOver", handleShowGameOver);
+    window.addEventListener("UnityCloseQuiz", handleCloseQuiz);
+    window.addEventListener("UnityMainMenuLoaded", handleMainMenuLoaded);
 
     return () => {
       window.removeEventListener("UnityStateUpdated", handleStateUpdate);
       window.removeEventListener("UnityShowQuiz", handleShowQuiz);
       window.removeEventListener("UnityShowPrologue", handleShowPrologue);
       window.removeEventListener("UnityShowGameOver", handleShowGameOver);
+      window.removeEventListener("UnityCloseQuiz", handleCloseQuiz);
+      window.removeEventListener("UnityMainMenuLoaded", handleMainMenuLoaded);
     };
   }, []);
 
@@ -82,6 +100,67 @@ function App() {
           onRoll={(power) => triggerUnityAction("OnRollDice", power)}
         />
       )}
+
+      {/* Floating Dice Result Banner */}
+      <AnimatePresence>
+        {gameState && gameState.showDiceResult && !prologue && !gameOver && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="absolute bottom-36 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center p-4 bg-slate-900/90 backdrop-blur-md rounded-cartoon border-4 border-slate-700/60 text-white min-w-[200px] text-center shadow-cartoon select-none pointer-events-auto"
+            style={{
+              boxShadow: "0 10px 0 0 rgba(0, 0, 0, 0.4)"
+            }}
+          >
+            {/* Roller Title */}
+            <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mb-1">
+              {gameState.diceValue === 0 ? "Melempar Dadu" : `Kocokan ${gameState.diceRollerName}`}
+            </span>
+            
+            {/* Dice Value / Rolling Animation */}
+            {gameState.diceValue === 0 ? (
+              <div className="flex flex-col items-center gap-1.5 py-1.5">
+                <motion.div 
+                  className="text-4xl"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  🎲
+                </motion.div>
+                <motion.span 
+                  className="text-[11px] font-black text-slate-350 animate-pulse uppercase tracking-wider"
+                >
+                  {gameState.diceRollerName} sedang mengocok...
+                </motion.span>
+              </div>
+            ) : (
+              <>
+                {/* Dice Value */}
+                <div className="text-4xl font-black text-yellow-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] my-1 animate-bounce">
+                  🎲 {gameState.diceValue}
+                </div>
+
+                {/* Timing Quality */}
+                {gameState.diceTimingQuality && (
+                  <span className={`text-xs font-black uppercase tracking-wider ${
+                    gameState.diceTimingQuality.includes("Perfect") ? "text-amber-400" :
+                    gameState.diceTimingQuality.includes("Good") ? "text-emerald-400" : "text-slate-300"
+                  }`}>
+                    {gameState.diceTimingQuality}
+                  </span>
+                )}
+
+                {/* Charge Percent */}
+                <span className="text-[10px] font-bold text-slate-400 mt-1">
+                  Power: {Math.round(gameState.diceChargePercent)}%
+                </span>
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 4. Modal Overlays */}
       {prologue && (

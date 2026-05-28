@@ -264,6 +264,29 @@ namespace UI
         public void ReturnToMainMenu()
         {
             PlayClickSound();
+            
+            // Reset time scale to normal in case it was paused
+            Time.timeScale = 1f;
+
+            // Clear dice result overlay
+            if (DiceRollPopupUI.Instance != null)
+            {
+                DiceRollPopupUI.Instance.ForceHide();
+            }
+            else if (GameplayUI.Instance != null)
+            {
+                GameplayUI.Instance.ClearDiceResult();
+            }
+
+            // Close any open quiz popup safely
+            if (QuizPopup.Instance != null)
+            {
+                QuizPopup.Instance.CloseQuiz();
+            }
+
+            // Reset setup variables to standard defaults
+            GameSetup.Reset();
+
             Core.SceneLoader.Instance.LoadScene("MainMenuScene");
         }
 

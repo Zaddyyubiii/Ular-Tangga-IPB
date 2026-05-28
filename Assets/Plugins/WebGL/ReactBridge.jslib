@@ -25,5 +25,23 @@ mergeInto(LibraryManager.library, {
         var jsonStr = UTF8ToString(prologueJson);
         var event = new CustomEvent("UnityShowPrologue", { detail: JSON.parse(jsonStr) });
         window.dispatchEvent(event);
+    },
+
+    // Notify React that the quiz has been answered (useful for bot auto-answers)
+    QuizAnsweredToReact: function(selectedIndex) {
+        var event = new CustomEvent("UnityQuizAnswered", { detail: { selectedIndex: selectedIndex } });
+        window.dispatchEvent(event);
+    },
+
+    // Notify React that the quiz feedback is closed
+    CloseQuizToReact: function() {
+        var event = new CustomEvent("UnityCloseQuiz");
+        window.dispatchEvent(event);
+    },
+
+    // Notify React that the Main Menu has been loaded and overlays should reset
+    LoadedMainMenuToReact: function() {
+        var event = new CustomEvent("UnityMainMenuLoaded");
+        window.dispatchEvent(event);
     }
 });

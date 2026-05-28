@@ -36,6 +36,7 @@ namespace Core
         public List<PlayerData> players = new List<PlayerData>();
         public Dictionary<int, PlayerToken> playerTokens = new Dictionary<int, PlayerToken>();
         private List<PlayerData> finishOrder = new List<PlayerData>();
+        private DiceResult lastDiceResult;
 
         private void Awake()
         {
@@ -49,6 +50,7 @@ namespace Core
             if (DiceGaugeController.Instance != null)
             {
                 DiceGaugeController.Instance.OnDiceRolled += HandleDiceRolled;
+                DiceGaugeController.Instance.OnDiceResultRolled += HandleDiceResultRolled;
             }
 
             if (TurnManager.Instance != null)
@@ -68,6 +70,7 @@ namespace Core
             if (DiceGaugeController.Instance != null)
             {
                 DiceGaugeController.Instance.OnDiceRolled -= HandleDiceRolled;
+                DiceGaugeController.Instance.OnDiceResultRolled -= HandleDiceResultRolled;
             }
 
             if (TurnManager.Instance != null)
@@ -79,6 +82,8 @@ namespace Core
         public void InitializeGame()
         {
             Debug.Log("[GameManager] Initializing Game Scene...");
+            if (DiceRollPopupUI.Instance != null) DiceRollPopupUI.Instance.ForceHide();
+            else if (GameplayUI.Instance != null) GameplayUI.Instance.ClearDiceResult();
             
             // Load player count from PlayerPrefs (persists across scene loads)
             numRealPlayers = PlayerPrefs.GetInt("NumRealPlayers", numRealPlayers);
@@ -271,6 +276,11 @@ namespace Core
             }
         }
 
+        private void HandleDiceResultRolled(DiceResult result)
+        {
+            lastDiceResult = result;
+        }
+
         private void HandleDiceRolled(int rollValue)
         {
             if (currentState != GameState.WaitingForInput) return;
@@ -317,7 +327,18 @@ namespace Core
                 Debug.Log($"Bounce back triggered: rawTarget={targetTile}, bouncedTarget={bouncedTarget}");
             }
 
-            yield return new WaitForSeconds(0.6f); // Wait for roll animation text display
+            if (DiceRollPopupUI.Instance != null)
+            {
+                yield return DiceRollPopupUI.Instance.ShowDiceResult(curPlayer, lastDiceResult.value, lastDiceResult.timingQuality, lastDiceResult.chargePercent);
+            }
+            else
+            {
+                if (GameplayUI.Instance != null)
+                {
+                    GameplayUI.Instance.ShowDiceResult(curPlayer, lastDiceResult.value, lastDiceResult.timingQuality, lastDiceResult.chargePercent);
+                }
+                yield return new WaitForSeconds(2.0f); // Wait for roll animation text display
+            }
 
             // Normal & Bounce Movement
             currentState = GameState.Moving;
@@ -663,6 +684,15 @@ namespace Core
             if (DiceGaugeController.Instance != null)
             {
                 DiceGaugeController.Instance.ResetGauge();
+            }
+
+            if (DiceRollPopupUI.Instance != null)
+            {
+                DiceRollPopupUI.Instance.ForceHide();
+            }
+            else if (GameplayUI.Instance != null)
+            {
+                GameplayUI.Instance.ClearDiceResult();
             }
 
             // Trigger TurnManager next step

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using UI;
 
 namespace Dice
 {
@@ -94,6 +95,13 @@ namespace Dice
             chargeDirection = 1;
             if (labelResult != null) labelResult.text = "...";
             UpdateGaugeUI();
+
+            if (GameplayUI.Instance != null)
+            {
+                var p = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
+                if (p != null) GameplayUI.Instance.ShowDiceRollingIndicator(p);
+            }
+
             if (Audio.AudioManager.Instance != null && Audio.AudioManager.Instance.diceRollClip != null)
                 Audio.AudioManager.Instance.PlaySFX(Audio.AudioManager.Instance.diceRollClip);
         }

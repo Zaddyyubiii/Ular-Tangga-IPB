@@ -2,12 +2,43 @@ using System.Collections;
 using UnityEngine;
 using Player;
 using Dice;
+using Quiz;
+using UI;
 
 namespace Turn
 {
     public class BotController : MonoBehaviour
     {
         public static BotController Instance;
+
+        public int ChooseQuizAnswerIndex(QuizQuestion question)
+        {
+            // Untuk MVP, bot punya peluang 60% menjawab benar.
+            float correctChance = 0.6f;
+
+            if (UnityEngine.Random.value <= correctChance)
+            {
+                return question.correctAnswerIndex;
+            }
+
+            // Pilih jawaban salah secara random.
+            System.Collections.Generic.List<int> wrongIndexes = new System.Collections.Generic.List<int>();
+
+            for (int i = 0; i < question.choices.Length; i++)
+            {
+                if (i != question.correctAnswerIndex)
+                {
+                    wrongIndexes.Add(i);
+                }
+            }
+
+            if (wrongIndexes.Count == 0)
+            {
+                return question.correctAnswerIndex;
+            }
+
+            return wrongIndexes[UnityEngine.Random.Range(0, wrongIndexes.Count)];
+        }
 
         private void Awake()
         {
@@ -50,6 +81,20 @@ namespace Turn
             {
                 Debug.Log($"[Bot] {botData.playerName} skipping - no longer active player.");
                 yield break;
+            }
+
+            // Show rolling indicator first
+            if (DiceRollPopupUI.Instance != null)
+            {
+                yield return DiceRollPopupUI.Instance.ShowBotRollingIndicator(botData);
+            }
+            else
+            {
+                if (GameplayUI.Instance != null)
+                {
+                    GameplayUI.Instance.ShowDiceRollingIndicator(botData);
+                }
+                yield return new WaitForSeconds(1.0f); // Wait 1s for rolling indicator visibility
             }
 
             float targetCharge = 50f;

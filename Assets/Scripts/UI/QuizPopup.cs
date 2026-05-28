@@ -23,8 +23,14 @@ namespace UI
         #if UNITY_WEBGL && !UNITY_EDITOR
         [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void ShowQuizToReact(string quizJson);
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void QuizAnsweredToReact(int selectedIndex);
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void CloseQuizToReact();
         #else
         private static void ShowQuizToReact(string quizJson) { }
+        private static void QuizAnsweredToReact(int selectedIndex) { }
+        private static void CloseQuizToReact() { }
         #endif
 
         [Header("UI Component Bindings")]
@@ -144,6 +150,9 @@ namespace UI
             }
             #endif
 
+            // Notify React that the option has been selected
+            QuizAnsweredToReact(selectedIndex);
+
             if (isCorrect)
             {
                 labelFeedbackResult.text = "BENAR! *";
@@ -202,6 +211,9 @@ namespace UI
             if (!isQuizOpen) return;
             isQuizOpen = false;
 
+            // Notify React that quiz has closed
+            CloseQuizToReact();
+
             if (autoCloseCoroutine != null)
             {
                 StopCoroutine(autoCloseCoroutine);
@@ -249,12 +261,20 @@ namespace UI
             // Wait for dramatic effect (bot "thinking" / player reading the question)
             yield return new WaitForSeconds(UnityEngine.Random.Range(0.5f, 1.0f));
 
-            // Choose an answer: bot has a 75% chance of answering correctly
-            bool answerCorrectly = UnityEngine.Random.value < 0.75f;
+            // Choose an answer using BotController logic
             int chosenIndex = currentQuestion.correctAnswerIndex;
-            if (!answerCorrectly)
+            if (Turn.BotController.Instance != null)
             {
-                chosenIndex = 1 - currentQuestion.correctAnswerIndex;
+                chosenIndex = Turn.BotController.Instance.ChooseQuizAnswerIndex(currentQuestion);
+            }
+            else
+            {
+                // Fallback
+                bool answerCorrectly = UnityEngine.Random.value < 0.75f;
+                if (!answerCorrectly)
+                {
+                    chosenIndex = 1 - currentQuestion.correctAnswerIndex;
+                }
             }
 
             // Trigger visual feedback and SFX via option selection

@@ -12,5 +12,17 @@ namespace UI
             "Mahasiswa 3",
             "Mahasiswa 4"
         };
+
+        public static void Reset()
+        {
+            HumanPlayerCount = 4;
+            PlayerNames = new string[]
+            {
+                "Mahasiswa 1",
+                "Mahasiswa 2",
+                "Mahasiswa 3",
+                "Mahasiswa 4"
+            };
+        }
     }
 }

@@ -677,6 +677,132 @@ namespace UlarTangga.EditorSetup
             GameObject gameOverGo = CreateGameOverPopupPanel(canvasGo.transform);
             gameOverGo.SetActive(false);
 
+            // Programmatic Dice Roll Popup Card UI (never deactivated, overlayed beautifully on top of everything)
+            GameObject diceResPanelGo = new GameObject("DiceRollPopup", typeof(RectTransform));
+            diceResPanelGo.transform.SetParent(canvasGo.transform, false);
+            diceResPanelGo.SetActive(false); // Hidden by default
+
+            RectTransform drRect = diceResPanelGo.GetComponent<RectTransform>();
+            drRect.anchorMin = new Vector2(0.5f, 0.5f);
+            drRect.anchorMax = new Vector2(0.5f, 0.5f);
+            drRect.pivot = new Vector2(0.5f, 0.5f);
+            drRect.anchoredPosition = new Vector2(0f, 0f); // Centered on screen for modern premium styling!
+            drRect.sizeDelta = new Vector2(280f, 180f); // Large beautiful modern popup card
+
+            // Add CanvasGroup for smooth fade animation
+            var cg = diceResPanelGo.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+
+            // Sleek glassmorphism background
+            Image drImg = diceResPanelGo.AddComponent<Image>();
+            drImg.color = new Color(0.08f, 0.08f, 0.12f, 0.95f);
+            
+            // Accent outline border
+            Outline drOutline = diceResPanelGo.AddComponent<Outline>();
+            drOutline.effectColor = new Color(1f, 1f, 1f, 0.25f);
+            drOutline.effectDistance = new Vector2(2f, 2f);
+
+            // 0. Player Name text (Sasya / Bot 3) - Anchored near top
+            GameObject drPlayerGo = new GameObject("PlayerText", typeof(RectTransform));
+            drPlayerGo.transform.SetParent(diceResPanelGo.transform, false);
+            var drPlayer = drPlayerGo.AddComponent<TMPro.TextMeshProUGUI>();
+            drPlayer.text = "";
+            drPlayer.alignment = TMPro.TextAlignmentOptions.Center;
+            drPlayer.fontSize = 18f; // Beautiful and clear name
+            drPlayer.fontStyle = TMPro.FontStyles.Bold;
+            RectTransform drPlayerRt = drPlayerGo.GetComponent<RectTransform>();
+            drPlayerRt.anchorMin = new Vector2(0f, 0.8f);
+            drPlayerRt.anchorMax = new Vector2(1f, 0.95f);
+            drPlayerRt.offsetMin = Vector2.zero;
+            drPlayerRt.offsetMax = Vector2.zero;
+
+            // 1. Rolling / Action Main Text ("sedang melempar dadu...")
+            GameObject drTextGo = new GameObject("MainText", typeof(RectTransform));
+            drTextGo.transform.SetParent(diceResPanelGo.transform, false);
+            var drText = drTextGo.AddComponent<TMPro.TextMeshProUGUI>();
+            drText.text = "";
+            drText.alignment = TMPro.TextAlignmentOptions.Center;
+            drText.fontSize = 12f;
+            drText.color = Color.white;
+            RectTransform drTextRt = drTextGo.GetComponent<RectTransform>();
+            drTextRt.anchorMin = new Vector2(0f, 0.65f);
+            drTextRt.anchorMax = new Vector2(1f, 0.8f);
+            drTextRt.offsetMin = Vector2.zero;
+            drTextRt.offsetMax = Vector2.zero;
+
+            // 2. Dice Number Text (Large in the center)
+            GameObject drNumGo = new GameObject("DiceNumberText", typeof(RectTransform));
+            drNumGo.transform.SetParent(diceResPanelGo.transform, false);
+            var drNum = drNumGo.AddComponent<TMPro.TextMeshProUGUI>();
+            drNum.text = "-";
+            drNum.alignment = TMPro.TextAlignmentOptions.Center;
+            drNum.fontSize = 64f; // Extremely large dice value for maximum premium wow factor!
+            drNum.fontStyle = TMPro.FontStyles.Bold;
+            drNum.color = Color.white;
+            RectTransform drNumRt = drNumGo.GetComponent<RectTransform>();
+            drNumRt.anchorMin = new Vector2(0f, 0.25f);
+            drNumRt.anchorMax = new Vector2(1f, 0.65f);
+            drNumRt.offsetMin = Vector2.zero;
+            drNumRt.offsetMax = Vector2.zero;
+
+            // 3. Loading Indicator (Spinning text dots or a simple visual asset)
+            GameObject drLoadingGo = new GameObject("LoadingIndicator", typeof(RectTransform));
+            drLoadingGo.transform.SetParent(diceResPanelGo.transform, false);
+            var drLoading = drLoadingGo.AddComponent<TMPro.TextMeshProUGUI>();
+            drLoading.text = "🎲 ... 🎲";
+            drLoading.alignment = TMPro.TextAlignmentOptions.Center;
+            drLoading.fontSize = 24f;
+            drLoading.color = Color.cyan;
+            RectTransform drLoadingRt = drLoadingGo.GetComponent<RectTransform>();
+            drLoadingRt.anchorMin = new Vector2(0f, 0.25f);
+            drLoadingRt.anchorMax = new Vector2(1f, 0.65f);
+            drLoadingRt.offsetMin = Vector2.zero;
+            drLoadingRt.offsetMax = Vector2.zero;
+            drLoadingGo.SetActive(false);
+
+            // 4. Timing text (Perfect Timing!) - Anchored near bottom-middle
+            GameObject drTimeGo = new GameObject("TimingText", typeof(RectTransform));
+            drTimeGo.transform.SetParent(diceResPanelGo.transform, false);
+            var drTime = drTimeGo.AddComponent<TMPro.TextMeshProUGUI>();
+            drTime.text = "";
+            drTime.alignment = TMPro.TextAlignmentOptions.Center;
+            drTime.fontSize = 11f;
+            drTime.fontStyle = TMPro.FontStyles.Bold;
+            drTime.color = Color.cyan;
+            RectTransform drTimeRt = drTimeGo.GetComponent<RectTransform>();
+            drTimeRt.anchorMin = new Vector2(0f, 0.12f);
+            drTimeRt.anchorMax = new Vector2(1f, 0.25f);
+            drTimeRt.offsetMin = Vector2.zero;
+            drTimeRt.offsetMax = Vector2.zero;
+
+            // 5. Charge text (Charge: 72%) - Anchored near bottom
+            GameObject drChargeGo = new GameObject("ChargeText", typeof(RectTransform));
+            drChargeGo.transform.SetParent(diceResPanelGo.transform, false);
+            var drCharge = drChargeGo.AddComponent<TMPro.TextMeshProUGUI>();
+            drCharge.text = "";
+            drCharge.alignment = TMPro.TextAlignmentOptions.Center;
+            drCharge.fontSize = 10f;
+            drCharge.color = new Color(0.8f, 0.8f, 0.8f);
+            RectTransform drChargeRt = drChargeGo.GetComponent<RectTransform>();
+            drChargeRt.anchorMin = new Vector2(0f, 0f);
+            drChargeRt.anchorMax = new Vector2(1f, 0.12f);
+            drChargeRt.offsetMin = Vector2.zero;
+            drChargeRt.offsetMax = Vector2.zero;
+
+            // Add the new DiceRollPopupUI controller script
+            var dicePopupUI = diceResPanelGo.AddComponent<DiceRollPopupUI>();
+            dicePopupUI.root = diceResPanelGo;
+            dicePopupUI.canvasGroup = cg;
+            dicePopupUI.cardTransform = drRect;
+            dicePopupUI.cardBackground = drImg;
+            dicePopupUI.accentBorder = drImg; // We can use the background image outline as accentBorder
+            dicePopupUI.playerNameText = drPlayer;
+            dicePopupUI.mainText = drText;
+            dicePopupUI.diceNumberText = drNum;
+            dicePopupUI.timingText = drTime;
+            dicePopupUI.chargeText = drCharge;
+            dicePopupUI.loadingIndicator = drLoadingGo;
+
             // Hook Managers Game Object
             GameObject managersGo = new GameObject("GameManagers");
             
@@ -708,6 +834,11 @@ namespace UlarTangga.EditorSetup
             gameplayUI.labelInstruction = instructText;
             gameplayUI.statusCardGridContainer = statusGridGo.transform;
             gameplayUI.playerStatusCardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/PlayerStatusCard.prefab");
+            gameplayUI.diceResultPanel = diceResPanelGo;
+            gameplayUI.dicePlayerText = drPlayer;
+            gameplayUI.diceResultText = drText;
+            gameplayUI.diceTimingText = drTime;
+            gameplayUI.diceChargeText = drCharge;
 
             var pop = managersGo.AddComponent<PopupController>();
             pop.popupPanel = normPopupGo;

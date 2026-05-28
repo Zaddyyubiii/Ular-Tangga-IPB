@@ -56,6 +56,11 @@ Dikirim setiap pergantian giliran pemain, pembaruan timer giliran, atau pergerak
   "activePlayerId": 1,
   "timerRemaining": 10.0,
   "instructionText": "Tahan tombol ROLL, lepaskan untuk melempar dadu!",
+  "showDiceResult": true,
+  "diceRollerName": "Zaddy",
+  "diceValue": 6,
+  "diceTimingQuality": "Perfect Timing!",
+  "diceChargePercent": 85.0,
   "players": [
     {
       "id": 1,
@@ -130,6 +135,29 @@ Dikirim ketika salah satu pemain berhasil menyentuh petak ke-100 (Finish) dan me
   "messageText": "Selamat! Kamu berhasil melewati semua tantangan, mematuhi tata tertib, dan dinobatkan menjadi Duta Tata Tertib IPB University!"
 }
 ```
+
+### 5. Quiz Answered State (`UnityQuizAnswered`)
+Dikirim ketika kuis dijawab (terutama berguna untuk sinkronisasi otomatis giliran bot).
+
+*   **CustomEvent Name:** `"UnityQuizAnswered"`
+*   **JSON Payload Schema:**
+```json
+{
+  "selectedIndex": 0
+}
+```
+
+### 6. Quiz Closed State (`UnityCloseQuiz`)
+Dikirim ketika panel penjelasan kuis ditutup oleh Unity untuk menghapus modal kuis di React.
+
+*   **CustomEvent Name:** `"UnityCloseQuiz"`
+*   **JSON Payload Schema:** *Tanpa Payload*
+
+### 7. Main Menu Loaded State (`UnityMainMenuLoaded`)
+Dikirim ketika scene menu utama berhasil dimuat untuk menginstruksikan React mereset seluruh overlay HUD permainan.
+
+*   **CustomEvent Name:** `"UnityMainMenuLoaded"`
+*   **JSON Payload Schema:** *Tanpa Payload*
 
 ---
 

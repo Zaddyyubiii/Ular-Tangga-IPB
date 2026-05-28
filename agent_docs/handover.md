@@ -65,6 +65,18 @@ Sesuai dengan arahan dan masukan terbaru dari Anda, kami telah menyelesaikan tig
 
 ---
 
+### 🐛 Pembaruan & Perbaikan Bug Kritis (Bug Fix Milestones)
+Kami telah melakukan perbaikan bug secara tuntas untuk menjamin keselarasan permainan di Unity Editor dan WebGL browser:
+1. **Dice Result Panel & Roll Indicator (SELESAI 🎲)**:
+   - **Indikator Sedang Melempar**: Sekarang, saat human menekan/menahan tombol ROLL/SPACE atau bot mulai mengocok dadu, sistem langsung menampilkan indikator rolling ("`[Player Name] sedang melempar dadu...`").
+   - **Visual Bouncy & Sinyal State di React**: Pada React Web UI, saat `diceValue === 0`, React menampilkan dadu yang berputar cepat secara 3D (rotasi) dan teks berdenyut (*"Mengocok dadu..."*). Setelah kocokan selesai, visual bertransisi lancar ke tampilan bouncy card hasil dadu, lengkap dengan timing kocokan, persentase power, dan nama pemain.
+   - **Dynamic PlayerText**: Di Unity Editor, `SceneSetupHelper.cs` kini membuat objek teks `PlayerText` secara prosedural di dalam `DiceResultPanel` dan menghubungkannya langsung ke `GameplayUI.Instance.dicePlayerText` untuk menghindari error/warning referensi null serta menjamin nama pemain tampil sempurna.
+   - **Delay Membaca Hasil & Pembersihan Turn**: Hasil dadu terjaga minimal 1.2 detik sebelum bidak bergerak dan tetap terlihat sepanjang perjalanan token, lalu di-clear secara bersih saat turn baru dimulai.
+2. **Sinkronisasi Otomatis Kuis Bot**: Bot kini memiliki kecerdasan `ChooseQuizAnswerIndex` di `BotController.cs` dengan peluang benar 60%. Melalui CustomEvents `"UnityQuizAnswered"` and `"UnityCloseQuiz"`, antarmuka kuis di React tersinkronisasi instan saat bot memilih jawaban dan menutup secara otomatis setelah 5 detik.
+3. **Pembersihan State Kembali ke Menu Utama**: Mengirimkan sinyal `"UnityMainMenuLoaded"` ke React saat scene Menu Utama dimuat. React secara instan mereduksi seluruh state overlayHUD permainan (`setGameState(null)`, `setQuiz(null)`, dll.) sehingga menu utama bersih 100% dari sisa tampilan game sebelumnya.
+
+---
+
 ## 🚀 Panduan Menjalankan Lingkungan Pengembangan Lengkap
 
 Untuk merasakan pengalaman bermain paling mutakhir dengan visual HUD React, ikuti langkah mudah berikut:
