@@ -41,7 +41,7 @@ Seluruh logika permainan diatur oleh skrip-skrip yang terbagi secara modular:
 ### 5. `Assets/ScriptableObjects/` (Aset Konfigurasi Data)
 Penyimpanan data statis berbasis ScriptableObject untuk memudahkan penyeimbangan tingkat kesulitan (*level balancing*):
 *   `BoardConfig.asset`: Konfigurasi letak petak kuis, petak tengkorak, posisi tangga, serta ular beserta efeknya.
-*   `QuizBank.asset`: Bank soal kuis yang berisi teks pertanyaan, pilihan ganda, kunci jawaban, dan feedback edukatif.
+*   `QuizBank.asset`: Bank kuis yang diperluas berisi 21 pertanyaan kuis tata tertib (3 lama + 18 baru) dengan struktur pilihan jawaban dinamis (2-4 pilihan, A-D) dan sistem seleksi 6 soal acak non-duplikat per game.
 *   `MessageBank.asset`: Kumpulan teks cerita prolog, pesan positif di petak biasa, pesan ular, sanksi tengkorak, dan pesan tangga.
 
 ### 6. `docs/` (WebGL Deployment)

@@ -38,6 +38,8 @@ namespace UI
         public TMPro.TextMeshProUGUI labelQuestion;
         public Button btnOptionA; // Representing True / Option A
         public Button btnOptionB; // Representing False / Option B
+        public Button btnOptionC; // Representing Option C
+        public Button btnOptionD; // Representing Option D
         
         [Header("Feedback Panel")]
         public GameObject feedbackContainer;
@@ -60,8 +62,13 @@ namespace UI
         {
             if (quizPanel != null) quizPanel.SetActive(false);
 
+            if (btnOptionC == null && quizPanel != null) btnOptionC = quizPanel.transform.Find("Options/BtnC")?.GetComponent<Button>();
+            if (btnOptionD == null && quizPanel != null) btnOptionD = quizPanel.transform.Find("Options/BtnD")?.GetComponent<Button>();
+
             if (btnOptionA != null) btnOptionA.onClick.AddListener(() => OnOptionSelected(0));
             if (btnOptionB != null) btnOptionB.onClick.AddListener(() => OnOptionSelected(1));
+            if (btnOptionC != null) btnOptionC.onClick.AddListener(() => OnOptionSelected(2));
+            if (btnOptionD != null) btnOptionD.onClick.AddListener(() => OnOptionSelected(3));
             if (btnCloseQuiz != null) btnCloseQuiz.onClick.AddListener(OnCloseQuizClicked);
         }
 
@@ -92,23 +99,47 @@ namespace UI
                 autoCloseCoroutine = null;
             }
 
+            Debug.Log($"Showing quiz question: {question.id}.");
+
             labelQuestion.text = question.questionText;
 
-            // Setup button labels
-            if (btnOptionA != null && btnOptionA.GetComponentInChildren<TMPro.TextMeshProUGUI>() != null)
+            // Setup button labels and visibility
+            if (btnOptionA != null)
             {
-                btnOptionA.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = question.choices[0];
+                btnOptionA.gameObject.SetActive(question.choices.Length > 0);
+                if (question.choices.Length > 0 && btnOptionA.GetComponentInChildren<TMPro.TextMeshProUGUI>() != null)
+                {
+                    btnOptionA.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = question.choices[0];
+                }
+                btnOptionA.interactable = true;
             }
-            if (btnOptionB != null && btnOptionB.GetComponentInChildren<TMPro.TextMeshProUGUI>() != null)
+            if (btnOptionB != null)
             {
-                btnOptionB.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = question.choices[1];
+                btnOptionB.gameObject.SetActive(question.choices.Length > 1);
+                if (question.choices.Length > 1 && btnOptionB.GetComponentInChildren<TMPro.TextMeshProUGUI>() != null)
+                {
+                    btnOptionB.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = question.choices[1];
+                }
+                btnOptionB.interactable = true;
             }
-
-            // Reset buttons
-            btnOptionA.gameObject.SetActive(true);
-            btnOptionB.gameObject.SetActive(true);
-            btnOptionA.interactable = true;
-            btnOptionB.interactable = true;
+            if (btnOptionC != null)
+            {
+                btnOptionC.gameObject.SetActive(question.choices.Length > 2);
+                if (question.choices.Length > 2 && btnOptionC.GetComponentInChildren<TMPro.TextMeshProUGUI>() != null)
+                {
+                    btnOptionC.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = question.choices[2];
+                }
+                btnOptionC.interactable = true;
+            }
+            if (btnOptionD != null)
+            {
+                btnOptionD.gameObject.SetActive(question.choices.Length > 3);
+                if (question.choices.Length > 3 && btnOptionD.GetComponentInChildren<TMPro.TextMeshProUGUI>() != null)
+                {
+                    btnOptionD.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = question.choices[3];
+                }
+                btnOptionD.interactable = true;
+            }
 
             // Hide feedback originally
             if (feedbackContainer != null) feedbackContainer.SetActive(false);
@@ -133,10 +164,20 @@ namespace UI
         private void OnOptionSelected(int selectedIndex)
         {
             // Lock buttons
-            btnOptionA.interactable = false;
-            btnOptionB.interactable = false;
+            if (btnOptionA != null) btnOptionA.interactable = false;
+            if (btnOptionB != null) btnOptionB.interactable = false;
+            if (btnOptionC != null) btnOptionC.interactable = false;
+            if (btnOptionD != null) btnOptionD.interactable = false;
+
+            var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
+            if (curPlayer != null && !curPlayer.isBot)
+            {
+                Debug.Log($"Player selected answer index: {selectedIndex}.");
+            }
+            Debug.Log($"Correct answer index: {currentQuestion.correctAnswerIndex}.");
 
             bool isCorrect = (selectedIndex == currentQuestion.correctAnswerIndex);
+            Debug.Log($"Quiz answered correctly: {isCorrect.ToString().ToLower()}.");
 
             // Display feedback with smooth animation
             #if UNITY_WEBGL && !UNITY_EDITOR
@@ -232,7 +273,10 @@ namespace UI
         public void SubmitAnswerFromReact(string answer)
         {
             int selectedIndex = 0;
-            if (answer.ToUpper() == "B" || answer == "1") selectedIndex = 1;
+            string upper = answer.ToUpper();
+            if (upper == "B" || answer == "1") selectedIndex = 1;
+            else if (upper == "C" || answer == "2") selectedIndex = 2;
+            else if (upper == "D" || answer == "3") selectedIndex = 3;
             OnOptionSelected(selectedIndex);
         }
 
@@ -253,6 +297,8 @@ namespace UI
             // Disable buttons for bot turn so the human player cannot click them
             if (btnOptionA != null) btnOptionA.interactable = false;
             if (btnOptionB != null) btnOptionB.interactable = false;
+            if (btnOptionC != null) btnOptionC.interactable = false;
+            if (btnOptionD != null) btnOptionD.interactable = false;
             if (btnCloseQuiz != null) btnCloseQuiz.interactable = false;
 
             var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
@@ -278,8 +324,9 @@ namespace UI
             }
 
             // Trigger visual feedback and SFX via option selection
-            string choiceChar = chosenIndex == 0 ? "A" : "B";
+            string choiceChar = ((char)('A' + chosenIndex)).ToString();
             Debug.Log($"Bot Player {botName} quiz answered: {choiceChar}.");
+            Debug.Log($"Bot selected answer index: {chosenIndex}.");
             OnOptionSelected(chosenIndex);
 
             // Wait for feedback to be displayed for exactly 5 seconds

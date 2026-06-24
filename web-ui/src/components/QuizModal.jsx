@@ -26,8 +26,8 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
     setSelectedIdx(idx);
     setHasAnswered(true);
     
-    // Convert index to "A" or "B" for Unity C# mapping compatibility
-    const answerChar = idx === 0 ? "A" : "B";
+    // Convert index to letters "A", "B", "C", "D" for Unity C# mapping compatibility
+    const answerChar = String.fromCharCode(65 + idx);
     onAnswer(answerChar);
   };
 
@@ -62,9 +62,9 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
 
         {/* Question options */}
         {!hasAnswered ? (
-          <div className="flex flex-col gap-3.5 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-2">
             {quiz.choices.map((choice, idx) => {
-              const labelPrefix = idx === 0 ? "A. " : "B. ";
+              const labelLetter = String.fromCharCode(65 + idx);
               return (
                 <button
                   key={idx}
@@ -72,7 +72,7 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
                   className="w-full text-left p-4 rounded-xl text-white font-extrabold text-sm uppercase transition-all duration-100 flex items-center gap-3 cursor-pointer bg-slate-900 border-2 border-slate-800 hover:bg-slate-850 hover:border-slate-700 active:translate-y-[2px] border-b-4 border-b-slate-950 active:border-b-2"
                 >
                   <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-yellow-300 text-sm font-black">
-                    {idx === 0 ? "A" : "B"}
+                    {labelLetter}
                   </span>
                   <span className="flex-1 text-slate-200">{choice}</span>
                 </button>

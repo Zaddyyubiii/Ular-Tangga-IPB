@@ -5,6 +5,10 @@ namespace Quiz
     [Serializable]
     public class QuizQuestion
     {
+        public string id;
+        public string type;
+        public string category;
+
         [UnityEngine.TextArea(3, 5)]
         public string questionText;
         public bool isTrueFalse = true;

@@ -168,7 +168,7 @@ Berikut adalah fungsi-fungsi publik di Unity yang dipanggil oleh React melalu `w
 | Nama Fungsi di Unity | Tipe Parameter | Deskripsi Fungsi |
 | :--- | :--- | :--- |
 | `OnRollDice` | `float` | Mengirim daya kocokan dadu (0 s.d 100) dan melempar dadu secara fisik di papan. |
-| `OnAnswerQuiz` | `string` | Mengirim jawaban pilihan ganda pemain (`"A"` untuk indeks 0, atau `"B"` untuk indeks 1). |
+| `OnAnswerQuiz` | `string` | Mengirim jawaban pilihan ganda pemain (`"A"` untuk indeks 0, `"B"` untuk indeks 1, `"C"` untuk indeks 2, atau `"D"` untuk indeks 3). |
 | `OnCloseQuizFeedback` | *Tanpa Parameter* | Mengonfirmasi penutupan panel penjelasan kuis untuk melanjutkan giliran. |
 | `OnStartJourney` | *Tanpa Parameter* | Mengonfirmasi selesainya pembacaan prolog cerita untuk melepaskan bidak di petak 0. |
 | `OnPlayAgain` | *Tanpa Parameter* | Meminta restart game dari awal scene utama dengan pemain yang sama. |

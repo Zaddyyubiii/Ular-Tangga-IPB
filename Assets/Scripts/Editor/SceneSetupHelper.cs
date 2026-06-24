@@ -852,6 +852,10 @@ namespace UlarTangga.EditorSetup
             qPop.labelQuestion = quizPopupGo.transform.Find("Question").GetComponent<TMPro.TextMeshProUGUI>();
             qPop.btnOptionA = quizPopupGo.transform.Find("Options/BtnA").GetComponent<Button>();
             qPop.btnOptionB = quizPopupGo.transform.Find("Options/BtnB").GetComponent<Button>();
+            var btnCTrans = quizPopupGo.transform.Find("Options/BtnC");
+            if (btnCTrans != null) qPop.btnOptionC = btnCTrans.GetComponent<Button>();
+            var btnDTrans = quizPopupGo.transform.Find("Options/BtnD");
+            if (btnDTrans != null) qPop.btnOptionD = btnDTrans.GetComponent<Button>();
             qPop.feedbackContainer = quizPopupGo.transform.Find("Feedback").gameObject;
             qPop.labelFeedbackResult = quizPopupGo.transform.Find("Feedback/ResultText").GetComponent<TMPro.TextMeshProUGUI>();
             qPop.labelFeedbackExplanations = quizPopupGo.transform.Find("Feedback/ExplainText").GetComponent<TMPro.TextMeshProUGUI>();
@@ -1068,10 +1072,12 @@ namespace UlarTangga.EditorSetup
             // Options Row
             GameObject rowGo = new GameObject("Options", typeof(RectTransform));
             rowGo.transform.SetParent(popGo.transform, false);
-            PositionRect(rowGo.GetComponent<RectTransform>(), new Vector2(0f, -40f), new Vector2(400f, 50f));
+            PositionRect(rowGo.GetComponent<RectTransform>(), new Vector2(0f, -40f), new Vector2(400f, 110f));
 
-            CreateStandardButton(rowGo.transform, "BtnA", "Option A / Benar", new Vector2(-105f, 0f), new Vector2(200f, 45f));
-            CreateStandardButton(rowGo.transform, "BtnB", "Option B / Salah", new Vector2(105f, 0f), new Vector2(200f, 45f));
+            CreateStandardButton(rowGo.transform, "BtnA", "Option A / Benar", new Vector2(-105f, 25f), new Vector2(200f, 45f));
+            CreateStandardButton(rowGo.transform, "BtnB", "Option B / Salah", new Vector2(105f, 25f), new Vector2(200f, 45f));
+            CreateStandardButton(rowGo.transform, "BtnC", "Option C", new Vector2(-105f, -25f), new Vector2(200f, 45f));
+            CreateStandardButton(rowGo.transform, "BtnD", "Option D", new Vector2(105f, -25f), new Vector2(200f, 45f));
 
             // Feedback Card inside
             GameObject feedGo = new GameObject("Feedback", typeof(RectTransform));

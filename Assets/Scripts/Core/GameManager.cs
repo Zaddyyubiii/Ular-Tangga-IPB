@@ -92,6 +92,9 @@ namespace Core
             if (boardConfig == null) boardConfig = ScriptableObject.CreateInstance<BoardConfig>();
             if (messageBank == null) messageBank = ScriptableObject.CreateInstance<MessageBank>();
             if (quizBank == null) quizBank = ScriptableObject.CreateInstance<QuizBank>();
+            
+            // Initialize quiz selection for this game
+            quizBank.SelectQuestionsForThisGame();
 
             currentState = GameState.Prologue;
 
@@ -441,7 +444,7 @@ namespace Core
 
                 case TileType.Question:
                     // Show quiz popup
-                    QuizQuestion question = quizBank.GetRandomQuestion();
+                    QuizQuestion question = quizBank.GetNextQuestion();
                     if (QuizPopup.Instance != null && question != null)
                     {
                         if (player.isBot)
