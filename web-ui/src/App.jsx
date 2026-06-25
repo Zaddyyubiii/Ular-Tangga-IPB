@@ -103,15 +103,16 @@ function App() {
 
       {/* Floating Dice Result Banner */}
       <AnimatePresence>
-        {gameState && gameState.showDiceResult && !prologue && !gameOver && (
+        {gameState && gameState.showDiceResult && !quiz && !prologue && !gameOver && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="absolute bottom-36 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center p-4 bg-slate-900/90 backdrop-blur-md rounded-cartoon border-4 border-slate-700/60 text-white min-w-[200px] text-center shadow-cartoon select-none pointer-events-auto"
+            className="absolute bottom-36 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center p-4 bg-slate-900/90 backdrop-blur-md rounded-cartoon border-4 text-white min-w-[200px] text-center shadow-cartoon select-none pointer-events-auto"
             style={{
-              boxShadow: "0 10px 0 0 rgba(0, 0, 0, 0.4)"
+              boxShadow: "0 10px 0 0 rgba(0, 0, 0, 0.4)",
+              borderColor: gameState.players.find(p => p.playerName === gameState.diceRollerName)?.playerColorHex || "rgba(100, 116, 139, 0.6)"
             }}
           >
             {/* Roller Title */}

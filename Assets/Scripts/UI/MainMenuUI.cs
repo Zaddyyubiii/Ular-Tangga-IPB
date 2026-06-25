@@ -12,6 +12,18 @@ namespace UI
         public Button btnStartGame;
         public Button btnQuitGame;
 
+        [Header("Visual Theme")]
+        public GameVisualTheme theme;
+
+        public GameVisualTheme Theme
+        {
+            get
+            {
+                if (theme == null) theme = Resources.Load<GameVisualTheme>("GameVisualTheme");
+                return theme;
+            }
+        }
+
         private int playerCountSelected = 4; // Default to 4
 
         [Header("Dynamic Name Inputs Container")]
@@ -41,6 +53,15 @@ namespace UI
             if (btnIncreasePlayers != null) btnIncreasePlayers.onClick.AddListener(IncreasePlayers);
             if (btnStartGame != null) btnStartGame.onClick.AddListener(StartGame);
             if (btnQuitGame != null) btnQuitGame.onClick.AddListener(QuitGame);
+
+            // Style buttons using Theme
+            if (Theme != null)
+            {
+                if (btnStartGame != null) Theme.StyleButtonAsWood(btnStartGame, btnStartGame.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+                if (btnQuitGame != null) Theme.StyleButtonAsWood(btnQuitGame, btnQuitGame.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+                if (btnDecreasePlayers != null) Theme.StyleButtonAsWood(btnDecreasePlayers, btnDecreasePlayers.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+                if (btnIncreasePlayers != null) Theme.StyleButtonAsWood(btnIncreasePlayers, btnIncreasePlayers.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+            }
 
             // Hide Quit button on WebGL
 #if UNITY_WEBGL
@@ -145,6 +166,10 @@ namespace UI
                 );
 
                 var inputField = inputGo.GetComponent<TMPro.TMP_InputField>();
+                if (Theme != null)
+                {
+                    Theme.StyleInputFieldAsParchment(inputField);
+                }
                 nameInputFields.Add(inputField);
             }
 
@@ -157,8 +182,8 @@ namespace UI
             mainLayout.childAlignment = TextAnchor.MiddleCenter;
             mainLayout.spacing = 18f;
             mainLayout.padding = new RectOffset(40, 40, 40, 40);
-            mainLayout.childControlWidth = false;
-            mainLayout.childControlHeight = false;
+            mainLayout.childControlWidth = true;
+            mainLayout.childControlHeight = true;
             mainLayout.childForceExpandWidth = false;
             mainLayout.childForceExpandHeight = false;
 
@@ -186,12 +211,47 @@ namespace UI
                 lineRect.sizeDelta = new Vector2(0f, 4f);
             }
 
-            // 6. Set Sibling Indices to enforce order from top to bottom
+            // 6. Set Sibling Indices and LayoutElement values to enforce order & size
             Transform ipbBadge = container.Find("IPBBadge");
             Transform diceDecoration = container.Find("DiceDecoration");
-            Transform title = container.Find("Title");
+            // TitleBoard is the wooden panel containing the Title text — it is a direct child of CenterCard
+            Transform title = container.Find("TitleBoard") ?? container.Find("Title");
             Transform playerSelectRow = container.Find("PlayerSelectRow");
             Transform btnQuit = btnQuitGame != null ? btnQuitGame.transform : null;
+
+            if (ipbBadge != null)
+            {
+                RectTransform rt = ipbBadge.GetComponent<RectTransform>();
+                float w = rt != null ? rt.rect.width : 100f;
+                float h = rt != null ? rt.rect.height : 60f;
+                EnsureLayoutElement(ipbBadge, w, h);
+            }
+            if (diceDecoration != null)
+            {
+                EnsureLayoutElement(diceDecoration, 180f, 90f);
+            }
+            if (title != null)
+            {
+                EnsureLayoutElement(title, 460f, 100f);
+            }
+            else
+            {
+                Debug.LogWarning("[MainMenuUI] TitleBoard not found in CenterCard — title may not display in correct order.");
+            }
+            if (playerSelectRow != null)
+            {
+                EnsureLayoutElement(playerSelectRow, 300f, 44f);
+            }
+            float inputsHeight = playerCountSelected * 42f + (playerCountSelected - 1) * 10f;
+            EnsureLayoutElement(nameInputsContainer.transform, 350f, inputsHeight);
+            if (btnStartGame != null)
+            {
+                EnsureLayoutElement(btnStartGame.transform, 240f, 48f);
+            }
+            if (btnQuit != null)
+            {
+                EnsureLayoutElement(btnQuit, 200f, 44f);
+            }
 
             int siblingIdx = 0;
             if (ipbBadge != null) ipbBadge.SetSiblingIndex(siblingIdx++);
@@ -380,20 +440,22 @@ namespace UI
                     lineRect.sizeDelta = new Vector2(0f, 4f);
                 }
 
-                // 2. Configure Title Text
-                Transform title = container.Find("Title");
-                if (title != null)
+                // 2. Configure TitleBoard (wooden panel) and its Title text child
+                Transform titleBoard = container.Find("TitleBoard") ?? container.Find("Title");
+                if (titleBoard != null)
                 {
-                    TMPro.TextMeshProUGUI titleText = title.GetComponent<TMPro.TextMeshProUGUI>();
+                    // Set size of the title board panel
+                    RectTransform titleRect = titleBoard as RectTransform;
+                    if (titleRect != null) titleRect.sizeDelta = new Vector2(460f, 100f);
+
+                    // Configure TMP text inside TitleBoard (or TitleBoard itself if it has TMP)
+                    TMPro.TextMeshProUGUI titleText = titleBoard.GetComponentInChildren<TMPro.TextMeshProUGUI>(true);
                     if (titleText != null)
                     {
-                        titleText.fontSize = 38f;
-                        titleText.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+                        titleText.fontSize = 32f;
+                        titleText.textWrappingMode = TMPro.TextWrappingModes.Normal;
                         titleText.alignment = TMPro.TextAlignmentOptions.Center;
                     }
-                    
-                    RectTransform titleRect = title as RectTransform;
-                    titleRect.sizeDelta = new Vector2(460f, 100f);
                 }
 
                 // 3. Configure DiceDecoration
@@ -424,6 +486,19 @@ namespace UI
                     quitRect.sizeDelta = new Vector2(200f, 44f);
                 }
             }
+        }
+
+        private void EnsureLayoutElement(Transform trans, float preferredWidth, float preferredHeight)
+        {
+            if (trans == null) return;
+            var le = trans.gameObject.GetComponent<LayoutElement>();
+            if (le == null) le = trans.gameObject.AddComponent<LayoutElement>();
+            le.preferredWidth = preferredWidth;
+            le.preferredHeight = preferredHeight;
+            le.minWidth = preferredWidth;
+            le.minHeight = preferredHeight;
+            le.flexibleWidth = 0f;
+            le.flexibleHeight = 0f;
         }
     }
 }

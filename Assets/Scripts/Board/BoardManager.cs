@@ -25,6 +25,16 @@ namespace Board
         [Header("Prefabs")]
         public GameObject tilePrefab;
 
+        private UI.GameVisualTheme _theme;
+        public UI.GameVisualTheme Theme
+        {
+            get
+            {
+                if (_theme == null) _theme = Resources.Load<UI.GameVisualTheme>("GameVisualTheme");
+                return _theme;
+            }
+        }
+
         private Dictionary<int, Vector2> tilePositions = new Dictionary<int, Vector2>();
         private Dictionary<int, GameObject> tileObjects = new Dictionary<int, GameObject>();
 
@@ -32,6 +42,60 @@ namespace Board
         {
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
+        }
+
+        private void Start()
+        {
+            ResizeBoard();
+        }
+
+        private void Update()
+        {
+            ResizeBoard();
+        }
+
+        public void ResizeBoard()
+        {
+            if (boardPanel == null) return;
+
+            // Enforce anchors and pivot to center
+            boardPanel.anchorMin = new Vector2(0.5f, 0.5f);
+            boardPanel.anchorMax = new Vector2(0.5f, 0.5f);
+            boardPanel.pivot = new Vector2(0.5f, 0.5f);
+            
+            // Grid width/height base is 640x640
+            boardPanel.sizeDelta = new Vector2(640f, 640f);
+
+            Canvas canvas = boardPanel.GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+            
+            RectTransform canvasRt = canvas.GetComponent<RectTransform>();
+            if (canvasRt == null) return;
+
+            float canvasWidth = canvasRt.rect.width;
+            float canvasHeight = canvasRt.rect.height;
+
+            // Target size based on height (80% of canvas height)
+            float targetSizeByHeight = canvasHeight * 0.80f;
+
+            // Target size based on width: avoid overlapping side cards (each is 256px wide).
+            // Margins of 270px on each side = 540px total margin to completely clear cards.
+            float targetSizeByWidth = canvasWidth - 540f;
+
+            // Choose the smaller of the two to fit both width and height boundaries
+            float targetSize = Mathf.Min(targetSizeByHeight, targetSizeByWidth);
+
+            // Clamp target size to reasonable values: let it go up to 880px for high readability
+            targetSize = Mathf.Clamp(targetSize, 560f, 880f);
+
+            // Calculate scale
+            float s = targetSize / 640f;
+
+            // Set local scale of boardPanel
+            boardPanel.localScale = new Vector3(s, s, 1f);
+
+            // Center position (slightly offset upwards to leave room for bottom dice bar)
+            boardPanel.anchoredPosition = new Vector2(0f, 15f);
         }
 
         public void GenerateBoard()
@@ -230,11 +294,18 @@ namespace Board
         private void ApplyTileStyle(int number, TileDefinition def, Image bg, TMPro.TextMeshProUGUI numText, TMPro.TextMeshProUGUI iconText)
         {
             // Crisp dark-gray number text on light backdrop
-            numText.color = new Color(0.12f, 0.12f, 0.12f, 0.85f);
+            if (Theme != null)
+            {
+                numText.color = Theme.darkText;
+            }
+            else
+            {
+                numText.color = new Color(0.12f, 0.12f, 0.12f, 0.85f);
+            }
 
             if (number == 0)
             {
-                bg.color = new Color(0.1f, 0.52f, 0.28f); // Soft Vibrant Forest Green
+                bg.color = Theme != null ? Theme.deepGrass : new Color(0.1f, 0.52f, 0.28f); // Soft Vibrant Forest Green
                 numText.text = "";
                 iconText.text = "START";
                 iconText.fontSize = 8.5f;
@@ -243,7 +314,7 @@ namespace Board
             }
             if (number == 100)
             {
-                bg.color = new Color(0.92f, 0.75f, 0.15f); // Luxurious Gold
+                bg.color = Theme != null ? Theme.warningOrange : new Color(0.92f, 0.75f, 0.15f); // Luxurious Gold
                 numText.text = "";
                 iconText.text = "HOME";
                 iconText.fontSize = 8.5f;
@@ -256,36 +327,48 @@ namespace Board
             switch (def.type)
             {
                 case TileType.Question:
-                    bg.color = new Color(0.2f, 0.55f, 0.9f); // Radiant Soft Blue
+                    bg.color = Theme != null ? Theme.skyBlue : new Color(0.2f, 0.55f, 0.9f); // Radiant Soft Blue
                     iconText.text = "?";
                     iconText.fontSize = 22f;
-                    iconText.color = new Color(1f, 0.95f, 0.4f); // Golden yellow "?"
+                    iconText.color = Theme != null ? Theme.creamText : new Color(1f, 0.95f, 0.4f); // Golden yellow "?"
                     break;
 
                 case TileType.Skull:
-                    bg.color = new Color(0.8f, 0.15f, 0.15f); // Soft Deep Crimson
+                    bg.color = Theme != null ? Theme.dangerRed : new Color(0.8f, 0.15f, 0.15f); // Soft Deep Crimson
                     iconText.text = "☠️"; // Proper high-quality warning icon
                     iconText.fontSize = 18f;
                     iconText.color = Color.white;
                     break;
 
                 case TileType.Snake:
-                    bg.color = new Color(0.85f, 0.32f, 0.25f); // Warning orange-red
+                    bg.color = Theme != null ? Theme.warningOrange : new Color(0.85f, 0.32f, 0.25f); // Warning orange-red
                     iconText.text = "";
                     break;
 
                 case TileType.Ladder:
-                    bg.color = new Color(0.88f, 0.55f, 0.15f); // Soft gold
+                    bg.color = Theme != null ? Theme.successGreen : new Color(0.88f, 0.55f, 0.15f); // Soft gold
                     iconText.text = "";
                     break;
 
                 default:
-                    // Diagonal pastel rainbow wave - warm physical board feel
-                    int z = number - 1;
-                    int r = z / 10;
-                    int c = z % 10;
-                    int waveIndex = (r + c) % PastelRainbowColors.Length;
-                    bg.color = PastelRainbowColors[waveIndex];
+                    if (Theme != null)
+                    {
+                        // Cozy natural pastel palette
+                        Color[] themeBoardColors = new Color[] { Theme.parchmentLight, Theme.lightDirt, Theme.softGrass, Theme.parchment };
+                        int z = number - 1;
+                        int r = z / 10;
+                        int c = z % 10;
+                        bg.color = themeBoardColors[(r + c) % themeBoardColors.Length];
+                    }
+                    else
+                    {
+                        // Diagonal pastel rainbow wave - warm physical board feel
+                        int z = number - 1;
+                        int r = z / 10;
+                        int c = z % 10;
+                        int waveIndex = (r + c) % PastelRainbowColors.Length;
+                        bg.color = PastelRainbowColors[waveIndex];
+                    }
                     iconText.text = "";
                     break;
             }
@@ -321,20 +404,41 @@ namespace Board
             Color rungColor;
 
             // Choose beautiful dynamic rail/rung colors based on severity
-            if (severity == 0) // Light / Short
+            if (Theme != null)
             {
-                railColor = new Color(0.25f, 0.72f, 0.35f, 0.95f); // Soft Vibrant Green
-                rungColor = new Color(0.15f, 0.58f, 0.22f, 0.95f);
+                if (severity == 0)
+                {
+                    railColor = Theme.successGreen;
+                    rungColor = Theme.deepGrass;
+                }
+                else if (severity == 1)
+                {
+                    railColor = Theme.skyBlue;
+                    rungColor = Theme.deepBlue;
+                }
+                else
+                {
+                    railColor = Theme.dangerRed;
+                    rungColor = Theme.darkWood;
+                }
             }
-            else if (severity == 1) // Medium
+            else
             {
-                railColor = new Color(0.2f, 0.5f, 0.9f, 0.95f); // Soft Vibrant Blue
-                rungColor = new Color(0.12f, 0.35f, 0.75f, 0.95f);
-            }
-            else // Severe / Long
-            {
-                railColor = new Color(0.92f, 0.32f, 0.25f, 0.95f); // Soft Vibrant Coral Red
-                rungColor = new Color(0.78f, 0.2f, 0.15f, 0.95f);
+                if (severity == 0) // Light / Short
+                {
+                    railColor = new Color(0.25f, 0.72f, 0.35f, 0.95f); // Soft Vibrant Green
+                    rungColor = new Color(0.15f, 0.58f, 0.22f, 0.95f);
+                }
+                else if (severity == 1) // Medium
+                {
+                    railColor = new Color(0.2f, 0.5f, 0.9f, 0.95f); // Soft Vibrant Blue
+                    rungColor = new Color(0.12f, 0.35f, 0.75f, 0.95f);
+                }
+                else // Severe / Long
+                {
+                    railColor = new Color(0.92f, 0.32f, 0.25f, 0.95f); // Soft Vibrant Coral Red
+                    rungColor = new Color(0.78f, 0.2f, 0.15f, 0.95f);
+                }
             }
 
             // Left rail
@@ -352,7 +456,7 @@ namespace Board
             }
 
             // Arrow indicator at top
-            CreateArrow(end, dir, new Color(1f, 0.95f, 0.35f, 0.95f));
+            CreateArrow(end, dir, Theme != null ? Theme.creamText : new Color(1f, 0.95f, 0.35f, 0.95f));
         }
 
         private void DrawSnake(Vector2 start, Vector2 end, int severity)
@@ -366,18 +470,42 @@ namespace Board
             Vector2 prevPt = start;
 
             // Choose beautiful primary/secondary colors based on severity
-            Color primaryColor = new Color(0.08f, 0.55f, 0.15f, 0.95f); // Vibrant Green
-            Color secondaryColor = new Color(0.18f, 0.78f, 0.22f, 0.95f);
+            Color primaryColor;
+            Color secondaryColor;
 
-            if (severity == 1) // Medium
+            if (Theme != null)
             {
-                primaryColor = new Color(0.12f, 0.45f, 0.75f, 0.95f); // Vibrant Blue
-                secondaryColor = new Color(0.25f, 0.7f, 0.95f, 0.95f);
+                if (severity == 0)
+                {
+                    primaryColor = Theme.successGreen;
+                    secondaryColor = Theme.deepGrass;
+                }
+                else if (severity == 1)
+                {
+                    primaryColor = Theme.skyBlue;
+                    secondaryColor = Theme.deepBlue;
+                }
+                else
+                {
+                    primaryColor = Theme.dangerRed;
+                    secondaryColor = Theme.warningOrange;
+                }
             }
-            else if (severity >= 2) // Long
+            else
             {
-                primaryColor = new Color(0.8f, 0.12f, 0.12f, 0.95f); // Vibrant Crimson
-                secondaryColor = new Color(0.95f, 0.65f, 0.15f, 0.95f);
+                primaryColor = new Color(0.08f, 0.55f, 0.15f, 0.95f); // Vibrant Green
+                secondaryColor = new Color(0.18f, 0.78f, 0.22f, 0.95f);
+
+                if (severity == 1) // Medium
+                {
+                    primaryColor = new Color(0.12f, 0.45f, 0.75f, 0.95f); // Vibrant Blue
+                    secondaryColor = new Color(0.25f, 0.7f, 0.95f, 0.95f);
+                }
+                else if (severity >= 2) // Long
+                {
+                    primaryColor = new Color(0.8f, 0.12f, 0.12f, 0.95f); // Vibrant Crimson
+                    secondaryColor = new Color(0.95f, 0.65f, 0.15f, 0.95f);
+                }
             }
 
             for (int i = 1; i <= segments; i++)

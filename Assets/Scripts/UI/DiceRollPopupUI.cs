@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Player;
+using Dice;
 
 namespace UI
 {
@@ -61,6 +62,37 @@ namespace UI
             {
                 root.SetActive(false); // Hide at start
             }
+            ConfigureLayout();
+        }
+
+        private void ConfigureLayout()
+        {
+            if (cardTransform != null)
+            {
+                // Align to bottom-center, exactly above the dice gauge
+                cardTransform.anchorMin = new Vector2(0.5f, 0f);
+                cardTransform.anchorMax = new Vector2(0.5f, 0f);
+                cardTransform.pivot = new Vector2(0.5f, 0f);
+                cardTransform.anchoredPosition = new Vector2(0f, 85f);
+                cardTransform.sizeDelta = new Vector2(300f, 160f);
+            }
+        }
+
+        private void SetVisualsActive(bool active)
+        {
+            if (cardBackground != null) cardBackground.enabled = active;
+            if (accentBorder != null && accentBorder != cardBackground) accentBorder.enabled = active;
+            
+            var outline = cardBackground != null ? cardBackground.GetComponent<Outline>() : null;
+            if (outline != null) outline.enabled = active;
+
+            if (playerNameText != null) playerNameText.gameObject.SetActive(active);
+            if (mainText != null) mainText.gameObject.SetActive(active);
+            if (diceNumberText != null) diceNumberText.gameObject.SetActive(active);
+            if (timingText != null) timingText.gameObject.SetActive(active);
+            if (chargeText != null) chargeText.gameObject.SetActive(active);
+            if (loadingIndicator != null) loadingIndicator.SetActive(active && loadingIndicator.activeSelf);
+            if (diceIcon != null) diceIcon.gameObject.SetActive(active);
         }
 
         public IEnumerator ShowBotRollingIndicator(PlayerData bot)
@@ -75,11 +107,13 @@ namespace UI
 
             SetupBase(bot);
 
+            #if !(UNITY_WEBGL && !UNITY_EDITOR)
             if (mainText != null) mainText.text = $"{bot.playerName} sedang melempar dadu...";
             if (diceNumberText != null) diceNumberText.gameObject.SetActive(false);
             if (timingText != null) timingText.gameObject.SetActive(false);
             if (chargeText != null) chargeText.gameObject.SetActive(false);
             if (loadingIndicator != null) loadingIndicator.SetActive(true);
+            #endif
 
             yield return AnimateIn();
 
@@ -104,6 +138,7 @@ namespace UI
 
             SetupBase(player);
 
+            #if !(UNITY_WEBGL && !UNITY_EDITOR)
             if (mainText != null) mainText.text = $"{player.playerName} mendapatkan";
             
             if (diceNumberText != null)
@@ -142,6 +177,7 @@ namespace UI
             }
 
             if (loadingIndicator != null) loadingIndicator.SetActive(false);
+            #endif
 
             yield return AnimateIn();
 
@@ -154,6 +190,11 @@ namespace UI
             Debug.Log($"Dice result popup finished for {player.playerName}");
         }
 
+        public IEnumerator ShowDiceResult(PlayerData player, DiceResult result)
+        {
+            yield return ShowDiceResult(player, result.value, result.timingQuality, result.chargePercent);
+        }
+
         public IEnumerator ShowDiceResult(PlayerData player, int diceValue)
         {
             yield return ShowDiceResult(player, diceValue, "", 0f);
@@ -162,6 +203,7 @@ namespace UI
         public void ForceHide()
         {
             if (root != null) root.SetActive(false);
+            if (canvasGroup != null) canvasGroup.alpha = 0f;
             if (GameplayUI.Instance != null)
             {
                 GameplayUI.Instance.ClearDiceResult();
@@ -172,23 +214,55 @@ namespace UI
         {
             if (root != null) root.SetActive(true);
 
-            Color background = GetDicePopupBackground(player.playerColor);
-            Color accent = GetDicePopupAccent(player.playerColor);
-            Color textColor = GetReadableTextColor(background);
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            SetVisualsActive(false);
+            #else
+            SetVisualsActive(true);
 
-            if (cardBackground != null) cardBackground.color = background;
-            if (accentBorder != null) accentBorder.color = accent;
+            // Dark card / black navy style:
+            Color bgCol = new Color(0.08f, 0.09f, 0.16f); // Slate-900 / dark navy (#141729 or #0d0f1a)
+            Color borderCol = player.playerColor;
+
+            if (cardBackground != null)
+            {
+                cardBackground.color = bgCol;
+                
+                var outline = cardBackground.GetComponent<Outline>();
+                if (outline == null) outline = cardBackground.gameObject.AddComponent<Outline>();
+                outline.effectColor = borderCol;
+                outline.effectDistance = new Vector2(4f, 4f);
+                outline.enabled = true;
+            }
 
             if (playerNameText != null)
             {
                 playerNameText.text = player.playerName;
-                playerNameText.color = player.playerColor; // Vibrant signature player name
+                playerNameText.color = borderCol; // Signature color
             }
 
-            if (mainText != null) mainText.color = textColor;
-            if (diceNumberText != null) diceNumberText.color = Color.white; // Keep white or gold for high visibility
-            if (timingText != null && !timingText.text.Contains("Perfect") && !timingText.text.Contains("Good")) timingText.color = textColor;
-            if (chargeText != null) chargeText.color = new Color(textColor.r * 0.85f, textColor.g * 0.85f, textColor.b * 0.85f, 1f);
+            if (mainText != null)
+            {
+                mainText.color = Color.white;
+            }
+
+            if (diceNumberText != null)
+            {
+                diceNumberText.color = Color.yellow;
+            }
+
+            if (timingText != null)
+            {
+                // we keep colors for Perfect (Gold), Good (Green), Normal (White)
+                if (timingText.text.Contains("Perfect")) timingText.color = new Color(1f, 0.85f, 0.15f);
+                else if (timingText.text.Contains("Good")) timingText.color = new Color(0.2f, 0.95f, 0.4f);
+                else timingText.color = Color.white;
+            }
+
+            if (chargeText != null)
+            {
+                chargeText.color = new Color(0.7f, 0.75f, 0.85f);
+            }
+            #endif
         }
 
         private IEnumerator AnimateIn()

@@ -47,21 +47,33 @@ namespace UI
 
         private void ApplyPlayerColor(Color color, bool isActive)
         {
+            Color baseColor = color;
+            var theme = Resources.Load<GameVisualTheme>("GameVisualTheme");
+            if (playerData != null && theme != null)
+            {
+                baseColor = theme.GetPlayerColor(playerData.id, isActive);
+            }
+            else if (isActive)
+            {
+                baseColor = GetActiveCardColor(color);
+            }
+            else
+            {
+                baseColor = GetInactiveCardColor(color);
+            }
+
             if (imageAvatarBackground != null)
             {
                 imageAvatarBackground.material = null; // Remove any material override
-                if (isActive)
-                {
-                    imageAvatarBackground.color = GetActiveCardColor(color);
-                }
-                else
-                {
-                    imageAvatarBackground.color = GetInactiveCardColor(color);
-                }
+                imageAvatarBackground.color = baseColor;
             }
 
             // Ensure text color is highly readable against the card background color
-            Color txtColor = GetReadableTextColor(imageAvatarBackground != null ? imageAvatarBackground.color : color);
+            Color txtColor = Color.white;
+            if (theme != null)
+            {
+                txtColor = isActive ? theme.creamText : new Color(theme.creamText.r * 0.7f, theme.creamText.g * 0.7f, theme.creamText.b * 0.7f, 0.9f);
+            }
             if (labelName != null) labelName.color = txtColor;
             if (labelTile != null) labelTile.color = txtColor;
             if (labelEvolution != null) labelEvolution.color = txtColor;
@@ -91,6 +103,8 @@ namespace UI
         {
             if (data == null) return;
             this.playerData = data;
+
+            var theme = Resources.Load<GameVisualTheme>("GameVisualTheme");
 
             // Name & Bot Tag
             string botTag = data.isBot ? " (Bot)" : " (Human)";
@@ -160,7 +174,7 @@ namespace UI
                     imageHighlightBorder.gameObject.SetActive(isCurrentlyActive);
                     if (isCurrentlyActive)
                     {
-                        imageHighlightBorder.color = Color.white;
+                        imageHighlightBorder.color = theme != null ? theme.creamText : Color.white;
                     }
                 }
             }
@@ -171,13 +185,13 @@ namespace UI
                 if (cardOutline != null)
                 {
                     cardOutline.enabled = isCurrentlyActive;
-                    cardOutline.effectColor = Color.white;
+                    cardOutline.effectColor = theme != null ? theme.creamText : Color.white;
                 }
             }
 
-            // Apply card scale (1.03x) when active
+            // Apply card scale (1.05x) when active
             transform.localScale = isCurrentlyActive 
-                ? Vector3.one * 1.03f 
+                ? Vector3.one * 1.05f 
                 : Vector3.one;
 
             // Status details

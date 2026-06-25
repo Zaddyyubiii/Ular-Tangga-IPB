@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using Player;
 using Turn;
 using Dice;
+using Board;
 
 namespace UI
 {
@@ -312,18 +313,10 @@ namespace UI
             }
             Transform mainCanvas = canvas != null ? canvas.transform : (statusCardGridContainer != null ? statusCardGridContainer.parent : null);
 
-            // 1. Center and Scale the Board Panel slightly to fit the HUD perfectly
-            if (Core.GameManager.Instance != null && Core.GameManager.Instance.boardContainer != null)
+            // 1. Center and Scale the Board Panel dynamically
+            if (BoardManager.Instance != null)
             {
-                RectTransform boardRt = Core.GameManager.Instance.boardContainer.GetComponent<RectTransform>();
-                if (boardRt != null)
-                {
-                    boardRt.anchorMin = new Vector2(0.5f, 0.5f);
-                    boardRt.anchorMax = new Vector2(0.5f, 0.5f);
-                    boardRt.pivot = new Vector2(0.5f, 0.5f);
-                    boardRt.anchoredPosition = new Vector2(0f, 32f); // Centered and slightly raised
-                    boardRt.localScale = new Vector3(0.83f, 0.83f, 1f); // Scaled down slightly to fit HUD elegantly
-                }
+                BoardManager.Instance.ResizeBoard();
             }
 
             // 2. Set Background color to the original beautiful dark blue-grey

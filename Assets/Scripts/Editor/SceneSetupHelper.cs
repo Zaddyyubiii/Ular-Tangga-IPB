@@ -61,17 +61,24 @@ namespace UlarTangga.EditorSetup
                 AssetDatabase.CreateAsset(quizBank, "Assets/ScriptableObjects/QuizBank.asset");
             }
 
+            GameVisualTheme visualTheme = AssetDatabase.LoadAssetAtPath<GameVisualTheme>("Assets/Resources/GameVisualTheme.asset");
+            if (visualTheme == null)
+            {
+                visualTheme = ScriptableObject.CreateInstance<GameVisualTheme>();
+                AssetDatabase.CreateAsset(visualTheme, "Assets/Resources/GameVisualTheme.asset");
+            }
+
             AssetDatabase.SaveAssets();
             CreatePlaceholderPrefabs();
 
             // 2. Build MainMenuScene
             UnityEngine.SceneManagement.Scene mainMenuScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-            SetupMainMenuObjects(boardConfig, messageBank, quizBank);
+            SetupMainMenuObjects(boardConfig, messageBank, quizBank, visualTheme);
             EditorSceneManager.SaveScene(mainMenuScene, "Assets/Scenes/MainMenuScene.unity");
 
             // 3. Build GameScene
             UnityEngine.SceneManagement.Scene gameScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-            SetupGameSceneObjects(boardConfig, messageBank, quizBank);
+            SetupGameSceneObjects(boardConfig, messageBank, quizBank, visualTheme);
             EditorSceneManager.SaveScene(gameScene, "Assets/Scenes/GameScene.unity");
 
             // 4. Configure Build Settings
@@ -111,6 +118,7 @@ namespace UlarTangga.EditorSetup
             EnsureFolder("Assets/Art/UI");
             EnsureFolder("Assets/Audio/BGM");
             EnsureFolder("Assets/Audio/SFX");
+            EnsureFolder("Assets/Resources");
         }
 
         private static void EnsureFolder(string path)
@@ -256,7 +264,7 @@ namespace UlarTangga.EditorSetup
             return text;
         }
 
-        private static void SetupMainMenuObjects(BoardConfig board, MessageBank msg, QuizBank quiz)
+        private static void SetupMainMenuObjects(BoardConfig board, MessageBank msg, QuizBank quiz, GameVisualTheme visualTheme)
         {
             // Setup Canvas
             GameObject canvasGo = new GameObject("CanvasMainMenu");
@@ -279,54 +287,65 @@ namespace UlarTangga.EditorSetup
             persistentGo.AddComponent<AudioManager>();
             persistentGo.AddComponent<SceneLoader>();
 
-            // ---- BACKGROUND: Dark green gradient-like ----
+            // ---- BACKGROUND: Cozy Deep Grass ----
             GameObject bgGo = new GameObject("Background", typeof(RectTransform));
             bgGo.transform.SetParent(canvasGo.transform, false);
             Image bgImg = bgGo.AddComponent<Image>();
-            bgImg.color = new Color(0.05f, 0.12f, 0.08f); // deep forest green
+            bgImg.color = visualTheme.deepGrass;
             bgImg.raycastTarget = false;
             StretchRect(bgGo.GetComponent<RectTransform>());
 
-            // Decorative side panels (left and right accent)
+            // Decorative side panels (left and right grass accents)
             GameObject leftAccent = new GameObject("LeftAccent", typeof(RectTransform));
             leftAccent.transform.SetParent(canvasGo.transform, false);
             Image leftImg = leftAccent.AddComponent<Image>();
-            leftImg.color = new Color(0.08f, 0.25f, 0.14f, 0.6f);
+            leftImg.color = visualTheme.grassGreen;
             leftImg.raycastTarget = false;
             RectTransform leftRect = leftAccent.GetComponent<RectTransform>();
             leftRect.anchorMin = new Vector2(0f, 0f);
             leftRect.anchorMax = new Vector2(0.22f, 1f);
             leftRect.offsetMin = Vector2.zero;
             leftRect.offsetMax = Vector2.zero;
+            var leftOutline = leftAccent.AddComponent<Outline>();
+            leftOutline.effectColor = visualTheme.darkWood;
+            leftOutline.effectDistance = new Vector2(2f, 0f);
 
             GameObject rightAccent = new GameObject("RightAccent", typeof(RectTransform));
             rightAccent.transform.SetParent(canvasGo.transform, false);
             Image rightImg = rightAccent.AddComponent<Image>();
-            rightImg.color = new Color(0.08f, 0.25f, 0.14f, 0.6f);
+            rightImg.color = visualTheme.grassGreen;
             rightImg.raycastTarget = false;
             RectTransform rightRect = rightAccent.GetComponent<RectTransform>();
             rightRect.anchorMin = new Vector2(0.78f, 0f);
             rightRect.anchorMax = new Vector2(1f, 1f);
             rightRect.offsetMin = Vector2.zero;
             rightRect.offsetMax = Vector2.zero;
+            var rightOutline = rightAccent.AddComponent<Outline>();
+            rightOutline.effectColor = visualTheme.darkWood;
+            rightOutline.effectDistance = new Vector2(-2f, 0f);
 
-            // Center card panel
+            // Center card panel: Cozy Parchment Card
             GameObject cardGo = new GameObject("CenterCard", typeof(RectTransform));
             cardGo.transform.SetParent(canvasGo.transform, false);
             Image cardImg = cardGo.AddComponent<Image>();
-            cardImg.color = new Color(0.08f, 0.16f, 0.11f, 0.92f);
+            cardImg.color = visualTheme.parchment;
             cardImg.raycastTarget = false;
             RectTransform cardRect = cardGo.GetComponent<RectTransform>();
             cardRect.anchorMin = new Vector2(0.5f, 0.5f);
             cardRect.anchorMax = new Vector2(0.5f, 0.5f);
             cardRect.sizeDelta = new Vector2(520f, 560f);
             cardRect.anchoredPosition = Vector2.zero;
+            
+            // Wooden frame border for CenterCard
+            var cardOutline = cardGo.AddComponent<Outline>();
+            cardOutline.effectColor = visualTheme.darkWood;
+            cardOutline.effectDistance = new Vector2(4f, 4f);
 
-            // Top accent line on card
+            // Top accent line on card (dark wood)
             GameObject cardTopLine = new GameObject("CardTopLine", typeof(RectTransform));
             cardTopLine.transform.SetParent(cardGo.transform, false);
             Image lineImg = cardTopLine.AddComponent<Image>();
-            lineImg.color = new Color(0.15f, 0.75f, 0.35f);
+            lineImg.color = visualTheme.darkWood;
             lineImg.raycastTarget = false;
             RectTransform lineRect = cardTopLine.GetComponent<RectTransform>();
             lineRect.anchorMin = new Vector2(0f, 1f);
@@ -343,7 +362,7 @@ namespace UlarTangga.EditorSetup
             badgeText.alignment = TMPro.TextAlignmentOptions.Center;
             badgeText.fontSize = 11f;
             badgeText.fontStyle = TMPro.FontStyles.Bold;
-            badgeText.color = new Color(0.15f, 0.75f, 0.35f);
+            badgeText.color = visualTheme.darkText;
             badgeText.raycastTarget = false;
             badgeText.characterSpacing = 4f;
             RectTransform badgeRect = badgeGo.GetComponent<RectTransform>();
@@ -356,20 +375,31 @@ namespace UlarTangga.EditorSetup
             // Dice decoration row
             CreateDiceDecoration(cardGo.transform, new Vector2(0f, 150f));
 
+            // Title board (wooden panel)
+            GameObject titleBoardGo = new GameObject("TitleBoard", typeof(RectTransform));
+            titleBoardGo.transform.SetParent(cardGo.transform, false);
+            Image titleBoardImg = titleBoardGo.AddComponent<Image>();
+            titleBoardImg.color = visualTheme.woodBrown;
+            var titleBoardOutline = titleBoardGo.AddComponent<Outline>();
+            titleBoardOutline.effectColor = visualTheme.darkWood;
+            titleBoardOutline.effectDistance = new Vector2(3f, 3f);
+            PositionRect(titleBoardGo.GetComponent<RectTransform>(), new Vector2(0f, 60f), new Vector2(460f, 100f));
+
             // Title text
             GameObject titleGo = new GameObject("Title", typeof(RectTransform));
-            titleGo.transform.SetParent(cardGo.transform, false);
+            titleGo.transform.SetParent(titleBoardGo.transform, false);
             var titleText = titleGo.AddComponent<TMPro.TextMeshProUGUI>();
             titleText.text = "ULAR TANGGA\nTATA TERTIB";
             titleText.alignment = TMPro.TextAlignmentOptions.Center;
-            titleText.fontSize = 36f;
+            titleText.fontSize = 32f;
             titleText.fontStyle = TMPro.FontStyles.Bold;
-            titleText.color = Color.white;
+            titleText.color = visualTheme.creamText;
             titleText.raycastTarget = false;
-            PositionRect(titleGo.GetComponent<RectTransform>(), new Vector2(0f, 60f), new Vector2(460f, 100f));
+            StretchRect(titleGo.GetComponent<RectTransform>());
             
             // Start Button
-            GameObject btnStartGo = CreateStyledButton(cardGo.transform, "ButtonStart", "MULAI BERMAIN", new Vector2(0f, -40f), new Vector2(240f, 48f), new Color(0.12f, 0.73f, 0.35f));
+            GameObject btnStartGo = CreateStyledButton(cardGo.transform, "ButtonStart", "MULAI BERMAIN", new Vector2(0f, -40f), new Vector2(240f, 48f), visualTheme.woodBrown);
+            visualTheme.StyleButtonAsWood(btnStartGo.GetComponent<Button>(), btnStartGo.GetComponentInChildren<TMPro.TextMeshProUGUI>());
 
             // Player Select Row
             GameObject selectRow = new GameObject("PlayerSelectRow", typeof(RectTransform));
@@ -377,24 +407,36 @@ namespace UlarTangga.EditorSetup
             PositionRect(selectRow.GetComponent<RectTransform>(), new Vector2(0f, -110f), new Vector2(300f, 44f));
 
             GameObject btnDecGo = CreateStandardButton(selectRow.transform, "BtnDecrease", "<", new Vector2(-110f, 0f), new Vector2(40f, 40f));
+            visualTheme.StyleButtonAsWood(btnDecGo.GetComponent<Button>(), btnDecGo.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+            
             GameObject btnIncGo = CreateStandardButton(selectRow.transform, "BtnIncrease", ">", new Vector2(110f, 0f), new Vector2(40f, 40f));
+            visualTheme.StyleButtonAsWood(btnIncGo.GetComponent<Button>(), btnIncGo.GetComponentInChildren<TMPro.TextMeshProUGUI>());
 
             GameObject playerLabelGo = new GameObject("PlayerLabel");
             playerLabelGo.transform.SetParent(selectRow.transform, false);
             var playerLabel = playerLabelGo.AddComponent<TMPro.TextMeshProUGUI>();
             playerLabel.text = "Player: 4";
             playerLabel.fontSize = 24f;
+            playerLabel.fontStyle = TMPro.FontStyles.Bold;
+            playerLabel.color = visualTheme.darkText;
             playerLabel.alignment = TMPro.TextAlignmentOptions.Center;
             playerLabel.raycastTarget = false;
             playerLabel.enableWordWrapping = false;
             PositionRect(playerLabelGo.GetComponent<RectTransform>(), Vector2.zero, new Vector2(160f, 40f));
 
             // Quit Button
-            GameObject btnQuitGo = CreateStyledButton(cardGo.transform, "ButtonQuit", "KELUAR GAME", new Vector2(0f, -180f), new Vector2(240f, 48f), new Color(0.75f, 0.2f, 0.15f));
+            GameObject btnQuitGo = CreateStyledButton(cardGo.transform, "ButtonQuit", "KELUAR GAME", new Vector2(0f, -180f), new Vector2(240f, 48f), visualTheme.dangerRed);
+            visualTheme.StyleButtonAsWood(btnQuitGo.GetComponent<Button>(), btnQuitGo.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+            var cbQuit = btnQuitGo.GetComponent<Button>().colors;
+            cbQuit.normalColor = visualTheme.dangerRed;
+            cbQuit.highlightedColor = visualTheme.dangerRed * 1.2f;
+            cbQuit.pressedColor = visualTheme.dangerRed * 0.8f;
+            btnQuitGo.GetComponent<Button>().colors = cbQuit;
 
             // Hook MainMenuUI
             GameObject mmUiGo = new GameObject("MainMenuUI");
             MainMenuUI mmUi = mmUiGo.AddComponent<MainMenuUI>();
+            mmUi.theme = visualTheme;
             mmUi.btnStartGame = btnStartGo.GetComponent<Button>();
             mmUi.btnQuitGame = btnQuitGo.GetComponent<Button>();
             mmUi.btnDecreasePlayers = btnDecGo.GetComponent<Button>();
@@ -402,7 +444,7 @@ namespace UlarTangga.EditorSetup
             mmUi.labelPlayerCount = playerLabel;
         }
 
-        private static void SetupGameSceneObjects(BoardConfig board, MessageBank msg, QuizBank quiz)
+        private static void SetupGameSceneObjects(BoardConfig board, MessageBank msg, QuizBank quiz, GameVisualTheme visualTheme)
         {
             // Setup Canvas
             GameObject canvasGo = new GameObject("CanvasGameplay");
@@ -410,7 +452,7 @@ namespace UlarTangga.EditorSetup
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             CanvasScaler gpScaler = canvasGo.AddComponent<CanvasScaler>();
             gpScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            gpScaler.referenceResolution = new Vector2(1280f, 720f);
+            gpScaler.referenceResolution = new Vector2(1920f, 1080f);
             gpScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             gpScaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
@@ -420,11 +462,11 @@ namespace UlarTangga.EditorSetup
             eventSystemGo.AddComponent<UnityEngine.EventSystems.EventSystem>();
             eventSystemGo.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
 
-            // Main Background
+            // Main Background: Nature green grass
             GameObject bgGo = new GameObject("Background", typeof(RectTransform));
             bgGo.transform.SetParent(canvasGo.transform, false);
             Image bgImg = bgGo.AddComponent<Image>();
-            bgImg.color = new Color(0.13f, 0.13f, 0.18f);
+            bgImg.color = visualTheme.deepGrass;
             StretchRect(bgGo.GetComponent<RectTransform>());
 
             // ---- LEFT SIDE: Board Panel (anchor-stretched to fill left area) ----
@@ -432,7 +474,11 @@ namespace UlarTangga.EditorSetup
             GameObject boardGo = new GameObject("BoardPanel", typeof(RectTransform));
             boardGo.transform.SetParent(canvasGo.transform, false);
             Image boardImg = boardGo.AddComponent<Image>();
-            boardImg.color = new Color(0.22f, 0.22f, 0.28f);
+            boardImg.color = visualTheme.darkWood;
+            var boardOutline = boardGo.AddComponent<Outline>();
+            boardOutline.effectColor = visualTheme.woodBrown;
+            boardOutline.effectDistance = new Vector2(4f, 4f);
+
             RectTransform boardRect = boardGo.GetComponent<RectTransform>();
             boardRect.anchorMin = new Vector2(0f, 0f);
             boardRect.anchorMax = new Vector2(1f, 1f);
@@ -440,11 +486,15 @@ namespace UlarTangga.EditorSetup
             boardRect.offsetMin = new Vector2(8f, 8f);   // 8px from left & bottom
             boardRect.offsetMax = new Vector2(-282f, -8f); // 282px from right (sidebar 270+12 gap)
 
-            // ---- RIGHT SIDE: Sidebar Panel ----
+            // ---- RIGHT SIDE: Sidebar Panel (Wooden style) ----
             GameObject sidebarGo = new GameObject("SidebarPanel", typeof(RectTransform));
             sidebarGo.transform.SetParent(canvasGo.transform, false);
             Image sidebarImg = sidebarGo.AddComponent<Image>();
-            sidebarImg.color = new Color(0.15f, 0.15f, 0.20f, 0.95f);
+            sidebarImg.color = visualTheme.woodBrown;
+            var sidebarOutline = sidebarGo.AddComponent<Outline>();
+            sidebarOutline.effectColor = visualTheme.darkWood;
+            sidebarOutline.effectDistance = new Vector2(-4f, 0f);
+
             // Anchor to right side
             RectTransform sidebarRect = sidebarGo.GetComponent<RectTransform>();
             sidebarRect.anchorMin = new Vector2(1f, 0f);
@@ -474,7 +524,11 @@ namespace UlarTangga.EditorSetup
             GameObject turnHudGo = new GameObject("TurnHUD", typeof(RectTransform));
             turnHudGo.transform.SetParent(sidebarGo.transform, false);
             Image turnHudImg = turnHudGo.AddComponent<Image>();
-            turnHudImg.color = new Color(0.10f, 0.10f, 0.14f, 0.95f);
+            turnHudImg.color = visualTheme.parchment;
+            var turnHudOutline = turnHudGo.AddComponent<Outline>();
+            turnHudOutline.effectColor = visualTheme.darkWood;
+            turnHudOutline.effectDistance = new Vector2(2f, 2f);
+
             RectTransform turnHudRect = turnHudGo.GetComponent<RectTransform>();
             turnHudRect.anchorMin = new Vector2(0f, 0.27f);
             turnHudRect.anchorMax = new Vector2(1f, 0.44f);
@@ -488,7 +542,7 @@ namespace UlarTangga.EditorSetup
             hudTitleTxt.alignment = TMPro.TextAlignmentOptions.Center;
             hudTitleTxt.fontSize = 11f;
             hudTitleTxt.fontStyle = TMPro.FontStyles.Bold;
-            hudTitleTxt.color = new Color(0.8f, 0.8f, 0.8f);
+            hudTitleTxt.color = visualTheme.darkText;
             RectTransform hudTitleRect = hudTitle.GetComponent<RectTransform>();
             hudTitleRect.anchorMin = new Vector2(0f, 0.65f);
             hudTitleRect.anchorMax = new Vector2(1f, 1f);
@@ -502,7 +556,7 @@ namespace UlarTangga.EditorSetup
             hudNameTxt.alignment = TMPro.TextAlignmentOptions.Center;
             hudNameTxt.fontSize = 15f;
             hudNameTxt.fontStyle = TMPro.FontStyles.Bold;
-            hudNameTxt.color = Color.green;
+            hudNameTxt.color = visualTheme.successGreen;
             RectTransform hudNameRect = hudName.GetComponent<RectTransform>();
             hudNameRect.anchorMin = new Vector2(0f, 0.3f);
             hudNameRect.anchorMax = new Vector2(1f, 0.65f);
@@ -515,7 +569,7 @@ namespace UlarTangga.EditorSetup
             hudTimerTxt.text = "Sisa Waktu: 10s";
             hudTimerTxt.alignment = TMPro.TextAlignmentOptions.Center;
             hudTimerTxt.fontSize = 12f;
-            hudTimerTxt.color = Color.white;
+            hudTimerTxt.color = visualTheme.darkText;
             RectTransform hudTimerRect = hudTimer.GetComponent<RectTransform>();
             hudTimerRect.anchorMin = new Vector2(0f, 0f);
             hudTimerRect.anchorMax = new Vector2(1f, 0.3f);
@@ -526,7 +580,11 @@ namespace UlarTangga.EditorSetup
             GameObject gaugePanelGo = new GameObject("DiceGaugePanel", typeof(RectTransform));
             gaugePanelGo.transform.SetParent(sidebarGo.transform, false);
             Image gaugeImg = gaugePanelGo.AddComponent<Image>();
-            gaugeImg.color = new Color(0.10f, 0.10f, 0.14f, 0.95f);
+            gaugeImg.color = visualTheme.parchment;
+            var gaugeOutline = gaugePanelGo.AddComponent<Outline>();
+            gaugeOutline.effectColor = visualTheme.darkWood;
+            gaugeOutline.effectDistance = new Vector2(2f, 2f);
+
             RectTransform gaugeRect = gaugePanelGo.GetComponent<RectTransform>();
             gaugeRect.anchorMin = new Vector2(0f, 0f);
             gaugeRect.anchorMax = new Vector2(1f, 0.26f);
@@ -542,7 +600,7 @@ namespace UlarTangga.EditorSetup
             gaugeTitle.alignment = TMPro.TextAlignmentOptions.Center;
             gaugeTitle.fontSize = 11f;
             gaugeTitle.fontStyle = TMPro.FontStyles.Bold;
-            gaugeTitle.color = new Color(0.8f, 0.8f, 0.8f);
+            gaugeTitle.color = visualTheme.darkText;
             RectTransform gaugeTitleRect = gaugeTitleGo.GetComponent<RectTransform>();
             gaugeTitleRect.anchorMin = new Vector2(0f, 0.78f);
             gaugeTitleRect.anchorMax = new Vector2(1f, 1f);
@@ -561,7 +619,7 @@ namespace UlarTangga.EditorSetup
 
             GameObject sliderBg = new GameObject("Bg", typeof(RectTransform));
             sliderBg.transform.SetParent(sliderGo.transform, false);
-            sliderBg.AddComponent<Image>().color = new Color(0.3f, 0.3f, 0.35f);
+            sliderBg.AddComponent<Image>().color = visualTheme.parchmentDark;
             StretchRect(sliderBg.GetComponent<RectTransform>());
 
             GameObject sliderFillArea = new GameObject("Fill Area", typeof(RectTransform));
@@ -571,7 +629,7 @@ namespace UlarTangga.EditorSetup
             GameObject sliderFill = new GameObject("Fill", typeof(RectTransform));
             sliderFill.transform.SetParent(sliderFillArea.transform, false);
             var fillImg = sliderFill.AddComponent<Image>();
-            fillImg.color = new Color(0.95f, 0.35f, 0.15f);
+            fillImg.color = visualTheme.warningOrange;
             StretchRect(sliderFill.GetComponent<RectTransform>());
 
             slider.fillRect = sliderFill.GetComponent<RectTransform>();
@@ -584,7 +642,8 @@ namespace UlarTangga.EditorSetup
             labelRng.text = "Dadu: 2 - 12";
             labelRng.alignment = TMPro.TextAlignmentOptions.Center;
             labelRng.fontSize = 9f;
-            labelRng.color = Color.cyan;
+            labelRng.fontStyle = TMPro.FontStyles.Bold;
+            labelRng.color = visualTheme.darkWood;
             RectTransform labelRngRect = labelRngGo.GetComponent<RectTransform>();
             labelRngRect.anchorMin = new Vector2(0f, 0.42f);
             labelRngRect.anchorMax = new Vector2(1f, 0.57f);
@@ -598,7 +657,7 @@ namespace UlarTangga.EditorSetup
             labelSt.text = "Siap";
             labelSt.alignment = TMPro.TextAlignmentOptions.Center;
             labelSt.fontSize = 9f;
-            labelSt.color = Color.white;
+            labelSt.color = visualTheme.darkText;
             RectTransform labelStRect = labelStGo.GetComponent<RectTransform>();
             labelStRect.anchorMin = new Vector2(0f, 0.27f);
             labelStRect.anchorMax = new Vector2(0.55f, 0.41f);
@@ -613,7 +672,7 @@ namespace UlarTangga.EditorSetup
             labelRes.alignment = TMPro.TextAlignmentOptions.Center;
             labelRes.fontSize = 22f;
             labelRes.fontStyle = TMPro.FontStyles.Bold;
-            labelRes.color = Color.yellow;
+            labelRes.color = visualTheme.darkWood;
             RectTransform labelResRect = labelResGo.GetComponent<RectTransform>();
             labelResRect.anchorMin = new Vector2(0f, 0f);
             labelResRect.anchorMax = new Vector2(0.42f, 0.26f);
@@ -624,7 +683,7 @@ namespace UlarTangga.EditorSetup
             GameObject rollBtnGo = new GameObject("BtnRoll");
             rollBtnGo.transform.SetParent(gaugePanelGo.transform, false);
             Image rollBtnImg = rollBtnGo.AddComponent<Image>();
-            rollBtnImg.color = new Color(0.9f, 0.3f, 0.15f);
+            rollBtnImg.color = visualTheme.woodBrown;
             Button rollBtn = rollBtnGo.AddComponent<Button>();
             RectTransform rollBtnRect = rollBtnGo.GetComponent<RectTransform>();
             rollBtnRect.anchorMin = new Vector2(0.44f, 0f);
@@ -638,9 +697,10 @@ namespace UlarTangga.EditorSetup
             rollTxt.fontSize = 14f;
             rollTxt.fontStyle = TMPro.FontStyles.Bold;
             rollTxt.alignment = TMPro.TextAlignmentOptions.Center;
-            rollTxt.color = Color.white;
+            rollTxt.color = visualTheme.creamText;
             rollTxt.raycastTarget = false;
             StretchRect(rollTxtGo.GetComponent<RectTransform>());
+            visualTheme.StyleButtonAsWood(rollBtn, rollTxt);
 
             // Bottom Instruction Bar (below board panel)
             GameObject instructGo = new GameObject("InstructionHUD", typeof(RectTransform));
@@ -655,7 +715,7 @@ namespace UlarTangga.EditorSetup
             instructText.text = "Menunggu Giliran Mulai...";
             instructText.alignment = TMPro.TextAlignmentOptions.Center;
             instructText.fontSize = 12f;
-            instructText.color = Color.white;
+            instructText.color = visualTheme.creamText;
 
             // Setup Overlay Panels
             GameObject redFlashGo = new GameObject("RedFlashOverlay", typeof(RectTransform));
@@ -665,16 +725,16 @@ namespace UlarTangga.EditorSetup
             StretchRect(redFlashGo.GetComponent<RectTransform>());
 
             // Normal Popup Panel
-            GameObject normPopupGo = CreateCommonPopup(canvasGo.transform, "NormalPopupPanel");
+            GameObject normPopupGo = CreateCommonPopup(canvasGo.transform, "NormalPopupPanel", visualTheme);
             normPopupGo.SetActive(false);
             // Quiz Popup Panel
-            GameObject quizPopupGo = CreateQuizPopupPanel(canvasGo.transform);
+            GameObject quizPopupGo = CreateQuizPopupPanel(canvasGo.transform, visualTheme);
             quizPopupGo.SetActive(false);
             // Prologue Panel
-            GameObject prologueGo = CreateProloguePopupPanel(canvasGo.transform);
+            GameObject prologueGo = CreateProloguePopupPanel(canvasGo.transform, visualTheme);
             prologueGo.SetActive(false);
             // GameOver Panel
-            GameObject gameOverGo = CreateGameOverPopupPanel(canvasGo.transform);
+            GameObject gameOverGo = CreateGameOverPopupPanel(canvasGo.transform, visualTheme);
             gameOverGo.SetActive(false);
 
             // Programmatic Dice Roll Popup Card UI (never deactivated, overlayed beautifully on top of everything)
@@ -693,14 +753,14 @@ namespace UlarTangga.EditorSetup
             var cg = diceResPanelGo.AddComponent<CanvasGroup>();
             cg.alpha = 0f;
 
-            // Sleek glassmorphism background
+            // Cozy parchment background
             Image drImg = diceResPanelGo.AddComponent<Image>();
-            drImg.color = new Color(0.08f, 0.08f, 0.12f, 0.95f);
+            drImg.color = visualTheme.parchment;
             
-            // Accent outline border
+            // Accent outline border (dark wood)
             Outline drOutline = diceResPanelGo.AddComponent<Outline>();
-            drOutline.effectColor = new Color(1f, 1f, 1f, 0.25f);
-            drOutline.effectDistance = new Vector2(2f, 2f);
+            drOutline.effectColor = visualTheme.darkWood;
+            drOutline.effectDistance = new Vector2(3f, 3f);
 
             // 0. Player Name text (Sasya / Bot 3) - Anchored near top
             GameObject drPlayerGo = new GameObject("PlayerText", typeof(RectTransform));
@@ -710,6 +770,7 @@ namespace UlarTangga.EditorSetup
             drPlayer.alignment = TMPro.TextAlignmentOptions.Center;
             drPlayer.fontSize = 18f; // Beautiful and clear name
             drPlayer.fontStyle = TMPro.FontStyles.Bold;
+            drPlayer.color = visualTheme.darkText;
             RectTransform drPlayerRt = drPlayerGo.GetComponent<RectTransform>();
             drPlayerRt.anchorMin = new Vector2(0f, 0.8f);
             drPlayerRt.anchorMax = new Vector2(1f, 0.95f);
@@ -723,7 +784,7 @@ namespace UlarTangga.EditorSetup
             drText.text = "";
             drText.alignment = TMPro.TextAlignmentOptions.Center;
             drText.fontSize = 12f;
-            drText.color = Color.white;
+            drText.color = visualTheme.darkText;
             RectTransform drTextRt = drTextGo.GetComponent<RectTransform>();
             drTextRt.anchorMin = new Vector2(0f, 0.65f);
             drTextRt.anchorMax = new Vector2(1f, 0.8f);
@@ -738,7 +799,7 @@ namespace UlarTangga.EditorSetup
             drNum.alignment = TMPro.TextAlignmentOptions.Center;
             drNum.fontSize = 64f; // Extremely large dice value for maximum premium wow factor!
             drNum.fontStyle = TMPro.FontStyles.Bold;
-            drNum.color = Color.white;
+            drNum.color = visualTheme.darkWood;
             RectTransform drNumRt = drNumGo.GetComponent<RectTransform>();
             drNumRt.anchorMin = new Vector2(0f, 0.25f);
             drNumRt.anchorMax = new Vector2(1f, 0.65f);
@@ -752,7 +813,7 @@ namespace UlarTangga.EditorSetup
             drLoading.text = "🎲 ... 🎲";
             drLoading.alignment = TMPro.TextAlignmentOptions.Center;
             drLoading.fontSize = 24f;
-            drLoading.color = Color.cyan;
+            drLoading.color = visualTheme.darkWood;
             RectTransform drLoadingRt = drLoadingGo.GetComponent<RectTransform>();
             drLoadingRt.anchorMin = new Vector2(0f, 0.25f);
             drLoadingRt.anchorMax = new Vector2(1f, 0.65f);
@@ -768,7 +829,7 @@ namespace UlarTangga.EditorSetup
             drTime.alignment = TMPro.TextAlignmentOptions.Center;
             drTime.fontSize = 11f;
             drTime.fontStyle = TMPro.FontStyles.Bold;
-            drTime.color = Color.cyan;
+            drTime.color = visualTheme.darkWood;
             RectTransform drTimeRt = drTimeGo.GetComponent<RectTransform>();
             drTimeRt.anchorMin = new Vector2(0f, 0.12f);
             drTimeRt.anchorMax = new Vector2(1f, 0.25f);
@@ -782,7 +843,7 @@ namespace UlarTangga.EditorSetup
             drCharge.text = "";
             drCharge.alignment = TMPro.TextAlignmentOptions.Center;
             drCharge.fontSize = 10f;
-            drCharge.color = new Color(0.8f, 0.8f, 0.8f);
+            drCharge.color = visualTheme.darkText;
             RectTransform drChargeRt = drChargeGo.GetComponent<RectTransform>();
             drChargeRt.anchorMin = new Vector2(0f, 0f);
             drChargeRt.anchorMax = new Vector2(1f, 0.12f);
@@ -842,37 +903,36 @@ namespace UlarTangga.EditorSetup
 
             var pop = managersGo.AddComponent<PopupController>();
             pop.popupPanel = normPopupGo;
-            pop.labelTitle = normPopupGo.transform.Find("Title").GetComponent<TMPro.TextMeshProUGUI>();
-            pop.labelMessage = normPopupGo.transform.Find("Message").GetComponent<TMPro.TextMeshProUGUI>();
+            pop.labelTitle = FindChildComponent<TMPro.TextMeshProUGUI>(normPopupGo, "TitleBoard/Title");
+            pop.labelMessage = FindChildComponent<TMPro.TextMeshProUGUI>(normPopupGo, "Message");
             pop.btnContinue = normPopupGo.GetComponentInChildren<Button>();
             pop.redFlashOverlay = redFlash;
 
             var qPop = managersGo.AddComponent<QuizPopup>();
             qPop.quizPanel = quizPopupGo;
-            qPop.labelQuestion = quizPopupGo.transform.Find("Question").GetComponent<TMPro.TextMeshProUGUI>();
-            qPop.btnOptionA = quizPopupGo.transform.Find("Options/BtnA").GetComponent<Button>();
-            qPop.btnOptionB = quizPopupGo.transform.Find("Options/BtnB").GetComponent<Button>();
-            var btnCTrans = quizPopupGo.transform.Find("Options/BtnC");
-            if (btnCTrans != null) qPop.btnOptionC = btnCTrans.GetComponent<Button>();
-            var btnDTrans = quizPopupGo.transform.Find("Options/BtnD");
-            if (btnDTrans != null) qPop.btnOptionD = btnDTrans.GetComponent<Button>();
-            qPop.feedbackContainer = quizPopupGo.transform.Find("Feedback").gameObject;
-            qPop.labelFeedbackResult = quizPopupGo.transform.Find("Feedback/ResultText").GetComponent<TMPro.TextMeshProUGUI>();
-            qPop.labelFeedbackExplanations = quizPopupGo.transform.Find("Feedback/ExplainText").GetComponent<TMPro.TextMeshProUGUI>();
-            qPop.btnCloseQuiz = quizPopupGo.transform.Find("Feedback/BtnClose").GetComponent<Button>();
+            qPop.labelQuestion = FindChildComponent<TMPro.TextMeshProUGUI>(quizPopupGo, "Question");
+            qPop.btnOptionA = FindChildComponent<Button>(quizPopupGo, "Options/BtnA");
+            qPop.btnOptionB = FindChildComponent<Button>(quizPopupGo, "Options/BtnB");
+            qPop.btnOptionC = FindChildComponent<Button>(quizPopupGo, "Options/BtnC", true);
+            qPop.btnOptionD = FindChildComponent<Button>(quizPopupGo, "Options/BtnD", true);
+            var feedbackTrans = quizPopupGo.transform.Find("Feedback");
+            qPop.feedbackContainer = feedbackTrans != null ? feedbackTrans.gameObject : null;
+            qPop.labelFeedbackResult = FindChildComponent<TMPro.TextMeshProUGUI>(quizPopupGo, "Feedback/ResultText");
+            qPop.labelFeedbackExplanations = FindChildComponent<TMPro.TextMeshProUGUI>(quizPopupGo, "Feedback/ExplainText");
+            qPop.btnCloseQuiz = FindChildComponent<Button>(quizPopupGo, "Feedback/BtnClose");
 
             var pPop = managersGo.AddComponent<PrologueUI>();
             pPop.prologuePanel = prologueGo;
-            pPop.labelNarration = prologueGo.transform.Find("Narration").GetComponent<TMPro.TextMeshProUGUI>();
+            pPop.labelNarration = FindChildComponent<TMPro.TextMeshProUGUI>(prologueGo, "Narration");
             pPop.btnStartJourney = prologueGo.GetComponentInChildren<Button>();
 
             var gPop = managersGo.AddComponent<GameOverUI>();
             gPop.gameOverPanel = gameOverGo;
-            gPop.labelWinnerName = gameOverGo.transform.Find("WinnerTitle").GetComponent<TMPro.TextMeshProUGUI>();
-            gPop.imageWinnerAvatar = gameOverGo.transform.Find("Avatar").GetComponent<Image>();
-            gPop.labelMessage = gameOverGo.transform.Find("DescText").GetComponent<TMPro.TextMeshProUGUI>();
-            gPop.btnPlayAgain = gameOverGo.transform.Find("Btns/BtnAgain").GetComponent<Button>();
-            gPop.btnReturnToMenu = gameOverGo.transform.Find("Btns/BtnMenu").GetComponent<Button>();
+            gPop.labelWinnerName = FindChildComponent<TMPro.TextMeshProUGUI>(gameOverGo, "WinnerTitle");
+            gPop.imageWinnerAvatar = FindChildComponent<Image>(gameOverGo, "Avatar");
+            gPop.labelMessage = FindChildComponent<TMPro.TextMeshProUGUI>(gameOverGo, "DescText");
+            gPop.btnPlayAgain = FindChildComponent<Button>(gameOverGo, "Btns/BtnAgain");
+            gPop.btnReturnToMenu = FindChildComponent<Button>(gameOverGo, "Btns/BtnMenu");
 
             var gm = managersGo.AddComponent<GameManager>();
             gm.boardConfig = board;
@@ -1007,23 +1067,37 @@ namespace UlarTangga.EditorSetup
             }
         }
 
-        private static GameObject CreateCommonPopup(Transform parent, string name)
+        private static GameObject CreateCommonPopup(Transform parent, string name, GameVisualTheme visualTheme)
         {
             GameObject popGo = new GameObject(name);
             popGo.transform.SetParent(parent, false);
             Image popImg = popGo.AddComponent<Image>();
-            popImg.color = new Color(0.15f, 0.15f, 0.18f, 0.95f);
+            popImg.color = visualTheme.parchment;
+            var outline = popGo.AddComponent<Outline>();
+            outline.effectColor = visualTheme.darkWood;
+            outline.effectDistance = new Vector2(4f, 4f);
             PositionRect(popGo.GetComponent<RectTransform>(), Vector2.zero, new Vector2(400f, 320f));
+
+            // Title board (wooden panel)
+            GameObject titleBoardGo = new GameObject("TitleBoard", typeof(RectTransform));
+            titleBoardGo.transform.SetParent(popGo.transform, false);
+            Image titleBoardImg = titleBoardGo.AddComponent<Image>();
+            titleBoardImg.color = visualTheme.woodBrown;
+            var titleBoardOutline = titleBoardGo.AddComponent<Outline>();
+            titleBoardOutline.effectColor = visualTheme.darkWood;
+            titleBoardOutline.effectDistance = new Vector2(2f, 2f);
+            PositionRect(titleBoardGo.GetComponent<RectTransform>(), new Vector2(0f, 120f), new Vector2(380f, 40f));
 
             // Title
             GameObject titleGo = new GameObject("Title");
-            titleGo.transform.SetParent(popGo.transform, false);
+            titleGo.transform.SetParent(titleBoardGo.transform, false);
             var title = titleGo.AddComponent<TMPro.TextMeshProUGUI>();
             title.text = "Kegiatan Positif";
-            title.fontSize = 20f;
+            title.fontSize = 18f;
+            title.fontStyle = TMPro.FontStyles.Bold;
             title.alignment = TMPro.TextAlignmentOptions.Center;
-            title.color = Color.yellow;
-            PositionRect(titleGo.GetComponent<RectTransform>(), new Vector2(0f, 120f), new Vector2(380f, 30f));
+            title.color = visualTheme.creamText;
+            StretchRect(titleGo.GetComponent<RectTransform>());
 
             // Message
             GameObject msgGo = new GameObject("Message");
@@ -1032,32 +1106,47 @@ namespace UlarTangga.EditorSetup
             message.text = "Pesan edukasi detail...";
             message.fontSize = 13f;
             message.alignment = TMPro.TextAlignmentOptions.Center;
-            message.color = Color.white;
-            PositionRect(msgGo.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(360f, 180f));
+            message.color = visualTheme.darkText;
+            PositionRect(msgGo.GetComponent<RectTransform>(), new Vector2(0f, -10f), new Vector2(360f, 160f));
 
             // Button
-            CreateStandardButton(popGo.transform, "BtnLanjut", "Lanjut", new Vector2(0f, -120f));
+            GameObject btnGo = CreateStandardButton(popGo.transform, "BtnLanjut", "Lanjut", new Vector2(0f, -120f));
+            visualTheme.StyleButtonAsWood(btnGo.GetComponent<Button>(), btnGo.GetComponentInChildren<TMPro.TextMeshProUGUI>());
 
             return popGo;
         }
 
-        private static GameObject CreateQuizPopupPanel(Transform parent)
+        private static GameObject CreateQuizPopupPanel(Transform parent, GameVisualTheme visualTheme)
         {
             GameObject popGo = new GameObject("QuizPopupPanel");
             popGo.transform.SetParent(parent, false);
             Image popImg = popGo.AddComponent<Image>();
-            popImg.color = new Color(0.12f, 0.15f, 0.22f, 0.98f);
-            PositionRect(popGo.GetComponent<RectTransform>(), Vector2.zero, new Vector2(450f, 400f));
+            popImg.color = visualTheme.parchment;
+            var outline = popGo.AddComponent<Outline>();
+            outline.effectColor = visualTheme.darkWood;
+            outline.effectDistance = new Vector2(4f, 4f);
+            PositionRect(popGo.GetComponent<RectTransform>(), Vector2.zero, new Vector2(480f, 440f));
+
+            // Title board (wooden panel)
+            GameObject titleBoardGo = new GameObject("TitleBoard", typeof(RectTransform));
+            titleBoardGo.transform.SetParent(popGo.transform, false);
+            Image titleBoardImg = titleBoardGo.AddComponent<Image>();
+            titleBoardImg.color = visualTheme.woodBrown;
+            var titleBoardOutline = titleBoardGo.AddComponent<Outline>();
+            titleBoardOutline.effectColor = visualTheme.darkWood;
+            titleBoardOutline.effectDistance = new Vector2(2f, 2f);
+            PositionRect(titleBoardGo.GetComponent<RectTransform>(), new Vector2(0f, 180f), new Vector2(440f, 40f));
 
             // Title
             GameObject titleGo = new GameObject("Title");
-            titleGo.transform.SetParent(popGo.transform, false);
+            titleGo.transform.SetParent(titleBoardGo.transform, false);
             var title = titleGo.AddComponent<TMPro.TextMeshProUGUI>();
             title.text = "KUIS TATA TERTIB IPB";
-            title.fontSize = 22f;
+            title.fontSize = 18f;
+            title.fontStyle = TMPro.FontStyles.Bold;
             title.alignment = TMPro.TextAlignmentOptions.Center;
-            title.color = Color.cyan;
-            PositionRect(titleGo.GetComponent<RectTransform>(), new Vector2(0f, 160f), new Vector2(420f, 30f));
+            title.color = visualTheme.creamText;
+            StretchRect(titleGo.GetComponent<RectTransform>());
 
             // Question
             GameObject questGo = new GameObject("Question");
@@ -1066,25 +1155,32 @@ namespace UlarTangga.EditorSetup
             question.text = "Pertanyaan kuis...";
             question.fontSize = 14f;
             question.alignment = TMPro.TextAlignmentOptions.Center;
-            question.color = Color.white;
-            PositionRect(questGo.GetComponent<RectTransform>(), new Vector2(0f, 60f), new Vector2(400f, 100f));
+            question.color = visualTheme.darkText;
+            PositionRect(questGo.GetComponent<RectTransform>(), new Vector2(0f, 80f), new Vector2(430f, 100f));
 
             // Options Row
             GameObject rowGo = new GameObject("Options", typeof(RectTransform));
             rowGo.transform.SetParent(popGo.transform, false);
-            PositionRect(rowGo.GetComponent<RectTransform>(), new Vector2(0f, -40f), new Vector2(400f, 110f));
+            PositionRect(rowGo.GetComponent<RectTransform>(), new Vector2(0f, -40f), new Vector2(440f, 110f));
 
-            CreateStandardButton(rowGo.transform, "BtnA", "Option A / Benar", new Vector2(-105f, 25f), new Vector2(200f, 45f));
-            CreateStandardButton(rowGo.transform, "BtnB", "Option B / Salah", new Vector2(105f, 25f), new Vector2(200f, 45f));
-            CreateStandardButton(rowGo.transform, "BtnC", "Option C", new Vector2(-105f, -25f), new Vector2(200f, 45f));
-            CreateStandardButton(rowGo.transform, "BtnD", "Option D", new Vector2(105f, -25f), new Vector2(200f, 45f));
+            GameObject btnA = CreateStandardButton(rowGo.transform, "BtnA", "Option A / Benar", new Vector2(-110f, 25f), new Vector2(210f, 45f));
+            visualTheme.StyleButtonAsParchment(btnA.GetComponent<Button>(), btnA.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+            GameObject btnB = CreateStandardButton(rowGo.transform, "BtnB", "Option B / Salah", new Vector2(110f, 25f), new Vector2(210f, 45f));
+            visualTheme.StyleButtonAsParchment(btnB.GetComponent<Button>(), btnB.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+            GameObject btnC = CreateStandardButton(rowGo.transform, "BtnC", "Option C", new Vector2(-110f, -25f), new Vector2(210f, 45f));
+            visualTheme.StyleButtonAsParchment(btnC.GetComponent<Button>(), btnC.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+            GameObject btnD = CreateStandardButton(rowGo.transform, "BtnD", "Option D", new Vector2(110f, -25f), new Vector2(210f, 45f));
+            visualTheme.StyleButtonAsParchment(btnD.GetComponent<Button>(), btnD.GetComponentInChildren<TMPro.TextMeshProUGUI>());
 
             // Feedback Card inside
             GameObject feedGo = new GameObject("Feedback", typeof(RectTransform));
             feedGo.transform.SetParent(popGo.transform, false);
-            PositionRect(feedGo.GetComponent<RectTransform>(), new Vector2(0f, -40f), new Vector2(430f, 260f));
+            PositionRect(feedGo.GetComponent<RectTransform>(), new Vector2(0f, -40f), new Vector2(460f, 260f));
             var fImg = feedGo.AddComponent<Image>();
-            fImg.color = new Color(0.08f, 0.08f, 0.12f, 0.98f);
+            fImg.color = visualTheme.woodBrown;
+            var fOutline = feedGo.AddComponent<Outline>();
+            fOutline.effectColor = visualTheme.darkWood;
+            fOutline.effectDistance = new Vector2(3f, 3f);
 
             GameObject resGo = new GameObject("ResultText");
             resGo.transform.SetParent(feedGo.transform, false);
@@ -1093,7 +1189,8 @@ namespace UlarTangga.EditorSetup
             resTxt.alignment = TMPro.TextAlignmentOptions.Center;
             resTxt.fontSize = 20f;
             resTxt.fontStyle = TMPro.FontStyles.Bold;
-            PositionRect(resGo.GetComponent<RectTransform>(), new Vector2(0f, 90f), new Vector2(410f, 30f));
+            resTxt.color = visualTheme.successGreen;
+            PositionRect(resGo.GetComponent<RectTransform>(), new Vector2(0f, 90f), new Vector2(440f, 30f));
 
             GameObject explainGo = new GameObject("ExplainText");
             explainGo.transform.SetParent(feedGo.transform, false);
@@ -1101,31 +1198,46 @@ namespace UlarTangga.EditorSetup
             expTxt.text = "Penjelasan edukatif detail...";
             expTxt.alignment = TMPro.TextAlignmentOptions.Center;
             expTxt.fontSize = 12f;
-            expTxt.color = Color.white;
-            PositionRect(explainGo.GetComponent<RectTransform>(), new Vector2(0f, 10f), new Vector2(390f, 120f));
+            expTxt.color = visualTheme.creamText;
+            PositionRect(explainGo.GetComponent<RectTransform>(), new Vector2(0f, 10f), new Vector2(420f, 120f));
 
-            CreateStandardButton(feedGo.transform, "BtnClose", "Lanjut Perjalanan", new Vector2(0f, -90f));
+            GameObject closeBtn = CreateStandardButton(feedGo.transform, "BtnClose", "Lanjut Perjalanan", new Vector2(0f, -90f));
+            visualTheme.StyleButtonAsWood(closeBtn.GetComponent<Button>(), closeBtn.GetComponentInChildren<TMPro.TextMeshProUGUI>());
 
             return popGo;
         }
 
-        private static GameObject CreateProloguePopupPanel(Transform parent)
+        private static GameObject CreateProloguePopupPanel(Transform parent, GameVisualTheme visualTheme)
         {
             GameObject popGo = new GameObject("ProloguePopupPanel");
             popGo.transform.SetParent(parent, false);
             Image popImg = popGo.AddComponent<Image>();
-            popImg.color = new Color(0.1f, 0.1f, 0.14f, 0.98f);
+            popImg.color = visualTheme.parchment;
+            var outline = popGo.AddComponent<Outline>();
+            outline.effectColor = visualTheme.darkWood;
+            outline.effectDistance = new Vector2(4f, 4f);
             PositionRect(popGo.GetComponent<RectTransform>(), Vector2.zero, new Vector2(500f, 400f));
+
+            // Title board (wooden panel)
+            GameObject titleBoardGo = new GameObject("TitleBoard", typeof(RectTransform));
+            titleBoardGo.transform.SetParent(popGo.transform, false);
+            Image titleBoardImg = titleBoardGo.AddComponent<Image>();
+            titleBoardImg.color = visualTheme.woodBrown;
+            var titleBoardOutline = titleBoardGo.AddComponent<Outline>();
+            titleBoardOutline.effectColor = visualTheme.darkWood;
+            titleBoardOutline.effectDistance = new Vector2(2f, 2f);
+            PositionRect(titleBoardGo.GetComponent<RectTransform>(), new Vector2(0f, 150f), new Vector2(460f, 40f));
 
             // Title
             GameObject titleGo = new GameObject("Title");
-            titleGo.transform.SetParent(popGo.transform, false);
+            titleGo.transform.SetParent(titleBoardGo.transform, false);
             var title = titleGo.AddComponent<TMPro.TextMeshProUGUI>();
             title.text = "PROLOG PERJALANAN KAMPUS";
-            title.fontSize = 22f;
+            title.fontSize = 18f;
+            title.fontStyle = TMPro.FontStyles.Bold;
             title.alignment = TMPro.TextAlignmentOptions.Center;
-            title.color = Color.yellow;
-            PositionRect(titleGo.GetComponent<RectTransform>(), new Vector2(0f, 150f), new Vector2(460f, 40f));
+            title.color = visualTheme.creamText;
+            StretchRect(titleGo.GetComponent<RectTransform>());
 
             // Narration
             GameObject narrGo = new GameObject("Narration");
@@ -1134,32 +1246,47 @@ namespace UlarTangga.EditorSetup
             narration.text = "Narasi prolog...";
             narration.fontSize = 14f;
             narration.alignment = TMPro.TextAlignmentOptions.Center;
-            narration.color = Color.white;
-            PositionRect(narrGo.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(440f, 220f));
+            narration.color = visualTheme.darkText;
+            PositionRect(narrGo.GetComponent<RectTransform>(), new Vector2(0f, -10f), new Vector2(440f, 220f));
 
             // Start Journey Button
-            CreateStandardButton(popGo.transform, "BtnStartJourney", "Mulai Perjalanan", new Vector2(0f, -140f));
+            GameObject btnGo = CreateStandardButton(popGo.transform, "BtnStartJourney", "Mulai Perjalanan", new Vector2(0f, -140f));
+            visualTheme.StyleButtonAsWood(btnGo.GetComponent<Button>(), btnGo.GetComponentInChildren<TMPro.TextMeshProUGUI>());
 
             return popGo;
         }
 
-        private static GameObject CreateGameOverPopupPanel(Transform parent)
+        private static GameObject CreateGameOverPopupPanel(Transform parent, GameVisualTheme visualTheme)
         {
             GameObject popGo = new GameObject("GameOverPopupPanel");
             popGo.transform.SetParent(parent, false);
             Image popImg = popGo.AddComponent<Image>();
-            popImg.color = new Color(0.12f, 0.08f, 0.08f, 0.98f);
+            popImg.color = visualTheme.parchment;
+            var outline = popGo.AddComponent<Outline>();
+            outline.effectColor = visualTheme.darkWood;
+            outline.effectDistance = new Vector2(4f, 4f);
             PositionRect(popGo.GetComponent<RectTransform>(), Vector2.zero, new Vector2(500f, 450f));
+
+            // Title board (wooden panel)
+            GameObject titleBoardGo = new GameObject("TitleBoard", typeof(RectTransform));
+            titleBoardGo.transform.SetParent(popGo.transform, false);
+            Image titleBoardImg = titleBoardGo.AddComponent<Image>();
+            titleBoardImg.color = visualTheme.woodBrown;
+            var titleBoardOutline = titleBoardGo.AddComponent<Outline>();
+            titleBoardOutline.effectColor = visualTheme.darkWood;
+            titleBoardOutline.effectDistance = new Vector2(2f, 2f);
+            PositionRect(titleBoardGo.GetComponent<RectTransform>(), new Vector2(0f, 190f), new Vector2(460f, 30f));
 
             // Title
             GameObject titleGo = new GameObject("Title");
-            titleGo.transform.SetParent(popGo.transform, false);
+            titleGo.transform.SetParent(titleBoardGo.transform, false);
             var title = titleGo.AddComponent<TMPro.TextMeshProUGUI>();
             title.text = "PERMAINAN SELESAI";
-            title.fontSize = 18f;
+            title.fontSize = 14f;
+            title.fontStyle = TMPro.FontStyles.Bold;
             title.alignment = TMPro.TextAlignmentOptions.Center;
-            title.color = Color.yellow;
-            PositionRect(titleGo.GetComponent<RectTransform>(), new Vector2(0f, 190f), new Vector2(460f, 30f));
+            title.color = visualTheme.creamText;
+            StretchRect(titleGo.GetComponent<RectTransform>());
 
             // Winner title
             GameObject winTitleGo = new GameObject("WinnerTitle");
@@ -1169,8 +1296,8 @@ namespace UlarTangga.EditorSetup
             winTitle.alignment = TMPro.TextAlignmentOptions.Center;
             winTitle.fontSize = 24f;
             winTitle.fontStyle = TMPro.FontStyles.Bold;
-            winTitle.color = Color.green;
-            PositionRect(winTitleGo.GetComponent<RectTransform>(), new Vector2(0f, 150f), new Vector2(460f, 35f));
+            winTitle.color = visualTheme.successGreen;
+            PositionRect(winTitleGo.GetComponent<RectTransform>(), new Vector2(0f, 140f), new Vector2(460f, 35f));
 
             // Winner avatar card placeholder
             GameObject avaGo = new GameObject("Avatar");
@@ -1178,6 +1305,9 @@ namespace UlarTangga.EditorSetup
             Image avaImg = avaGo.AddComponent<Image>();
             avaImg.color = Color.white;
             PositionRect(avaGo.GetComponent<RectTransform>(), new Vector2(0f, 40f), new Vector2(100f, 100f));
+            var avaOutline = avaGo.AddComponent<Outline>();
+            avaOutline.effectColor = visualTheme.darkWood;
+            avaOutline.effectDistance = new Vector2(2f, 2f);
 
             // Description
             GameObject descGo = new GameObject("DescText");
@@ -1186,7 +1316,7 @@ namespace UlarTangga.EditorSetup
             desc.text = "Deskripsi kemenangan...";
             desc.alignment = TMPro.TextAlignmentOptions.Center;
             desc.fontSize = 13f;
-            desc.color = Color.white;
+            desc.color = visualTheme.darkText;
             PositionRect(descGo.GetComponent<RectTransform>(), new Vector2(0f, -60f), new Vector2(440f, 60f));
 
             // Buttons Row
@@ -1194,8 +1324,10 @@ namespace UlarTangga.EditorSetup
             rowGo.transform.SetParent(popGo.transform, false);
             PositionRect(rowGo.GetComponent<RectTransform>(), new Vector2(0f, -160f), new Vector2(400f, 50f));
 
-            CreateStandardButton(rowGo.transform, "BtnAgain", "Main Lagi", new Vector2(-105f, 0f));
-            CreateStandardButton(rowGo.transform, "BtnMenu", "Kembali Ke Menu", new Vector2(105f, 0f));
+            GameObject btnAgain = CreateStandardButton(rowGo.transform, "BtnAgain", "Main Lagi", new Vector2(-105f, 0f));
+            visualTheme.StyleButtonAsWood(btnAgain.GetComponent<Button>(), btnAgain.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+            GameObject btnMenu = CreateStandardButton(rowGo.transform, "BtnMenu", "Kembali Ke Menu", new Vector2(105f, 0f));
+            visualTheme.StyleButtonAsWood(btnMenu.GetComponent<Button>(), btnMenu.GetComponentInChildren<TMPro.TextMeshProUGUI>());
 
             return popGo;
         }
@@ -1214,6 +1346,67 @@ namespace UlarTangga.EditorSetup
             rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.anchoredPosition = pos;
             rect.sizeDelta = size;
+        }
+
+        private static T FindChildComponent<T>(GameObject root, string path, bool optional = false) where T : Component
+        {
+            if (root == null)
+            {
+                if (!optional) Debug.LogError($"[FindChildComponent] Root GameObject is null when searching for path '{path}'");
+                return null;
+            }
+            Transform found = root.transform.Find(path);
+            if (found == null)
+            {
+                // Fallback: search recursively by name
+                string[] parts = path.Split('/');
+                string targetName = parts[parts.Length - 1];
+                T recurseComp = FindComponentInChildrenRecursive<T>(root.transform, targetName);
+                if (recurseComp != null)
+                {
+                    Debug.LogWarning($"[FindChildComponent] Direct path '{path}' was not found under '{root.name}', but found '{targetName}' recursively. Using it.");
+                    return recurseComp;
+                }
+
+                if (!optional)
+                {
+                    // If completely failed, print current children hierarchy to help debugging
+                    string hierarchy = GetHierarchyString(root.transform, "");
+                    Debug.LogError($"[FindChildComponent] Failed to find '{path}' under '{root.name}'. Hierarchy:\n{hierarchy}");
+                }
+                return null;
+            }
+            T comp = found.GetComponent<T>();
+            if (comp == null && !optional)
+            {
+                Debug.LogError($"[FindChildComponent] Component '{typeof(T).Name}' not found on object '{found.name}' at path '{path}'");
+            }
+            return comp;
+        }
+
+        private static T FindComponentInChildrenRecursive<T>(Transform parent, string name) where T : Component
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name == name)
+                {
+                    T comp = child.GetComponent<T>();
+                    if (comp != null) return comp;
+                }
+                T sub = FindComponentInChildrenRecursive<T>(child, name);
+                if (sub != null) return sub;
+            }
+            return null;
+        }
+
+        private static string GetHierarchyString(Transform parent, string indent)
+        {
+            string s = indent + "- " + parent.name + "\n";
+            foreach (Transform child in parent)
+            {
+                s += GetHierarchyString(child, indent + "  ");
+            }
+            return s;
         }
     }
 }

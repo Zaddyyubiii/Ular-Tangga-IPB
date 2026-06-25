@@ -330,9 +330,11 @@ namespace Core
                 Debug.Log($"Bounce back triggered: rawTarget={targetTile}, bouncedTarget={bouncedTarget}");
             }
 
+            Debug.Log("Dice popup shown for " + curPlayer.playerName);
             if (DiceRollPopupUI.Instance != null)
             {
                 yield return DiceRollPopupUI.Instance.ShowDiceResult(curPlayer, lastDiceResult.value, lastDiceResult.timingQuality, lastDiceResult.chargePercent);
+                DiceRollPopupUI.Instance.ForceHide();
             }
             else
             {
@@ -341,7 +343,13 @@ namespace Core
                     GameplayUI.Instance.ShowDiceResult(curPlayer, lastDiceResult.value, lastDiceResult.timingQuality, lastDiceResult.chargePercent);
                 }
                 yield return new WaitForSeconds(2.0f); // Wait for roll animation text display
+                if (GameplayUI.Instance != null)
+                {
+                    GameplayUI.Instance.ClearDiceResult();
+                }
             }
+            Debug.Log("Dice popup finished and hidden.");
+            Debug.Log("Movement started after dice popup hidden.");
 
             // Normal & Bounce Movement
             currentState = GameState.Moving;
@@ -590,7 +598,7 @@ namespace Core
                     int positiveIndex = (roll - 2) % 6; // Range [2, 12] mapped to [0, 5]
                     string posMsg = messageBank.GetPositiveMessage(positiveIndex);
                     
-                    string formattedMsg = $"Selamat, Anda telah mendapatkan {roll} poin dadu dikarenakan pencapaian positif berikut:\n\n\"{posMsg}\"";
+                    string formattedMsg = $"Selamat! Anda melakukan kegiatan positif:\n\n\"{posMsg}\"";
 
                     if (PopupController.Instance != null)
                     {

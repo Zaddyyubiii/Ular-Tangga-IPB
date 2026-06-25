@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c16abacadcf76c841b8c4e300e944586, type: 3}
+  m_Name: GameVisualTheme
+  m_EditorClassIdentifier: Assembly-CSharp::UI.GameVisualTheme
+  grassGreen: {r: 0.36, g: 0.73, b: 0.39, a: 1}
+  deepGrass: {r: 0.18, g: 0.49, b: 0.31, a: 1}
+  softGrass: {r: 0.56, g: 0.86, b: 0.45, a: 1}
+  dirtPath: {r: 0.84, g: 0.61, b: 0.32, a: 1}
+  lightDirt: {r: 0.94, g: 0.75, b: 0.44, a: 1}
+  woodBrown: {r: 0.6, g: 0.35, b: 0.18, a: 1}
+  darkWood: {r: 0.36, g: 0.2, b: 0.12, a: 1}
+  parchment: {r: 0.96, g: 0.79, b: 0.51, a: 1}
+  parchmentLight: {r: 1, g: 0.85, b: 0.57, a: 1}
+  parchmentDark: {r: 0.72, g: 0.42, b: 0.21, a: 1}
+  skyBlue: {r: 0.37, g: 0.78, b: 0.95, a: 1}
+  deepBlue: {r: 0.11, g: 0.31, b: 0.54, a: 1}
+  creamText: {r: 1, g: 0.95, b: 0.76, a: 1}
+  darkText: {r: 0.29, g: 0.16, b: 0.1, a: 1}
+  successGreen: {r: 0.12, g: 0.73, b: 0.35, a: 1}
+  warningOrange: {r: 0.95, g: 0.6, b: 0.1, a: 1}
+  dangerRed: {r: 0.8, g: 0.2, b: 0.15, a: 1}
+  player1Normal: {r: 0.62, g: 0.18, b: 0.18, a: 1}
+  player1Active: {r: 0.91, g: 0.3, b: 0.3, a: 1}
+  player2Normal: {r: 0.18, g: 0.36, b: 0.66, a: 1}
+  player2Active: {r: 0.31, g: 0.55, b: 1, a: 1}
+  player3Normal: {r: 0.18, g: 0.55, b: 0.34, a: 1}
+  player3Active: {r: 0.22, g: 0.82, b: 0.48, a: 1}
+  player4Normal: {r: 0.72, g: 0.47, b: 0.13, a: 1}
+  player4Active: {r: 1, g: 0.76, b: 0.28, a: 1}

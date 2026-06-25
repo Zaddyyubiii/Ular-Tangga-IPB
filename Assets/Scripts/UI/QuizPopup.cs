@@ -74,6 +74,16 @@ namespace UI
 
         public void ShowQuiz(QuizQuestion question, Action callback)
         {
+            // Force hide the dice popup to avoid overlap
+            if (DiceRollPopupUI.Instance != null)
+            {
+                DiceRollPopupUI.Instance.ForceHide();
+            }
+            else if (GameplayUI.Instance != null)
+            {
+                GameplayUI.Instance.ClearDiceResult();
+            }
+
             // Pause turn timer
             if (Turn.TurnManager.Instance != null)
             {
@@ -102,6 +112,26 @@ namespace UI
             Debug.Log($"Showing quiz question: {question.id}.");
 
             labelQuestion.text = question.questionText;
+
+            // Apply theme styling
+            var theme = Resources.Load<GameVisualTheme>("GameVisualTheme");
+            if (theme != null)
+            {
+                theme.StylePanelAsParchment(quizPanel);
+                if (labelQuestion != null) labelQuestion.color = theme.darkText;
+
+                if (feedbackContainer != null)
+                {
+                    theme.StylePanelAsWood(feedbackContainer);
+                    if (labelFeedbackExplanations != null) labelFeedbackExplanations.color = theme.creamText;
+                    if (btnCloseQuiz != null) theme.StyleButtonAsWood(btnCloseQuiz, btnCloseQuiz.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+                }
+
+                if (btnOptionA != null) theme.StyleButtonAsParchment(btnOptionA, btnOptionA.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+                if (btnOptionB != null) theme.StyleButtonAsParchment(btnOptionB, btnOptionB.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+                if (btnOptionC != null) theme.StyleButtonAsParchment(btnOptionC, btnOptionC.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+                if (btnOptionD != null) theme.StyleButtonAsParchment(btnOptionD, btnOptionD.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+            }
 
             // Setup button labels and visibility
             if (btnOptionA != null)
@@ -150,7 +180,7 @@ namespace UI
             #else
             quizPanel.SetActive(true);
             quizPanel.transform.localScale = Vector3.zero;
-            StartCoroutine(PopScaleCo(quizPanel.transform, Vector3.one, 0.25f));
+            StartCoroutine(PopScaleCo(quizPanel.transform, Vector3.one, 0.2f));
             #endif
 
             // Trigger bot auto-solve if current player is a bot
@@ -179,6 +209,44 @@ namespace UI
             bool isCorrect = (selectedIndex == currentQuestion.correctAnswerIndex);
             Debug.Log($"Quiz answered correctly: {isCorrect.ToString().ToLower()}.");
 
+            // Apply correct/wrong dynamic colors using theme
+            var theme = Resources.Load<GameVisualTheme>("GameVisualTheme");
+            if (theme != null)
+            {
+                // Correct answer is highlighted in green
+                Button correctBtn = null;
+                if (currentQuestion.correctAnswerIndex == 0) correctBtn = btnOptionA;
+                else if (currentQuestion.correctAnswerIndex == 1) correctBtn = btnOptionB;
+                else if (currentQuestion.correctAnswerIndex == 2) correctBtn = btnOptionC;
+                else if (currentQuestion.correctAnswerIndex == 3) correctBtn = btnOptionD;
+
+                if (correctBtn != null)
+                {
+                    var img = correctBtn.GetComponent<Image>();
+                    if (img != null) img.color = theme.successGreen;
+                    var txt = correctBtn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+                    if (txt != null) txt.color = theme.creamText;
+                }
+
+                // If user selected the wrong answer, highlight it in red
+                if (selectedIndex != currentQuestion.correctAnswerIndex)
+                {
+                    Button selectedBtn = null;
+                    if (selectedIndex == 0) selectedBtn = btnOptionA;
+                    else if (selectedIndex == 1) selectedBtn = btnOptionB;
+                    else if (selectedIndex == 2) selectedBtn = btnOptionC;
+                    else if (selectedIndex == 3) selectedBtn = btnOptionD;
+
+                    if (selectedBtn != null)
+                    {
+                        var img = selectedBtn.GetComponent<Image>();
+                        if (img != null) img.color = theme.dangerRed;
+                        var txt = selectedBtn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+                        if (txt != null) txt.color = theme.creamText;
+                    }
+                }
+            }
+
             // Display feedback with smooth animation
             #if UNITY_WEBGL && !UNITY_EDITOR
             // React handles feedback panel
@@ -197,7 +265,7 @@ namespace UI
             if (isCorrect)
             {
                 labelFeedbackResult.text = "BENAR! *";
-                labelFeedbackResult.color = new Color(0.12f, 0.73f, 0.35f); // Beautiful green
+                labelFeedbackResult.color = theme != null ? theme.successGreen : new Color(0.12f, 0.73f, 0.35f); // Beautiful green
                 labelFeedbackExplanations.text = currentQuestion.correctFeedback;
 
                 if (Audio.AudioManager.Instance != null)
@@ -208,7 +276,7 @@ namespace UI
             else
             {
                 labelFeedbackResult.text = "KURANG TEPAT. *";
-                labelFeedbackResult.color = Color.red;
+                labelFeedbackResult.color = theme != null ? theme.dangerRed : Color.red;
                 labelFeedbackExplanations.text = currentQuestion.incorrectFeedback;
 
                 if (Audio.AudioManager.Instance != null)
@@ -220,7 +288,6 @@ namespace UI
             Debug.Log($"[Quiz] Answered correct: {isCorrect}");
 
             // Start auto close timer for human players
-            var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
             bool isBot = curPlayer != null && curPlayer.isBot;
             if (!isBot)
             {

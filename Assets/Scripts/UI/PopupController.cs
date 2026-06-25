@@ -45,6 +45,12 @@ namespace UI
 
         public void ShowPopup(string title, string message, Action callback, bool playExplosion = false)
         {
+            Debug.Log("Preparing gameplay popup. Forcing dice popup hidden.");
+            if (DiceRollPopupUI.Instance != null)
+            {
+                DiceRollPopupUI.Instance.ForceHide();
+            }
+
             var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
             bool showContinue = curPlayer == null || !curPlayer.isBot;
             ShowPopup(title, message, callback, showContinue, POPUP_AUTO_CLOSE_DELAY, playExplosion);
@@ -59,6 +65,12 @@ namespace UI
             bool playExplosion = false
         )
         {
+            Debug.Log("Preparing gameplay popup. Forcing dice popup hidden.");
+            if (DiceRollPopupUI.Instance != null)
+            {
+                DiceRollPopupUI.Instance.ForceHide();
+            }
+
             if (autoCloseDelay <= 0f)
             {
                 autoCloseDelay = POPUP_AUTO_CLOSE_DELAY;
@@ -80,6 +92,42 @@ namespace UI
             labelMessage.text = message;
             onContinueCallback = onClose;
 
+            // Apply theme styles dynamically
+            var theme = Resources.Load<GameVisualTheme>("GameVisualTheme");
+            if (theme != null && popupPanel != null)
+            {
+                theme.StylePanelAsParchment(popupPanel);
+                
+                var outline = popupPanel.GetComponent<Outline>();
+                if (outline == null) outline = popupPanel.AddComponent<Outline>();
+                
+                Color outlineColor = theme.darkWood; // default
+                string lowerTitle = title.ToLower();
+                if (lowerTitle.Contains("prestasi") || lowerTitle.Contains("duta") || lowerTitle.Contains("selamat") || lowerTitle.Contains("kegiatan positif"))
+                {
+                    outlineColor = theme.successGreen;
+                }
+                else if (lowerTitle.Contains("pelanggaran berat") || lowerTitle.Contains("skors") || lowerTitle.Contains("sanksi"))
+                {
+                    outlineColor = theme.dangerRed;
+                }
+                else if (lowerTitle.Contains("pelanggaran") || lowerTitle.Contains("ular"))
+                {
+                    outlineColor = theme.warningOrange;
+                }
+                else
+                {
+                    outlineColor = theme.deepGrass;
+                }
+                
+                outline.effectColor = outlineColor;
+                outline.effectDistance = new Vector2(4f, 4f);
+                
+                if (labelTitle != null) labelTitle.color = theme.darkText;
+                if (labelMessage != null) labelMessage.color = theme.darkText;
+                if (btnContinue != null) theme.StyleButtonAsWood(btnContinue, btnContinue.GetComponentInChildren<TMPro.TextMeshProUGUI>());
+            }
+
             isPopupOpen = true;
             popupPanel.SetActive(true);
 
@@ -91,7 +139,7 @@ namespace UI
 
             // Pop animation (fade / scale)
             popupPanel.transform.localScale = Vector3.zero;
-            StartCoroutine(PopScaleCo(popupPanel.transform, Vector3.one, 0.25f));
+            StartCoroutine(PopScaleCo(popupPanel.transform, Vector3.one, 0.2f));
 
             if (playExplosion)
             {
@@ -102,6 +150,7 @@ namespace UI
             bool isBot = curPlayer != null && curPlayer.isBot;
 
             // Logs matching section 11
+            Debug.Log($"Gameplay popup shown: {title}");
             Debug.Log($"Popup opened: {title}. Auto close in {autoCloseDelay} seconds.");
             if (isBot)
             {

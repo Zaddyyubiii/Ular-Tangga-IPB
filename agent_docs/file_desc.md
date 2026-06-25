@@ -29,8 +29,8 @@ Seluruh logika permainan diatur oleh skrip-skrip yang terbagi secara modular:
 *   **Dice/**: Logika pengukur dadu interaktif (*Dice Gauge*) dan animasi dadu bergulir (`DiceController.cs`, `DiceGauge.cs`).
 *   **Player/**: Mengatur posisi bidak pemain, pergerakan petak demi petak, serta perubahan sprite evolusi berdasarkan skor (`PlayerController.cs`, `PlayerEvolutionController.cs`).
 *   **Quiz/**: Mengontrol jendela sembul kuis, membaca bank soal kuis, serta memvalidasi jawaban benar/salah (`QuizManager.cs`, `QuizUI.cs`).
-*   **Turn/**: Mengelola sistem giliran pemain, timer giliran 10 detik, dan bot AI (`TurnManager.cs`, `BotAIController.cs`).
-*   **UI/**: Mengatur pembaruan UI seperti papan skor, status bar, pop-up pesan, dan dialog prolog (`UIManager.cs`, `ScoreboardUI.cs`).
+*   **Turn/**: Mengelola sistem giliran pemain, timer giliran 10 detik, dan bot AI (`TurnManager.cs`, `BotController.cs`).
+*   **UI/**: Mengatur pembaruan UI game (`MainMenuUI.cs`, `GameplayUI.cs`, `PlayerStatusView.cs`, `DiceRollPopupUI.cs`, `PopupController.cs`, `QuizPopup.cs`, `GameVisualTheme.cs`, `PrologueUI.cs`, `GameOverUI.cs`).
 *   **Editor/**: Skrip pembantu editor Unity dan modul pengujian otomatis:
     *   `SceneSetupHelper.cs`, `WebGLBuildHelper.cs`: Berkas utilitas pembantu Unity Editor.
     *   **Tests/**: Modul berkas pengujian otomatis (*automated unit tests*) EditMode:
@@ -38,11 +38,12 @@ Seluruh logika permainan diatur oleh skrip-skrip yang terbagi secara modular:
         *   `PlayerEvolutionTests.cs`: Menguji ketepatan ambang batas skor petak evolusi karakter (Stage 1 s.d 5) dan alokasi visual sprite.
         *   `BoardConfigTests.cs`: Menguji keabsahan konfigurasi transisi ular/tangga, batasan petak khusus, serta perhitungan rumus *serpentine grid* 10x10.
 
-### 5. `Assets/ScriptableObjects/` (Aset Konfigurasi Data)
-Penyimpanan data statis berbasis ScriptableObject untuk memudahkan penyeimbangan tingkat kesulitan (*level balancing*):
+### 5. `Assets/ScriptableObjects/` & `Assets/Resources/` (Aset Konfigurasi Data & Tema)
+Penyimpanan data statis berbasis ScriptableObject untuk memudahkan penyeimbangan tingkat kesulitan dan kustomisasi visual:
 *   `BoardConfig.asset`: Konfigurasi letak petak kuis, petak tengkorak, posisi tangga, serta ular beserta efeknya.
 *   `QuizBank.asset`: Bank kuis yang diperluas berisi 21 pertanyaan kuis tata tertib (3 lama + 18 baru) dengan struktur pilihan jawaban dinamis (2-4 pilihan, A-D) dan sistem seleksi 6 soal acak non-duplikat per game.
 *   `MessageBank.asset`: Kumpulan teks cerita prolog, pesan positif di petak biasa, pesan ular, sanksi tengkorak, dan pesan tangga.
+*   `GameVisualTheme.asset` (dalam `Assets/Resources/`): Konfigurasi tema visual utama game (palet warna kayu, kertas/parchment, teks krem/gelap, dan warna outlines status).
 
 ### 6. `docs/` (WebGL Deployment)
 *   Berisi berkas hasil *build* WebGL permainan yang di-overlay oleh bundle web produksi React yang siap di-host menggunakan GitHub Pages.
