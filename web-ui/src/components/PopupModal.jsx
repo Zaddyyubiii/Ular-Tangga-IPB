@@ -1,29 +1,44 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PopupModal = ({ popupData, triggerUnityAction }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  
-  useEffect(() => {
-    if (popupData) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
-  }, [popupData]);
+  const [prevPopupData, setPrevPopupData] = useState(popupData);
+  const [isVisible, setIsVisible] = useState(!!popupData);
+
+  if (popupData !== prevPopupData) {
+    setPrevPopupData(popupData);
+    setIsVisible(!!popupData);
+  }
 
   const handleContinue = () => {
     setIsVisible(false);
     triggerUnityAction("OnPopupClosedFromReact", "");
   };
 
+  useEffect(() => {
+    if (!popupData || !popupData.showContinueButton) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        setIsVisible(false);
+        triggerUnityAction("OnPopupClosedFromReact", "");
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [popupData, triggerUnityAction]);
+
   if (!popupData) return null;
 
   // Determine colors based on title (similar to Unity's logic)
   const lowerTitle = (popupData.title || "").toLowerCase();
-  let borderColor = "var(--color-game-dark-wood)";
-  let titleBg = "var(--color-game-wood)";
-  let titleColor = "var(--color-game-cream-text)";
+  let borderColor;
+  let titleBg;
+  let titleColor;
   
   if (lowerTitle.includes("prestasi") || lowerTitle.includes("duta") || lowerTitle.includes("selamat") || lowerTitle.includes("kegiatan positif")) {
     borderColor = "var(--color-game-deep-grass)";

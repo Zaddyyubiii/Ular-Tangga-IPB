@@ -2,6 +2,22 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export default function PrologueModal({ text, onStart }) {
+  React.useEffect(() => {
+    if (!text) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        onStart();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [text, onStart]);
+
   if (!text) return null;
 
   return (

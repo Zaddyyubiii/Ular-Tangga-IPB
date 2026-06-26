@@ -57,6 +57,8 @@ Penyimpanan data statis berbasis ScriptableObject untuk memudahkan penyeimbangan
     *   `QuizModal.jsx`: Pop-up kuis bubble dengan pilihan ganda dan feedback akademik edukatif instan.
     *   `PrologueModal.jsx`: Pop-up prolog pembuka bergaya lembaran buku dongeng petualangan.
     *   `GameOverModal.jsx`: Pop-up penobatan Duta Tata Tertib IPB University dan tombol navigasi akhir.
+    *   `MainMenu.jsx`: Menu awal game untuk memilih jumlah pemain (1-4) dan memasukkan nama pemain secara dinamis.
+    *   `PopupModal.jsx`: Pop-up sembul interaktif untuk pesan ubin biasa, sanksi tengkorak, ular, tangga, dan bounce-back.
 *   `index.html`: Pembungkus terpadu yang memuat Canvas WebGL Unity dan menumpangkan React Overlay `#root` di atasnya.
 *   `vite.config.js`: Konfigurasi build Vite yang otomatis mengekspor bundle produksi ke folder `/docs/` tanpa mengganggu file `.wasm` Unity.
 *   `src/index.css`: Konfigurasi theme modern Tailwind v4 `@theme` (font Outfit, game-dark/blue/cyan palette, rounded-cartoon, shadow-bubble).

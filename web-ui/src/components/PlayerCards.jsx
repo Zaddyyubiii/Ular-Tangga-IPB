@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const EVOLUTION_STAGES = [
@@ -28,10 +27,6 @@ export default function PlayerCards({ players, activePlayerId }) {
         
         // Dynamic styling depending on state
         // Dynamic styling depending on state
-        let borderGlow = "border-4 var(--shadow-pixel)";
-        if (isSelfActive) {
-          borderGlow = `border-4 shadow-[0_0_0_4px_${player.playerColorHex},var(--shadow-pixel)] scale-105`;
-        }
 
         const currentEvo = EVOLUTION_STAGES[player.currentEvolutionStage] || EVOLUTION_STAGES[0];
 

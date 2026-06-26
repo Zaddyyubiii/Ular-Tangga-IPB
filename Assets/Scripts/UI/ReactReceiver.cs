@@ -37,6 +37,9 @@ namespace UI
                 Instance = this;
                 name = "ReactReceiver"; // Wajib persis agar SendMessage bisa menemukan objek ini
                 DontDestroyOnLoad(gameObject);
+#if UNITY_WEBGL && !UNITY_EDITOR
+                UnityEngine.WebGLInput.captureAllKeyboardInput = false;
+#endif
             }
             else if (Instance != this)
             {
