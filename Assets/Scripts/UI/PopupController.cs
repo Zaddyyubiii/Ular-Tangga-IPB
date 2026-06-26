@@ -5,6 +5,17 @@ using UnityEngine.UI;
 
 namespace UI
 {
+    [System.Serializable]
+    public class ReactPopupData
+    {
+        public string title;
+        public string message;
+        public bool showContinueButton;
+        public float autoCloseDelay;
+        public bool playExplosion;
+        public string type; // "NormalPopup"
+    }
+
     public class PopupController : MonoBehaviour
     {
         public static PopupController Instance;
@@ -24,6 +35,17 @@ namespace UI
         private Action onContinueCallback;
         private Coroutine autoCloseCoroutine;
         private bool isPopupOpen;
+
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void ShowPopupToReact(string json);
+
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void ClosePopupToReact();
+        #else
+        private static void ShowPopupToReact(string json) {}
+        private static void ClosePopupToReact() {}
+        #endif
 
         private void Awake()
         {
@@ -168,6 +190,21 @@ namespace UI
             var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
             bool isBot = curPlayer != null && curPlayer.isBot;
 
+            // Sync to React
+            ReactPopupData data = new ReactPopupData {
+                title = title,
+                message = message,
+                showContinueButton = showContinueButton,
+                autoCloseDelay = autoCloseDelay,
+                playExplosion = playExplosion,
+                type = "NormalPopup"
+            };
+            ShowPopupToReact(JsonUtility.ToJson(data));
+
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            if (popupPanel != null) popupPanel.SetActive(false); // Hide local UI
+            #endif
+
             // Logs matching section 11
             Debug.Log($"Gameplay popup shown: {title}");
             Debug.Log($"Popup opened: {title}. Auto close in {autoCloseDelay} seconds.");
@@ -212,6 +249,8 @@ namespace UI
 
             // Reset scale if it was shaking or animating
             if (popupPanel != null) popupPanel.transform.localPosition = Vector3.zero;
+
+            ClosePopupToReact();
 
             Action callback = onContinueCallback;
             onContinueCallback = null;

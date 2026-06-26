@@ -27,6 +27,19 @@ mergeInto(LibraryManager.library, {
         window.dispatchEvent(event);
     },
 
+    // Notify React to show generic popup (Normal Tile / Event)
+    ShowPopupToReact: function(popupJson) {
+        var jsonStr = UTF8ToString(popupJson);
+        var event = new CustomEvent("UnityShowPopup", { detail: JSON.parse(jsonStr) });
+        window.dispatchEvent(event);
+    },
+
+    // Notify React to hide generic popup
+    ClosePopupToReact: function() {
+        var event = new CustomEvent("UnityClosePopup");
+        window.dispatchEvent(event);
+    },
+
     // Notify React that the quiz has been answered (useful for bot auto-answers)
     QuizAnsweredToReact: function(selectedIndex) {
         var event = new CustomEvent("UnityQuizAnswered", { detail: { selectedIndex: selectedIndex } });

@@ -1,6 +1,18 @@
-# Arsitektur Komunikasi & Integrasi React UI Overlay (WebGL)
+# Arsitektur Komunikasi & Integrasi React UI Overlay
 
-Dokumen ini menjelaskan rancangan sistem, jembatan komunikasi, serta kontrak pertukaran data (*data contracts*) antara mesin game **Unity C#** dan pembungkus **React HUD Overlay** yang melayang di atas Canvas browser.
+## Arsitektur Utama (Headless Unity UI)
+
+Proyek ini menggunakan pendekatan **Headless Unity UI** untuk WebGL. Artinya:
+1. **Unity (C#):** Berfungsi murni sebagai **State Engine / Server** dan perender objek 3D (Papan, Pion). Seluruh Canvas UI bawaan Unity (HUD, Popup, Quiz, GameOver) **DINONAKTIFKAN** saat di-*build* ke WebGL.
+2. **React (JavaScript):** Berfungsi murni sebagai **Frontend UI**. React menerima pembaruan *state* dari Unity melalui jembatan JSON, lalu merender antarmuka yang dinamis, interaktif, dan cantik menggunakan Tailwind CSS dan Framer Motion.
+
+## Jembatan Komunikasi (Bridge)
+
+Komunikasi dua arah ini ditangani oleh:
+- **`ReactBridge.jslib`**: Plugin WebGL di dalam Unity yang memungkinkan C# memanggil fungsi JavaScript di sisi browser (React).
+- **`ReactSender.cs`**: Mengirimkan data dari Unity ke React (menggunakan struktur data JSON seperti `ReactGameState`, `ReactQuizState`, dll).
+- **`ReactReceiver.cs`**: Menerima interaksi klik/tombol dari React (misalnya `OnRollDiceFromReact`, `OnAnswerQuiz`, dll) dan meneruskannya ke Game Engine Unity.
+- **`App.jsx`**: Mendengarkan *custom events* di `window` browser dan mendistribusikannya ke komponen-komponen visual React.
 
 ---
 

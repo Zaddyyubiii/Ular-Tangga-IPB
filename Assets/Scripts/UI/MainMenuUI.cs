@@ -39,7 +39,7 @@ namespace UI
 
         private void Awake()
         {
-            RepairGeneratedLayout();
+            // Tidak perlu mereparasi layout karena UI Unity akan disembunyikan dan digantikan React
         }
 
         private void Start()
@@ -47,6 +47,14 @@ namespace UI
             // Reset player setup configuration and clear React overlays
             GameSetup.Reset();
             LoadedMainMenuToReact();
+
+            // MATIKAN KANVAS UNITY! Karena UI Main Menu sekarang dirender penuh oleh React
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) canvas = FindAnyObjectByType<Canvas>();
+            if (canvas != null && canvas.name.Contains("MainMenu"))
+            {
+                canvas.gameObject.SetActive(false);
+            }
 
             // Bind buttons
             if (btnDecreasePlayers != null) btnDecreasePlayers.onClick.AddListener(DecreasePlayers);
@@ -69,7 +77,7 @@ namespace UI
 #endif
 
             UpdatePlayerLabel();
-            RefreshNameInputFields();
+            // RefreshNameInputFields(); // Tidak lagi merender UI C#
 
             // Play background music (safe)
             if (Audio.AudioManager.Instance != null && Audio.AudioManager.Instance.mainMenuBGM != null)
@@ -85,7 +93,6 @@ namespace UI
             {
                 playerCountSelected--;
                 UpdatePlayerLabel();
-                RefreshNameInputFields();
             }
         }
 
@@ -96,7 +103,6 @@ namespace UI
             {
                 playerCountSelected++;
                 UpdatePlayerLabel();
-                RefreshNameInputFields();
             }
         }
 

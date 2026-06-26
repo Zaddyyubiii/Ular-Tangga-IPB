@@ -8,7 +8,7 @@
     <!-- Playful typography outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
       body, html {
         margin: 0;
@@ -168,8 +168,8 @@
         }
       };
     </script>
-    <script type="module" crossorigin src="./assets/index-O6eHZ3yy.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BwQ-7cW4.css">
+    <script type="module" crossorigin src="./assets/index-B-P0IZe5.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D2Oy5Cxu.css">
   </head>
   <body>
     <!-- Collapsible Debug Log Screen Panel - Shifted next to Player 3 card to avoid overlap -->
@@ -186,6 +186,20 @@
       <span>🐞 LOGS</span>
     </button>
 
+    <!-- Keyboard Focus Interceptor for Unity WebGL -->
+    <script>
+      // Unity's WebGL engine captures all keyboard events by default. 
+      // We stop the events in the capture phase so React inputs work natively.
+      function stopUnityKeyboardCapture(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          e.stopImmediatePropagation();
+        }
+      }
+      window.addEventListener('keydown', stopUnityKeyboardCapture, true);
+      window.addEventListener('keyup', stopUnityKeyboardCapture, true);
+      window.addEventListener('keypress', stopUnityKeyboardCapture, true);
+    </script>
+
     <!-- Unity Background Container -->
     <div id="unity-container">
       <canvas id="unity-canvas" tabindex="-1"></canvas>
@@ -201,7 +215,7 @@
     <!-- React Overlay Mount -->
     <div id="root"></div>
 
-    <!-- React App Scripts Bundle -->
+    <!-- React App Scripts Bundle -->
 
     <!-- Native Unity Loader script execution -->
     <script>

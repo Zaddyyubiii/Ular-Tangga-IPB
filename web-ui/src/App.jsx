@@ -5,6 +5,8 @@ import RollDiceBar from './components/RollDiceBar';
 import QuizModal from './components/QuizModal';
 import PrologueModal from './components/PrologueModal';
 import GameOverModal from './components/GameOverModal';
+import MainMenu from './components/MainMenu';
+import PopupModal from './components/PopupModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
@@ -12,6 +14,8 @@ function App() {
   const [quiz, setQuiz] = useState(null);
   const [prologue, setPrologue] = useState(null);
   const [gameOver, setGameOver] = useState(null);
+  const [isMainMenu, setIsMainMenu] = useState(true);
+  const [popupData, setPopupData] = useState(null);
 
   // Listen to native Unity WebGL CustomEvents
   useEffect(() => {
@@ -40,12 +44,24 @@ function App() {
       setQuiz(null);
     };
 
+    const handleShowPopup = (e) => {
+      console.log("React received ShowPopup:", e.detail);
+      setPopupData(e.detail);
+    };
+
+    const handleClosePopup = () => {
+      console.log("React received ClosePopup");
+      setPopupData(null);
+    };
+
     const handleMainMenuLoaded = () => {
       console.log("React received MainMenuLoaded. Resetting all state.");
       setGameState(null);
       setQuiz(null);
       setPrologue(null);
       setGameOver(null);
+      setPopupData(null);
+      setIsMainMenu(true);
     };
 
     window.addEventListener("UnityStateUpdated", handleStateUpdate);
@@ -53,6 +69,8 @@ function App() {
     window.addEventListener("UnityShowPrologue", handleShowPrologue);
     window.addEventListener("UnityShowGameOver", handleShowGameOver);
     window.addEventListener("UnityCloseQuiz", handleCloseQuiz);
+    window.addEventListener("UnityShowPopup", handleShowPopup);
+    window.addEventListener("UnityClosePopup", handleClosePopup);
     window.addEventListener("UnityMainMenuLoaded", handleMainMenuLoaded);
 
     return () => {
@@ -61,6 +79,8 @@ function App() {
       window.removeEventListener("UnityShowPrologue", handleShowPrologue);
       window.removeEventListener("UnityShowGameOver", handleShowGameOver);
       window.removeEventListener("UnityCloseQuiz", handleCloseQuiz);
+      window.removeEventListener("UnityShowPopup", handleShowPopup);
+      window.removeEventListener("UnityClosePopup", handleClosePopup);
       window.removeEventListener("UnityMainMenuLoaded", handleMainMenuLoaded);
     };
   }, []);
@@ -76,9 +96,21 @@ function App() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden pointer-events-none select-none select-none flex flex-col items-center justify-between">
+    <div className="relative w-screen h-screen overflow-hidden pointer-events-none flex flex-col items-center justify-between">
+      {/* 0. Main Menu */}
+      <AnimatePresence>
+        {isMainMenu && (
+          <MainMenu 
+            onStartGame={(data) => {
+              setIsMainMenu(false);
+              triggerUnityAction("OnStartGameFromReact", JSON.stringify(data));
+            }} 
+          />
+        )}
+      </AnimatePresence>
+
       {/* 1. Top HUD active capsule */}
-      {gameState && !prologue && !gameOver && (
+      {gameState && !prologue && !gameOver && !isMainMenu && (
         <TopHUD 
           activePlayerName={gameState.players.find(p => p.id === gameState.activePlayerId)?.playerName || ""}
           activePlayerColor={gameState.players.find(p => p.id === gameState.activePlayerId)?.playerColorHex || "#ffffff"}
@@ -163,7 +195,13 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* 4. Modal Overlays */}
+      {/* 4. Quiz Modal overlay */}
+      <QuizModal quizData={quiz} triggerUnityAction={triggerUnityAction} />
+
+      {/* 4b. Normal Popup Modal overlay */}
+      <PopupModal popupData={popupData} triggerUnityAction={triggerUnityAction} />
+
+      {/* 5. Prologue overlay */}
       {prologue && (
         <PrologueModal 
           text={prologue.narrationText} 
@@ -174,16 +212,7 @@ function App() {
         />
       )}
 
-      {quiz && (
-        <QuizModal 
-          quiz={quiz} 
-          onAnswer={(answer) => triggerUnityAction("OnAnswerQuiz", answer)}
-          onClose={() => {
-            setQuiz(null);
-            triggerUnityAction("OnCloseQuizFeedback", "");
-          }}
-        />
-      )}
+
 
       {gameOver && (
         <GameOverModal 

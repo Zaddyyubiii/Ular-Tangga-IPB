@@ -5,6 +5,13 @@ using Core;
 
 namespace UI
 {
+    [System.Serializable]
+    public class ReactStartGameData
+    {
+        public int playerCount;
+        public string[] playerNames;
+    }
+
     public class ReactReceiver : MonoBehaviour
     {
         public static ReactReceiver Instance;
@@ -77,6 +84,16 @@ namespace UI
             }
         }
 
+        // Dipanggil dari React saat pemain mengklik tombol Lanjut pada Popup biasa (Kegiatan Positif, Ular Tangga)
+        public void OnPopupClosedFromReact(string dummy)
+        {
+            Debug.Log("[ReactReceiver] Received OnPopupClosedFromReact from React");
+            if (PopupController.Instance != null)
+            {
+                PopupController.Instance.ClosePopup();
+            }
+        }
+
         // Dipanggil dari React saat mengklik Play Again
         public void OnPlayAgain(string dummy)
         {
@@ -94,6 +111,45 @@ namespace UI
             if (GameOverUI.Instance != null)
             {
                 GameOverUI.Instance.ReturnToMainMenu();
+            }
+        }
+
+        // Dipanggil dari React saat klik "Mulai Bermain" di MainMenu React
+        public void OnStartGameFromReact(string jsonPayload)
+        {
+            Debug.Log($"[ReactReceiver] Received OnStartGameFromReact: {jsonPayload}");
+            try
+            {
+                ReactStartGameData data = JsonUtility.FromJson<ReactStartGameData>(jsonPayload);
+                
+                GameSetup.HumanPlayerCount = data.playerCount;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (i < data.playerCount)
+                    {
+                        string trimmed = (data.playerNames != null && i < data.playerNames.Length && data.playerNames[i] != null) 
+                            ? data.playerNames[i].Trim() : "";
+                        GameSetup.PlayerNames[i] = string.IsNullOrEmpty(trimmed) ? $"Mahasiswa {i + 1}" : (trimmed.Length > 14 ? trimmed.Substring(0, 14) : trimmed);
+                    }
+                    else
+                    {
+                        GameSetup.PlayerNames[i] = $"Bot {i + 1}";
+                    }
+                }
+
+                Core.GameManager.numRealPlayers = data.playerCount;
+                PlayerPrefs.SetInt("NumRealPlayers", data.playerCount);
+                for (int i = 0; i < 4; i++)
+                {
+                    PlayerPrefs.SetString($"PlayerName_{i}", GameSetup.PlayerNames[i]);
+                }
+                PlayerPrefs.Save();
+
+                Core.SceneLoader.Instance.LoadScene("GameScene");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[ReactReceiver] Failed to parse OnStartGameFromReact payload: {e.Message}");
             }
         }
     }

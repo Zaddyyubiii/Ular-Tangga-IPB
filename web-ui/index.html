@@ -8,7 +8,7 @@
     <!-- Playful typography outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
       body, html {
         margin: 0;
@@ -183,6 +183,20 @@
       <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #00ff00; animation: dot-pulse 1.5s infinite;"></span>
       <span>🐞 LOGS</span>
     </button>
+
+    <!-- Keyboard Focus Interceptor for Unity WebGL -->
+    <script>
+      // Unity's WebGL engine captures all keyboard events by default. 
+      // We stop the events in the capture phase so React inputs work natively.
+      function stopUnityKeyboardCapture(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          e.stopImmediatePropagation();
+        }
+      }
+      window.addEventListener('keydown', stopUnityKeyboardCapture, true);
+      window.addEventListener('keyup', stopUnityKeyboardCapture, true);
+      window.addEventListener('keypress', stopUnityKeyboardCapture, true);
+    </script>
 
     <!-- Unity Background Container -->
     <div id="unity-container">

@@ -34,16 +34,14 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
   const isCorrect = selectedIdx === quiz.correctAnswerIndex;
 
   return (
-    <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 pointer-events-auto select-none font-playful">
+    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 pointer-events-auto select-none font-playful">
       <motion.div
-        className="w-full max-w-lg bg-game-dark/95 border-4 border-slate-700/60 rounded-cartoon p-6 text-center text-white"
+        className="w-full max-w-lg parchment-panel shadow-2xl p-6 text-center"
         style={{
-          boxShadow: hasAnswered 
-            ? (isCorrect ? "0 0 35px rgba(21, 184, 90, 0.35), 0 8px 0 0 rgba(0, 0, 0, 0.45)" : "0 0 35px rgba(230, 62, 39, 0.35), 0 8px 0 0 rgba(0, 0, 0, 0.45)")
-            : "0 8px 0 0 rgba(0, 0, 0, 0.45)",
           borderColor: hasAnswered
-            ? (isCorrect ? "rgba(21, 184, 90, 0.6)" : "rgba(230, 62, 39, 0.6)")
-            : "rgba(255, 255, 255, 0.15)"
+            ? (isCorrect ? "var(--color-game-deep-grass)" : "#8b0000")
+            : "var(--color-game-dark-wood)",
+          backgroundColor: "var(--color-game-parchment-light)"
         }}
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -51,12 +49,12 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
         {/* Academic Header Badge */}
-        <div className="inline-block bg-game-blue/20 text-game-cyan border border-game-blue/40 text-[10px] font-black uppercase px-3 py-1 rounded-full mb-3 tracking-widest">
-          IPB Quiz Challenge 🎓
+        <div className="inline-block bg-[var(--color-game-sky)] text-[var(--color-game-dark-text)] border-2 border-black/20 text-[10px] font-black uppercase px-3 py-1 rounded-md mb-3 tracking-widest font-bangers">
+          Kuis Tata Tertib 🎓
         </div>
 
         {/* Question text */}
-        <h2 className="text-lg font-black leading-snug text-slate-100 mb-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+        <h2 className="text-xl font-black leading-snug text-[var(--color-game-dark-text)] mb-6 drop-shadow-sm font-playful">
           {quiz.questionText}
         </h2>
 
@@ -69,12 +67,13 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
                 <button
                   key={idx}
                   onClick={() => handleOptionClick(idx)}
-                  className="w-full text-left p-4 rounded-xl text-white font-extrabold text-sm uppercase transition-all duration-100 flex items-center gap-3 cursor-pointer bg-slate-900 border-2 border-slate-800 hover:bg-slate-850 hover:border-slate-700 active:translate-y-[2px] border-b-4 border-b-slate-950 active:border-b-2"
+                  className="wood-button w-full text-left p-4 text-[var(--color-game-cream-text)] font-extrabold text-sm transition-all duration-100 flex items-center gap-3 bg-[var(--color-game-wood)] border-[var(--color-game-dark-wood)] hover:brightness-110"
+                  style={{ textTransform: 'none' }}
                 >
-                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-yellow-300 text-sm font-black">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--color-game-dark-wood)] text-yellow-300 text-lg font-bangers">
                     {labelLetter}
                   </span>
-                  <span className="flex-1 text-slate-200">{choice}</span>
+                  <span className="flex-1 font-playful">{choice}</span>
                 </button>
               );
             })}
@@ -84,11 +83,11 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex flex-col items-center gap-4 bg-slate-900/60 p-5 rounded-2xl border border-slate-800 mb-2"
+            className="flex flex-col items-center gap-4 bg-[var(--color-game-parchment)] p-5 rounded-2xl border-4 border-black/10 mb-2"
           >
             {/* Header statement */}
             <motion.h3
-              className={`text-2xl font-black ${isCorrect ? "text-green-400" : "text-red-400"}`}
+              className={`text-3xl font-bangers ${isCorrect ? "text-[var(--color-game-deep-grass)]" : "text-[#8b0000]"}`}
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 0.3 }}
             >
@@ -96,18 +95,19 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
             </motion.h3>
 
             {/* Explanatory text */}
-            <p className="text-xs font-semibold text-slate-300 leading-relaxed text-justify max-h-[140px] overflow-y-auto px-1.5">
+            <p className="text-sm font-bold text-[var(--color-game-dark-text)] leading-relaxed text-center max-h-[140px] overflow-y-auto px-1.5 font-playful">
               {isCorrect ? quiz.correctFeedback : quiz.incorrectFeedback}
             </p>
 
             {/* Bubbly dismiss button */}
             <button
               onClick={onClose}
-              className={`mt-2 py-2.5 px-6 rounded-xl text-white font-black text-xs uppercase cursor-pointer transition-all duration-100 hover:scale-105 active:translate-y-1 border-b-4 ${
+              className={`wood-button mt-2 py-3 px-8 text-xl font-bangers uppercase transition-all duration-100 ${
                 isCorrect 
-                  ? "bg-green-600 hover:bg-green-500 border-green-800 active:border-b-0" 
-                  : "bg-red-600 hover:bg-red-500 border-red-800 active:border-b-0"
+                  ? "bg-[var(--color-game-grass)] border-[var(--color-game-deep-grass)]" 
+                  : "bg-[#E84C4C] border-[#8b0000]"
               }`}
+              style={{ backgroundColor: isCorrect ? 'var(--color-game-grass)' : '#E84C4C', borderColor: isCorrect ? 'var(--color-game-deep-grass)' : '#8b0000' }}
             >
               Lanjutkan Perjalanan
             </button>

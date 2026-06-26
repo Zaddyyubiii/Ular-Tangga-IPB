@@ -167,7 +167,9 @@ namespace UI
         {
             if (diceResultPanel != null)
             {
+                #if !UNITY_WEBGL || UNITY_EDITOR
                 diceResultPanel.SetActive(true);
+                #endif
             }
 
             if (dicePlayerText != null)
@@ -205,7 +207,9 @@ namespace UI
         {
             if (diceResultPanel != null)
             {
+                #if !UNITY_WEBGL || UNITY_EDITOR
                 diceResultPanel.SetActive(true);
+                #endif
             }
 
             if (dicePlayerText != null)
@@ -251,7 +255,9 @@ namespace UI
         {
             if (diceResultPanel != null)
             {
+                #if !UNITY_WEBGL || UNITY_EDITOR
                 diceResultPanel.SetActive(false);
+                #endif
             }
 
             if (dicePlayerText != null) dicePlayerText.text = "";

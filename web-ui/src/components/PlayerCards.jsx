@@ -2,11 +2,11 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const EVOLUTION_STAGES = [
-  { name: "MABA 🌱", style: "bg-green-500/20 text-green-300 border-green-500/40" },
-  { name: "SOPHOMORE 📖", style: "bg-blue-500/20 text-blue-300 border-blue-500/40" },
-  { name: "JUNIOR 🔬", style: "bg-purple-500/20 text-purple-300 border-purple-500/40" },
-  { name: "SENIOR 🎓", style: "bg-orange-500/20 text-orange-300 border-orange-500/40" },
-  { name: "DUTA TATIB 👑", style: "bg-yellow-500/30 text-yellow-300 border-yellow-500 animate-pulse" }
+  { name: "MABA 🌱", style: "wood-panel text-[var(--color-game-cream-text)]" },
+  { name: "SOPHOMORE 📖", style: "wood-panel text-[var(--color-game-cream-text)]" },
+  { name: "JUNIOR 🔬", style: "wood-panel text-[var(--color-game-cream-text)]" },
+  { name: "SENIOR 🎓", style: "wood-panel text-[var(--color-game-cream-text)]" },
+  { name: "DUTA TATIB 👑", style: "wood-panel text-yellow-300 border-yellow-500 animate-pulse" }
 ];
 
 export default function PlayerCards({ players, activePlayerId }) {
@@ -27,9 +27,10 @@ export default function PlayerCards({ players, activePlayerId }) {
         const posClass = positionClasses[index] || "hidden";
         
         // Dynamic styling depending on state
-        let borderGlow = "border-2 border-slate-700/50 shadow-bubble";
+        // Dynamic styling depending on state
+        let borderGlow = "border-4 var(--shadow-pixel)";
         if (isSelfActive) {
-          borderGlow = `border-4 shadow-[0_0_20px_rgba(255,255,255,0.2)]`;
+          borderGlow = `border-4 shadow-[0_0_0_4px_${player.playerColorHex},var(--shadow-pixel)] scale-105`;
         }
 
         const currentEvo = EVOLUTION_STAGES[player.currentEvolutionStage] || EVOLUTION_STAGES[0];
@@ -37,14 +38,15 @@ export default function PlayerCards({ players, activePlayerId }) {
         return (
           <motion.div
             key={player.id}
-            className={`absolute ${posClass} w-64 p-3 rounded-cartoon pointer-events-auto bg-game-dark/85 backdrop-blur-md select-none border-4 ${borderGlow} overflow-hidden`}
+            className={`absolute ${posClass} w-64 p-3 rounded-xl pointer-events-auto parchment-panel select-none overflow-hidden transition-transform ${isSelfActive ? 'z-20' : 'z-10'}`}
             style={{ 
-              borderColor: isSelfActive ? player.playerColorHex : "rgba(255, 255, 255, 0.15)",
-              boxShadow: isSelfActive ? `0 8px 0 0 rgba(0, 0, 0, 0.35), 0 0 25px ${player.playerColorHex}40` : "0 6px 0 0 rgba(0, 0, 0, 0.3)"
+              borderColor: 'var(--color-game-dark-wood)',
+              backgroundColor: isSelfActive ? 'var(--color-game-parchment-light)' : 'var(--color-game-parchment)',
+              boxShadow: isSelfActive ? `0 0 0 4px ${player.playerColorHex}, var(--shadow-pixel)` : "var(--shadow-pixel)"
             }}
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ 
-              scale: isSelfActive ? 1.03 : 1.0, 
+              scale: isSelfActive ? 1.05 : 1.0, 
               opacity: player.isDroppedOut ? 0.5 : 1.0 
             }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -53,68 +55,72 @@ export default function PlayerCards({ players, activePlayerId }) {
             <AnimatePresence>
               {isSelfActive && (
                 <motion.div 
-                  className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent"
-                  animate={{ opacity: [0.3, 1, 0.3] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                />
+                  className="absolute top-0 right-0 left-0 text-center font-bangers text-[10px] tracking-widest text-[var(--color-game-cream-text)] py-0.5 z-10"
+                  style={{ backgroundColor: player.playerColorHex }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  GILIRAN BERJALAN
+                </motion.div>
               )}
             </AnimatePresence>
 
             {/* Header info: Name and Bot tag */}
-            <div className="flex justify-between items-center mb-2">
+            <div className={`flex justify-between items-center mb-2 ${isSelfActive ? 'mt-4' : ''}`}>
               <span 
-                className="font-extrabold text-lg truncate drop-shadow-[0_2px_2px_rgba(0,0,0,0.6)]"
+                className="font-black text-xl truncate drop-shadow-sm font-playful"
                 style={{ color: player.playerColorHex }}
               >
                 {player.playerName}
               </span>
               <div className="flex gap-1.5 items-center">
                 {player.isBot && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                    BOT 🤖
+                  <span className="text-[10px] font-bangers px-2 py-0.5 rounded border border-[var(--color-game-dark-wood)] bg-[var(--color-game-wood)] text-[var(--color-game-cream-text)]">
+                    BOT
                   </span>
                 )}
                 {player.isDroppedOut && (
-                  <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-red-600 text-white border border-red-500 animate-pulse">
+                  <span className="text-[10px] font-bangers px-2 py-0.5 rounded bg-red-600 text-white border border-red-800 animate-pulse">
                     DO ❌
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Grid statistics - Cartoon bubbly style */}
+            {/* Grid statistics - Wood Panel Style */}
             <div className="grid grid-cols-2 gap-2 text-xs font-semibold mb-2">
-              <div className="bg-slate-900/50 p-1.5 rounded-xl border border-slate-850 flex flex-col items-center">
-                <span className="text-slate-400 text-[10px] uppercase font-bold">Ubin Aktif</span>
-                <span className="text-sm font-extrabold text-yellow-300">
+              <div className="bg-[var(--color-game-wood)] text-[var(--color-game-cream-text)] p-1.5 rounded-lg border-2 border-[var(--color-game-dark-wood)] flex flex-col items-center">
+                <span className="text-[10px] uppercase font-bold opacity-80">Ubin Aktif</span>
+                <span className="text-sm font-black text-yellow-300">
                   {player.isFinished ? "FINISH 🎉" : `# ${player.currentTile}`}
                 </span>
               </div>
-              <div className="bg-slate-900/50 p-1.5 rounded-xl border border-slate-850 flex flex-col items-center">
-                <span className="text-slate-400 text-[10px] uppercase font-bold">Langgar Tatib</span>
-                <span className="text-sm font-extrabold text-red-400 flex items-center gap-1">
+              <div className="bg-[var(--color-game-wood)] text-[var(--color-game-cream-text)] p-1.5 rounded-lg border-2 border-[var(--color-game-dark-wood)] flex flex-col items-center">
+                <span className="text-[10px] uppercase font-bold opacity-80">Langgar Tatib</span>
+                <span className="text-sm font-black text-red-400 flex items-center gap-1">
                   💀 {player.skullHitCount}
                 </span>
               </div>
             </div>
 
             {/* Footer status row */}
-            <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-slate-800/80">
+            <div className="flex justify-between items-center mt-2.5 pt-2 border-t-2 border-[var(--color-game-dark-wood)] border-dashed opacity-80">
               {/* Evolution Rank Badge */}
-              <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-lg border ${currentEvo.style}`}>
+              <span className={`text-[10px] font-bangers px-2 py-0.5 rounded-md border-2 ${currentEvo.style}`}>
                 {currentEvo.name}
               </span>
 
               {/* Status String */}
               <div className="text-right">
                 {player.skipTurns > 0 ? (
-                  <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-lg font-bold animate-pulse">
+                  <span className="text-[10px] bg-red-500 text-white border border-red-800 px-1.5 py-0.5 rounded-lg font-bold animate-pulse">
                     DISKORS ({player.skipTurns} giliran)
                   </span>
                 ) : (
                   <span 
-                    className="text-[10px] font-extrabold uppercase"
-                    style={{ color: isSelfActive ? player.playerColorHex : "#94a3b8" }}
+                    className="text-[12px] font-bangers uppercase drop-shadow-sm"
+                    style={{ color: isSelfActive ? player.playerColorHex : "var(--color-game-dark-text)" }}
                   >
                     {player.status}
                   </span>
@@ -125,12 +131,12 @@ export default function PlayerCards({ players, activePlayerId }) {
             {/* Pulsating active arrow */}
             {isSelfActive && (
               <motion.div 
-                className="absolute top-1 right-2"
+                className="absolute bottom-2 right-2 flex justify-center items-center"
                 animate={{ y: [0, -3, 0] }}
                 transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
               >
                 <div 
-                  className="w-2.5 h-2.5 rounded-full"
+                  className="w-3 h-3 rounded-sm rotate-45 border-2 border-white"
                   style={{ backgroundColor: player.playerColorHex }}
                 />
               </motion.div>

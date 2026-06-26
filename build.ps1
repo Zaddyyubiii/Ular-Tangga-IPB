@@ -3,7 +3,7 @@ Write-Host "  Ular Tangga IPB WebGL Auto-Builder & Runner" -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Green
 
 $unityPath = "C:\Program Files\Unity\Hub\Editor\6000.4.8f1\Editor\Unity.exe"
-$projectPath = "C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB"
+$projectPath = "c:\Users\LENOVO\Desktop\Ular-Tangga-IPB"
 $buildMethod = "UlarTangga.EditorSetup.WebGLBuildHelper.BuildWebGLToDocs"
 
 # Check if Unity Editor is currently running to avoid file lock issues

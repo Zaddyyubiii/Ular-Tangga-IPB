@@ -119,7 +119,7 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
         {instruction && (
           <motion.div
             key={instruction}
-            className="px-4 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-sm border border-slate-700 text-[11px] font-bold text-slate-200 tracking-wide text-center"
+            className="px-4 py-1.5 parchment-panel text-[11px] font-bold text-[var(--color-game-dark-text)] tracking-wide text-center"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -132,18 +132,18 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
 
       {/* Main Flat Charging Panel */}
       <div 
-        className={`w-full max-w-[580px] p-2 bg-game-dark/85 backdrop-blur-md rounded-cartoon border-4 border-white/10 shadow-bubble flex items-center justify-between gap-3 ${
+        className={`w-full max-w-[580px] p-2 wood-panel flex items-center justify-between gap-3 ${
           !isHumanTurn ? "opacity-70 pointer-events-none" : "pointer-events-auto"
         }`}
         style={{
           boxShadow: isCharging 
-            ? `0 0 20px rgba(0, 204, 255, 0.2), 0 6px 0 0 rgba(0, 0, 0, 0.3)` 
-            : "0 6px 0 0 rgba(0, 0, 0, 0.3)"
+            ? `0 0 20px rgba(0, 204, 255, 0.4), var(--shadow-pixel)` 
+            : "var(--shadow-pixel)"
         }}
       >
         {/* Left Side: Stats and Info labels */}
-        <div className="flex flex-col w-40 text-left pl-2">
-          <span className="text-[10px] text-slate-400 font-extrabold uppercase truncate">
+        <div className="flex flex-col w-40 text-left pl-2 font-playful">
+          <span className="text-[10px] text-[var(--color-game-parchment-light)] font-extrabold uppercase truncate">
             {isCharging ? zone.label : "Siap Mengocok"}
           </span>
           <span className="text-xs font-black text-yellow-300 truncate">
@@ -152,7 +152,7 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
         </div>
 
         {/* Center: Slider container */}
-        <div className="flex-1 h-8 bg-slate-950/80 rounded-xl border-2 border-slate-800 relative overflow-hidden flex items-center px-1">
+        <div className="flex-1 h-8 bg-slate-900 rounded-xl border-2 border-[var(--color-game-dark-wood)] relative overflow-hidden flex items-center px-1">
           {/* Slider gauge fill */}
           <motion.div 
             className={`h-5 rounded-lg bg-gradient-to-r ${zone.color}`}
@@ -161,27 +161,24 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
           />
 
           {/* Grid markers for standard zones */}
-          <div className="absolute top-0 bottom-0 left-[20%] w-0.5 bg-slate-800/40" />
-          <div className="absolute top-0 bottom-0 left-[40%] w-0.5 bg-slate-800/40" />
-          <div className="absolute top-0 bottom-0 left-[60%] w-0.5 bg-slate-800/40" />
-          <div className="absolute top-0 bottom-0 left-[80%] w-0.5 bg-slate-800/40" />
+          <div className="absolute top-0 bottom-0 left-[20%] w-0.5 bg-[var(--color-game-dark-wood)] opacity-40" />
+          <div className="absolute top-0 bottom-0 left-[40%] w-0.5 bg-[var(--color-game-dark-wood)] opacity-40" />
+          <div className="absolute top-0 bottom-0 left-[60%] w-0.5 bg-[var(--color-game-dark-wood)] opacity-40" />
+          <div className="absolute top-0 bottom-0 left-[80%] w-0.5 bg-[var(--color-game-dark-wood)] opacity-40" />
 
           {/* Centered power percent text */}
-          <span className="absolute left-1/2 -translate-x-1/2 text-xs font-black text-white drop-shadow-[0_1.5px_1.5px_rgba(0,0,0,0.8)]">
+          <span className="absolute left-1/2 -translate-x-1/2 text-xs font-bangers tracking-wider text-white drop-shadow-md">
             POWER: {Math.round(charge)}%
           </span>
         </div>
 
         {/* Right Side: Roll bubble button */}
         <button
-          className={`h-11 px-5 rounded-xl text-white font-black text-sm uppercase transition-all duration-100 flex items-center justify-center cursor-pointer select-none active:translate-y-[4px] border-b-4 ${
+          className={`h-11 px-5 rounded-xl font-bangers text-xl uppercase transition-all duration-100 flex items-center justify-center select-none ${
             isHumanTurn 
-              ? "bg-game-orange hover:bg-game-orange/90 active:border-b-0 border-orange-800 active:translate-y-1" 
-              : "bg-slate-700 border-slate-800 text-slate-400 cursor-not-allowed"
+              ? "wood-button" 
+              : "bg-slate-700 border-4 border-[var(--color-game-dark-wood)] text-slate-400 cursor-not-allowed opacity-50"
           }`}
-          style={{
-            boxShadow: isHumanTurn && !isCharging ? "0 4px 0 0 rgba(154, 43, 22, 1)" : "none"
-          }}
           onMouseDown={startCharging}
           onMouseUp={() => stopCharging(true)}
           onTouchStart={(e) => { e.preventDefault(); startCharging(); }}
