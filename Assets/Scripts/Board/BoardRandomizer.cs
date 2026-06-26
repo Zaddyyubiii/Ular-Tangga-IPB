@@ -8,7 +8,7 @@ namespace Board
         public static RuntimeBoardConfig GenerateBoard(BoardConfig originalConfig, int seed, Core.MessageBank messageBank)
         {
             int attempts = 0;
-            while (attempts < 100)
+            while (attempts < 1000)
             {
                 attempts++;
                 // Deterministic seed progression per attempt to guarantee we eventually find a solution
@@ -31,6 +31,7 @@ namespace Board
             RuntimeBoardConfig config = new RuntimeBoardConfig();
             HashSet<int> occupied = new HashSet<int>();
             HashSet<int> starts = new HashSet<int>();
+            HashSet<int> specialTiles = new HashSet<int>();
 
             // Setup zones
             List<int>[] zoneTiles = new List<int>[5];
@@ -46,28 +47,14 @@ namespace Board
             // Determine element counts
             int questionCount = originalConfig != null && originalConfig.questionTiles != null ? originalConfig.questionTiles.Count : 6;
             int skullCount = originalConfig != null && originalConfig.skullTiles != null ? originalConfig.skullTiles.Count : 3;
-            int snakeCount = originalConfig != null && originalConfig.snakes != null ? originalConfig.snakes.Count : 5;
-            int ladderCount = originalConfig != null && originalConfig.ladders != null ? originalConfig.ladders.Count : 5;
+            int snakeCount = 6;
+            int ladderCount = 6;
 
-            // Predefine severity and level arrays
-            List<int> snakeSeverities = new List<int>();
-            for (int i = 0; i < snakeCount; i++)
-            {
-                // Balance combination: severity 0 (light), 1 (medium), 2 (heavy)
-                if (i < 2) snakeSeverities.Add(0); // 2 light
-                else if (i < 4) snakeSeverities.Add(1); // 2 medium
-                else snakeSeverities.Add(2); // 1 heavy (and scale beyond that)
-            }
+            // Predefine severity and level arrays to strictly ensure exactly 2 of each level
+            List<int> snakeSeverities = new List<int> { 0, 0, 1, 1, 2, 2 };
             ShuffleList(snakeSeverities);
 
-            List<int> ladderLevels = new List<int>();
-            for (int i = 0; i < ladderCount; i++)
-            {
-                // Balance combination: level 0 (short), 1 (medium), 2 (long)
-                if (i < 2) ladderLevels.Add(0); // 2 short
-                else if (i < 4) ladderLevels.Add(1); // 2 medium
-                else ladderLevels.Add(2); // 1 long (and scale beyond that)
-            }
+            List<int> ladderLevels = new List<int> { 0, 0, 1, 1, 2, 2 };
             ShuffleList(ladderLevels);
 
             // Determine zone quotas ensuring minZone counts are always satisfied
@@ -80,19 +67,32 @@ namespace Board
             for (int i = 0; i < ladderCount; i++)
             {
                 int level = ladderLevels[i];
-                int targetZone = PickZoneFromQuota(ladderQuota);
-                if (targetZone == -1) return null;
-
+                int rowDiff = level == 0 ? 1 : (level == 1 ? 2 : 3);
+                
                 bool placed = false;
-                List<int> candidates = new List<int>(zoneTiles[targetZone]);
+                List<int> candidates = new List<int>();
+                for (int t = 2; t <= 99; t++)
+                {
+                    int r = (t - 1) / 10;
+                    if (r + rowDiff <= 9) candidates.Add(t);
+                }
                 ShuffleList(candidates);
 
                 foreach (int start in candidates)
                 {
-                    int dest = start + (level == 0 ? 10 : (level == 1 ? 20 : 30));
-                    if (dest > 99) continue;
+                    int startRow = (start - 1) / 10;
+                    int destRow = startRow + rowDiff;
+                    
+                    int startCol = (startRow % 2 == 0) ? ((start - 1) % 10) : (9 - ((start - 1) % 10));
+                    int minCol = Mathf.Max(0, startCol - 2);
+                    int maxCol = Mathf.Min(9, startCol + 2);
+                    int destCol = UnityEngine.Random.Range(minCol, maxCol + 1);
+                    
+                    int dest = (destRow % 2 == 0) ? (destRow * 10 + destCol + 1) : (destRow * 10 + (9 - destCol) + 1);
+                    
+                    if (dest > 100) dest = 100;
 
-                    if (IsValidPlacement(start, occupied) && !starts.Contains(dest) && !occupied.Contains(dest))
+                    if (IsValidPlacement(start, occupied, specialTiles) && !starts.Contains(dest) && !occupied.Contains(dest))
                     {
                         TileDefinition def = new TileDefinition
                         {
@@ -108,6 +108,7 @@ namespace Board
                         occupied.Add(start);
                         occupied.Add(dest);
                         starts.Add(start);
+                        specialTiles.Add(start);
                         placed = true;
                         break;
                     }
@@ -119,21 +120,32 @@ namespace Board
             for (int i = 0; i < snakeCount; i++)
             {
                 int severity = snakeSeverities[i];
-                int targetZone = PickZoneFromQuota(snakeQuota);
-                if (targetZone == -1) return null;
-
+                int rowDiff = severity == 0 ? 1 : (severity == 1 ? 2 : 3);
+                
                 bool placed = false;
-                List<int> candidates = new List<int>(zoneTiles[targetZone]);
+                List<int> candidates = new List<int>();
+                for (int t = 2; t <= 99; t++)
+                {
+                    int r = (t - 1) / 10;
+                    if (r - rowDiff >= 0) candidates.Add(t);
+                }
                 ShuffleList(candidates);
 
                 foreach (int start in candidates)
                 {
-                    int dest = start - (severity == 0 ? 10 : (severity == 1 ? 20 : 40));
-                    dest = Mathf.Max(1, dest);
+                    int startRow = (start - 1) / 10;
+                    int destRow = startRow - rowDiff;
+                    
+                    int startCol = (startRow % 2 == 0) ? ((start - 1) % 10) : (9 - ((start - 1) % 10));
+                    int minCol = Mathf.Max(0, startCol - 2);
+                    int maxCol = Mathf.Min(9, startCol + 2);
+                    int destCol = UnityEngine.Random.Range(minCol, maxCol + 1);
+                    
+                    int dest = (destRow % 2 == 0) ? (destRow * 10 + destCol + 1) : (destRow * 10 + (9 - destCol) + 1);
+                    
+                    if (dest >= start) continue;
 
-                    if (dest >= start) continue; // Safety check
-
-                    if (IsValidPlacement(start, occupied) && !starts.Contains(dest) && !occupied.Contains(dest))
+                    if (IsValidPlacement(start, occupied, specialTiles) && !starts.Contains(dest) && !occupied.Contains(dest))
                     {
                         TileDefinition def = new TileDefinition
                         {
@@ -149,6 +161,7 @@ namespace Board
                         occupied.Add(start);
                         occupied.Add(dest);
                         starts.Add(start);
+                        specialTiles.Add(start);
                         placed = true;
                         break;
                     }
@@ -170,7 +183,7 @@ namespace Board
                 {
                     if (start <= 10) continue; // Do not place skulls in 2-10
 
-                    if (IsValidPlacement(start, occupied))
+                    if (IsValidPlacement(start, occupied, specialTiles))
                     {
                         TileDefinition def = new TileDefinition
                         {
@@ -181,6 +194,7 @@ namespace Board
 
                         config.tiles[start] = def;
                         occupied.Add(start);
+                        specialTiles.Add(start);
                         placed = true;
                         break;
                     }
@@ -200,7 +214,7 @@ namespace Board
 
                 foreach (int start in candidates)
                 {
-                    if (IsValidPlacement(start, occupied))
+                    if (IsValidPlacement(start, occupied, specialTiles))
                     {
                         TileDefinition def = new TileDefinition
                         {
@@ -210,6 +224,7 @@ namespace Board
 
                         config.tiles[start] = def;
                         occupied.Add(start);
+                        specialTiles.Add(start);
                         placed = true;
                         break;
                     }
@@ -220,23 +235,31 @@ namespace Board
             return config;
         }
 
-        private static bool IsValidPlacement(int tile, HashSet<int> occupied)
+        private static bool IsValidPlacement(int tile, HashSet<int> occupied, HashSet<int> specialTiles)
         {
             if (occupied.Contains(tile)) return false;
 
-            // Radius check: no more than 2 special tiles in [tile-3, tile+3]
-            int specialCount = 0;
-            for (int i = -3; i <= 3; i++)
+            // Radius check 1: no special tiles allowed within [tile-1, tile+1]
+            // This prevents snakes/ladders from starting exactly right next to each other
+            for (int i = -1; i <= 1; i++)
             {
-                int checkTile = tile + i;
-                if (occupied.Contains(checkTile))
-                {
-                    specialCount++;
-                }
+                if (occupied.Contains(tile + i)) return false;
             }
 
-            // Adding this tile would make it 2, which is allowed, but > 2 is forbidden
-            if (specialCount >= 2) return false;
+            // Radius check 2: no more than 2 special tiles in radius 3
+            // This aligns with BoardValidator's radius rule.
+            for (int p = tile - 3; p <= tile + 3; p++)
+            {
+                if (p == tile || specialTiles.Contains(p))
+                {
+                    int count = 0;
+                    for (int k = p - 3; k <= p + 3; k++)
+                    {
+                        if (k == tile || specialTiles.Contains(k)) count++;
+                    }
+                    if (count > 2) return false;
+                }
+            }
 
             return true;
         }

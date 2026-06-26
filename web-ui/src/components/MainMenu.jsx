@@ -41,8 +41,8 @@ const MainMenu = ({ onStartGame }) => {
         </div>
 
         <div className="wood-panel px-10 py-5 mb-8 text-center border-[5px]">
-          <h1 className="text-3xl sm:text-4xl font-bangers tracking-widest text-[var(--color-game-cream-text)] drop-shadow-md uppercase">Ular Tangga</h1>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-wider text-[var(--color-game-cream-text)] mt-1 uppercase">Tata Tertib IPB</h2>
+          <h1 className="text-3xl sm:text-4xl font-pixel font-bold tracking-widest text-[var(--color-game-cream-text)] drop-shadow-md uppercase">Ular Tangga</h1>
+          <h2 className="text-xl sm:text-2xl font-pixel font-bold tracking-wider text-[var(--color-game-cream-text)] mt-1 uppercase">Tata Tertib IPB</h2>
         </div>
 
         <div className="flex items-center justify-center gap-6 mb-8 w-full">
@@ -83,7 +83,7 @@ const MainMenu = ({ onStartGame }) => {
                 onKeyDown={stopProp}
                 onKeyUp={stopProp}
                 onKeyPress={stopProp}
-                className="px-5 py-3 font-bold text-lg rounded-lg border-[3px] border-[var(--color-game-dark-wood)] shadow-inner focus:outline-none focus:ring-4 focus:ring-[var(--color-game-wood)] transition-all placeholder:opacity-50 origin-top bg-[var(--color-game-parchment-light)] text-[var(--color-game-dark-text)]"
+                className="px-5 py-3 font-pixel font-bold text-lg rounded-lg border-[3px] border-[var(--color-game-dark-wood)] shadow-inner focus:outline-none focus:ring-4 focus:ring-[var(--color-game-wood)] transition-all placeholder:opacity-50 origin-top bg-[var(--color-game-parchment-light)] text-[var(--color-game-dark-text)]"
               />
             ))}
           </AnimatePresence>

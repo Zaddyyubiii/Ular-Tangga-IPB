@@ -48,3 +48,6 @@ Desktop.ini
 
 # Crashlytics generated files
 [Aa]ssets/[Ss]treamingAssets/crashlytics-build.properties
+
+# Build log
+build.log

@@ -47,17 +47,21 @@ Merepresentasikan **pelanggaran akademik berat** (Skorsing).
 *   Mendatangkan visualisasi animasi bom dengan pesan *"Pelanggaran Berat! [Alasan]"*.
 *   **Drop Out (DO)**: Jika pemain yang sama mendarat di petak tengkorak sebanyak **3 kali** (akumulatif), pemain tersebut langsung dinyatakan **Drop Out** (gugur/kalah seketika).
 
-### 4. Petak Ular (Snakes)
+### 4. Petak Ular (Snakes - 6 Kotak)
 Merepresentasikan hambatan studi atau pelanggaran ringan-sedang di kampus.
-*   **Tingkat 1 (Ular Pendek)**: Turun 1 baris (10 petak). Contoh: Parkir sembarangan (Pelanggaran Ringan).
-*   **Tingkat 2 (Ular Sedang)**: Turun 2 baris (20 petak). Contoh: Merusak fasilitas IPB (Pelanggaran Sedang).
-*   **Tingkat 3 (Ular Panjang)**: Turun 4 baris (40 petak). Contoh: Membawa senjata tajam di lingkungan kampus (Pelanggaran Berat).
+*   **Tingkat 1 (Ular Pendek, 2 Kotak)**: Turun 1 baris (10 petak). Contoh: Parkir sembarangan (Pelanggaran Ringan).
+*   **Tingkat 2 (Ular Sedang, 2 Kotak)**: Turun 2 baris (20 petak). Contoh: Merusak fasilitas IPB (Pelanggaran Sedang).
+*   **Tingkat 3 (Ular Panjang, 2 Kotak)**: Turun 3 baris (30 petak). Contoh: Membawa senjata tajam di lingkungan kampus (Pelanggaran Berat denda/sanksi, sedangkan skorsing ada di Kotak Tengkorak).
 
-### 5. Petak Tangga (Ladders)
+### 5. Petak Tangga (Ladders - 6 Kotak)
 Merepresentasikan pencapaian akademik mahasiswa.
-*   **Tingkat 1 (Tangga Pendek)**: Naik 1 baris (10 petak). Contoh: Juara 1 lomba debat departemen di tingkat Fakultas / Proposal proyek sosial lolos pendanaan BEM.
-*   **Tingkat 2 (Tangga Sedang)**: Naik 2 baris (20 petak). Contoh: Karya tulis ilmiah memenangkan Juara 1 tingkat Nasional di kompetisi Inovasi Pertanian.
-*   **Tingkat 3 (Tangga Panjang)**: Naik 3 baris (30 petak).
+*   **Tingkat 1 (Tangga Pendek, 2 Kotak)**: Naik 1 baris (10 petak). Contoh: Juara 1 lomba debat departemen di tingkat Fakultas / Proposal proyek sosial lolos pendanaan BEM.
+*   **Tingkat 2 (Tangga Sedang, 2 Kotak)**: Naik 2 baris (20 petak). Contoh: Karya tulis ilmiah memenangkan Juara 1 tingkat Nasional di kompetisi Inovasi Pertanian.
+*   **Tingkat 3 (Tangga Panjang, 2 Kotak)**: Naik 3 baris (30 petak).
+
+### 6. Aturan Penempatan Board (Board Randomizer constraints)
+*   **Posisi Natural**: Ular dan Tangga selalu bergerak secara proporsional. Titik awal dan akhirnya maksimal hanya bergeser sejauh 2 kolom (X-axis +/- 2) agar lintasannya terlihat vertikal natural.
+*   **Anti-Dempet**: Jarak minimal antar kotak spesial (ular/tangga/kuis/tengkorak) adalah 2 petak. Tidak boleh ada kotak spesial yang bersebelahan persis (mencegah efek rel kereta api sejajar).
 
 ---
 

@@ -38,6 +38,29 @@ namespace Board
         private Dictionary<int, Vector2> tilePositions = new Dictionary<int, Vector2>();
         private Dictionary<int, GameObject> tileObjects = new Dictionary<int, GameObject>();
 
+        private Sprite _tileTextureSprite;
+        private Sprite TileTexture
+        {
+            get
+            {
+                if (_tileTextureSprite == null)
+                {
+                    Texture2D tex = new Texture2D(2, 2);
+                    tex.filterMode = FilterMode.Point;
+                    tex.wrapMode = TextureWrapMode.Repeat;
+                    tex.SetPixels(new Color[] {
+                        new Color(1f, 1f, 1f, 1f),
+                        new Color(0.92f, 0.92f, 0.92f, 1f),
+                        new Color(0.92f, 0.92f, 0.92f, 1f),
+                        new Color(1f, 1f, 1f, 1f)
+                    });
+                    tex.Apply();
+                    _tileTextureSprite = Sprite.Create(tex, new Rect(0, 0, 2, 2), new Vector2(0.5f, 0.5f), 2f, 0, SpriteMeshType.FullRect);
+                }
+                return _tileTextureSprite;
+            }
+        }
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -215,6 +238,9 @@ namespace Board
             innerGo.transform.SetParent(tileGo.transform, false);
             Image inner = innerGo.AddComponent<Image>();
             inner.raycastTarget = false;
+            inner.sprite = TileTexture;
+            inner.type = Image.Type.Tiled;
+            inner.pixelsPerUnitMultiplier = 0.5f; // Adjust size of checkers
             RectTransform innerRect = innerGo.GetComponent<RectTransform>();
             innerRect.anchorMin = Vector2.zero;
             innerRect.anchorMax = Vector2.one;

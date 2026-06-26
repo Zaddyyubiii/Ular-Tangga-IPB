@@ -2,7 +2,6 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
 const PUBLIC_DIR = path.join(__dirname, 'docs');
 
 const MIME_TYPES = {
@@ -57,16 +56,30 @@ const server = http.createServer((req, res) => {
             const ext = path.extname(filePath).toLowerCase();
             const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-            // Add security and CORS headers
-            res.writeHead(200, {
+            // IMPORTANT: Prevent browser from caching old WebGL builds
+            res.writeHead(200, { 
                 'Content-Type': contentType,
                 'Access-Control-Allow-Origin': '*',
                 'X-Content-Type-Options': 'nosniff',
-                'Cache-Control': 'no-cache'
+                'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             });
             res.end(data);
         });
     });
+});
+
+let PORT = process.env.PORT || 3000;
+
+server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+        console.log(`[Warning] Port ${PORT} sedang dipakai. Mencoba port ${PORT + 1}...`);
+        PORT++;
+        server.listen(PORT);
+    } else {
+        console.error(e);
+    }
 });
 
 server.listen(PORT, () => {

@@ -67,7 +67,7 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
                 <button
                   key={idx}
                   onClick={() => handleOptionClick(idx)}
-                  className="wood-button w-full text-left p-4 text-[var(--color-game-cream-text)] font-extrabold text-sm transition-all duration-100 flex items-center gap-3 bg-[var(--color-game-wood)] border-[var(--color-game-dark-wood)] hover:brightness-110"
+                  className="wood-button w-full text-left p-4 text-[var(--color-game-cream-text)] font-extrabold text-sm transition-all duration-100 flex items-center gap-3 border-[var(--color-game-dark-wood)] hover:brightness-110"
                   style={{ textTransform: 'none' }}
                 >
                   <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--color-game-dark-wood)] text-yellow-300 text-lg font-bangers">

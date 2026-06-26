@@ -69,14 +69,17 @@ export default function PlayerCards({ players, activePlayerId }) {
             {/* Header info: Name and Bot tag */}
             <div className={`flex justify-between items-center mb-2 ${isSelfActive ? 'mt-4' : ''}`}>
               <span 
-                className="font-black text-xl truncate drop-shadow-sm font-playful"
-                style={{ color: player.playerColorHex }}
+                className="font-black text-xl truncate drop-shadow-sm font-playful tracking-wide"
+                style={{ 
+                  color: player.playerColorHex,
+                  WebkitTextStroke: '1px var(--color-game-dark-wood)'
+                }}
               >
                 {player.playerName}
               </span>
               <div className="flex gap-1.5 items-center">
                 {player.isBot && (
-                  <span className="text-[10px] font-bangers px-2 py-0.5 rounded border border-[var(--color-game-dark-wood)] bg-[var(--color-game-wood)] text-[var(--color-game-cream-text)]">
+                  <span className="text-[10px] font-bangers px-2 py-0.5 rounded border border-[var(--color-game-dark-wood)] wood-bg text-[var(--color-game-cream-text)]">
                     BOT
                   </span>
                 )}
@@ -90,13 +93,13 @@ export default function PlayerCards({ players, activePlayerId }) {
 
             {/* Grid statistics - Wood Panel Style */}
             <div className="grid grid-cols-2 gap-2 text-xs font-semibold mb-2">
-              <div className="bg-[var(--color-game-wood)] text-[var(--color-game-cream-text)] p-1.5 rounded-lg border-2 border-[var(--color-game-dark-wood)] flex flex-col items-center">
+              <div className="wood-bg text-[var(--color-game-cream-text)] p-1.5 rounded-lg border-2 border-[var(--color-game-dark-wood)] flex flex-col items-center">
                 <span className="text-[10px] uppercase font-bold opacity-80">Ubin Aktif</span>
                 <span className="text-sm font-black text-yellow-300">
                   {player.isFinished ? "FINISH 🎉" : `# ${player.currentTile}`}
                 </span>
               </div>
-              <div className="bg-[var(--color-game-wood)] text-[var(--color-game-cream-text)] p-1.5 rounded-lg border-2 border-[var(--color-game-dark-wood)] flex flex-col items-center">
+              <div className="wood-bg text-[var(--color-game-cream-text)] p-1.5 rounded-lg border-2 border-[var(--color-game-dark-wood)] flex flex-col items-center">
                 <span className="text-[10px] uppercase font-bold opacity-80">Langgar Tatib</span>
                 <span className="text-sm font-black text-red-400 flex items-center gap-1">
                   💀 {player.skullHitCount}

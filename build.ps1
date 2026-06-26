@@ -26,15 +26,63 @@ if ($unityProcesses) {
 Write-Host "Mulai membangun (compiling) WebGL. Proses ini membutuhkan waktu beberapa menit..." -ForegroundColor Yellow
 Write-Host "Harap tunggu..." -ForegroundColor DarkGray
 
-# Start Unity in batchmode
-$process = Start-Process -FilePath $unityPath -ArgumentList "-batchmode", "-projectPath `"$projectPath`"", "-executeMethod $buildMethod", "-quit" -Wait -NoNewWindow -PassThru
+# Detect CPU Cores for maximum multicore utilization
+$cores = (Get-WmiObject -class Win32_processor).NumberOfLogicalProcessors
+# Set log path
+$logPath = Join-Path $projectPath "build.log"
+if (Test-Path $logPath) { Remove-Item $logPath -Force }
+
+Write-Host "Mendeteksi $cores CPU threads. Mengaktifkan kompilasi multi-core & efisiensi maksimal..." -ForegroundColor Cyan
+
+# Start Unity in batchmode without Wait so we can track progress
+$process = Start-Process -FilePath $unityPath -ArgumentList "-batchmode", "-nographics", "-projectPath `"$projectPath`"", "-executeMethod $buildMethod", "-job-worker-count", "$cores", "-logFile", "`"$logPath`"", "-quit" -PassThru
+
+# Progress tracking loop
+$startTime = Get-Date
+$statusText = "Memulai Engine Unity..."
+$percent = 0
+$estimatedTotal = 60 # Default estimated total seconds
+
+while (!$process.HasExited) {
+    $elapsed = (Get-Date) - $startTime
+    
+    if (Test-Path $logPath) {
+        $lastLines = Get-Content $logPath -Tail 15 -ErrorAction SilentlyContinue
+        if ($lastLines) {
+            foreach ($line in $lastLines) {
+                if ($line -match "DisplayProgressbar: (.+)") {
+                    $statusText = $matches[1]
+                }
+                if ($line -match "IL2CPP") { $percent = [math]::Max($percent, 40); $estimatedTotal = 80; $statusText = "Kompilasi C++ (IL2CPP)..." }
+                if ($line -match "Emscripten") { $percent = [math]::Max($percent, 75); $statusText = "Kompilasi WebAssembly..." }
+                if ($line -match "Building WebGL") { $percent = [math]::Max($percent, 90); $statusText = "Menyelesaikan Build..." }
+            }
+        }
+    }
+    
+    # Smooth progress increment
+    if ($percent -lt 99) { $percent += 0.2 }
+    
+    $remaining = [math]::Max(0, $estimatedTotal - $elapsed.TotalSeconds)
+    
+    Write-Progress -Activity "Building WebGL Project" -Status "[$($elapsed.ToString('mm\:ss')) berjalan | ~Maks. $([math]::Round($remaining))s tersisa] $statusText" -PercentComplete ([math]::Min(100, $percent))
+    
+    Start-Sleep -Milliseconds 500
+}
+
+Write-Progress -Activity "Building WebGL Project" -Completed
 
 if ($process.ExitCode -eq 0) {
-    Write-Host "[SUCCESS] WebGL berhasil dibangun ulang ke folder docs/!" -ForegroundColor Green
-    Write-Host "Menjalankan server lokal..." -ForegroundColor Green
-    Write-Host "--------------------------------------------------"
-    node server.js
+    Write-Host "[SUCCESS] WebGL berhasil dibangun dalam waktu $($((Get-Date) - $startTime).ToString('mm\:ss'))!" -ForegroundColor Green
+    Write-Host "Menyatukan React UI ke dalam Build..." -ForegroundColor Yellow
+    Set-Location -Path "$projectPath\web-ui"
+    npm run build
+    Set-Location -Path $projectPath
+    Write-Host "[SUCCESS] React UI berhasil digabungkan!" -ForegroundColor Green
+    
+    Write-Host "--------------------------------------------------" -ForegroundColor Cyan
+    Write-Host "[INFO] Build selesai! Silakan jalankan 'node server.js' secara manual jika ingin menyalakan server." -ForegroundColor Yellow
 } else {
     Write-Host "[ERROR] Kompilasi WebGL gagal dengan kode keluar: $($process.ExitCode)" -ForegroundColor Red
-    Write-Host "Pastikan tidak ada instance Unity lain yang sedang terbuka pada proyek ini." -ForegroundColor Red
+    Write-Host "Silakan cek file build.log untuk detail error." -ForegroundColor Red
 }
