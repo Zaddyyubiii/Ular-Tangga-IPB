@@ -123,8 +123,27 @@ namespace UI
                 outline.effectColor = outlineColor;
                 outline.effectDistance = new Vector2(4f, 4f);
                 
-                if (labelTitle != null) labelTitle.color = theme.darkText;
-                if (labelMessage != null) labelMessage.color = theme.darkText;
+                // Adjust panel size to make it larger and more readable
+                var rectTransform = popupPanel.GetComponent<RectTransform>();
+                if (rectTransform != null)
+                {
+                    rectTransform.sizeDelta = new Vector2(540f, 320f);
+                }
+
+                if (labelTitle != null)
+                {
+                    labelTitle.color = new Color(1.00f, 0.95f, 0.76f); // Cream Text (#FFF1C1) for dark wood title bar contrast
+                    labelTitle.fontSize = 24f;
+                }
+
+                if (labelMessage != null)
+                {
+                    labelMessage.color = new Color(0.23f, 0.12f, 0.07f); // Dark Brown Text (#3A1F12) for light parchment contrast
+                    labelMessage.fontSize = 18f;
+                    labelMessage.enableWordWrapping = true;
+                    labelMessage.alignment = TMPro.TextAlignmentOptions.Center;
+                }
+
                 if (btnContinue != null) theme.StyleButtonAsWood(btnContinue, btnContinue.GetComponentInChildren<TMPro.TextMeshProUGUI>());
             }
 
