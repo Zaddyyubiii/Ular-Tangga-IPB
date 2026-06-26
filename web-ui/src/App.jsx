@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PlayerCards from './components/PlayerCards';
 import TopHUD from './components/TopHUD';
 import RollDiceBar from './components/RollDiceBar';
@@ -85,7 +85,6 @@ function App() {
     };
   }, []);
 
-  // Web bridge helper triggers
   const triggerUnityAction = (methodName, parameter) => {
     if (window.unityInstance) {
       console.log(`React calling C# Receiver: ${methodName}(${parameter})`);
@@ -94,6 +93,11 @@ function App() {
       console.warn("Unity instance not loaded yet or in mock testing environment.");
     }
   };
+
+  const activePlayer = gameState?.players?.find(p => p.id === gameState.activePlayerId);
+  const activePlayerName = activePlayer?.playerName || "";
+  const isPopupOpen = !!(popupData || quiz || prologue || gameOver);
+  const showDiceBanner = gameState && gameState.showDiceResult && !isPopupOpen && gameState.diceRollerName === activePlayerName;
 
   return (
     <div className="relative w-screen h-screen overflow-hidden pointer-events-none flex flex-col items-center justify-between">
@@ -112,8 +116,8 @@ function App() {
       {/* 1. Top HUD active capsule */}
       {gameState && !prologue && !gameOver && !isMainMenu && (
         <TopHUD 
-          activePlayerName={gameState.players.find(p => p.id === gameState.activePlayerId)?.playerName || ""}
-          activePlayerColor={gameState.players.find(p => p.id === gameState.activePlayerId)?.playerColorHex || "#ffffff"}
+          activePlayerName={activePlayerName}
+          activePlayerColor={activePlayer?.playerColorHex || "#ffffff"}
           timer={gameState.timerRemaining}
         />
       )}
@@ -130,12 +134,14 @@ function App() {
           activePlayerId={gameState.activePlayerId}
           instruction={gameState.instructionText}
           onRoll={(power) => triggerUnityAction("OnRollDice", power)}
+          gameState={gameState}
+          isPopupOpen={isPopupOpen}
         />
       )}
 
       {/* Floating Dice Result Banner */}
       <AnimatePresence>
-        {gameState && gameState.showDiceResult && !quiz && !prologue && !gameOver && (
+        {showDiceBanner && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -196,7 +202,15 @@ function App() {
       </AnimatePresence>
 
       {/* 4. Quiz Modal overlay */}
-      <QuizModal quizData={quiz} triggerUnityAction={triggerUnityAction} />
+      <QuizModal 
+        key={quiz ? quiz.questionText : "empty-quiz"}
+        quiz={quiz} 
+        onAnswer={(answer) => triggerUnityAction("OnAnswerQuiz", answer)}
+        onClose={() => {
+          setQuiz(null);
+          triggerUnityAction("OnCloseQuizFeedback", "");
+        }}
+      />
 
       {/* 4b. Normal Popup Modal overlay */}
       <PopupModal popupData={popupData} triggerUnityAction={triggerUnityAction} />

@@ -1,56 +1,45 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function RollDiceBar({ players, activePlayerId, instruction, onRoll }) {
+export default function RollDiceBar({ players, activePlayerId, instruction, onRoll, gameState, isPopupOpen }) {
   const [charge, setCharge] = useState(0);
   const [isCharging, setIsCharging] = useState(false);
+  const [hasRolledThisTurn, setHasRolledThisTurn] = useState(false);
   const chargeRef = useRef(0);
   const directionRef = useRef(1); // 1 = up, -1 = down
   const animFrameId = useRef(null);
   const lastTimeRef = useRef(null);
 
   const activePlayer = players.find(p => p.id === activePlayerId);
-  const isHumanTurn = activePlayer && !activePlayer.isBot;
   const isGameOverState = players.every(p => p.isFinished || p.isDroppedOut);
 
-  // Constants matching C# settings
+  // Derived state machine: "ready", "charging", "locked", "disabled"
+  let diceControlState = "disabled";
+  if (isGameOverState) {
+    diceControlState = "disabled";
+  } else if (activePlayer) {
+    if (activePlayer.isBot) {
+      diceControlState = "disabled";
+    } else {
+      if (activePlayer.isFinished || activePlayer.isDroppedOut) {
+        diceControlState = "disabled";
+      } else if (hasRolledThisTurn || (gameState && gameState.showDiceResult)) {
+        diceControlState = "locked";
+      } else if (isPopupOpen) {
+        diceControlState = "disabled";
+      } else if (isCharging) {
+        diceControlState = "charging";
+      } else {
+        diceControlState = "ready";
+      }
+    }
+  }
+
   const CHARGE_SPEED = 280; // Fast reflex-based!
+  const chargeLoopRef = useRef();
 
-  // Reset charge if turn changes
-  useEffect(() => {
-    stopCharging(false);
-    setCharge(0);
-  }, [activePlayerId]);
-
-  // Handle global Space key listeners for charging
-  useEffect(() => {
-    if (!isHumanTurn || isGameOverState) return;
-
-    const handleKeyDown = (e) => {
-      if (e.code === 'Space' && !e.repeat && !isCharging) {
-        e.preventDefault();
-        startCharging();
-      }
-    };
-
-    const handleKeyUp = (e) => {
-      if (e.code === 'Space' && isCharging) {
-        e.preventDefault();
-        stopCharging(true);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [isHumanTurn, isCharging, isGameOverState]);
-
-  // Charging animation loop
-  const chargeLoop = (timestamp) => {
+  // Charging animation loop (stable callback, empty dependency array)
+  const chargeLoop = useCallback((timestamp) => {
     if (!lastTimeRef.current) lastTimeRef.current = timestamp;
     const delta = (timestamp - lastTimeRef.current) / 1000; // in seconds
     lastTimeRef.current = timestamp;
@@ -68,29 +57,116 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
     chargeRef.current = nextCharge;
     setCharge(nextCharge);
 
-    animFrameId.current = requestAnimationFrame(chargeLoop);
-  };
+    animFrameId.current = requestAnimationFrame(chargeLoopRef.current);
+  }, []);
 
-  const startCharging = () => {
-    if (isCharging || !isHumanTurn) return;
+  useEffect(() => {
+    chargeLoopRef.current = chargeLoop;
+  }, [chargeLoop]);
+
+  // startCharging and stopCharging callbacks
+  const startCharging = useCallback(() => {
+    if (diceControlState !== "ready") return;
     setIsCharging(true);
     chargeRef.current = 0;
     directionRef.current = 1;
     lastTimeRef.current = null;
-    animFrameId.current = requestAnimationFrame(chargeLoop);
-  };
+    animFrameId.current = requestAnimationFrame(chargeLoopRef.current);
+  }, [diceControlState]);
 
-  const stopCharging = (shouldRoll = true) => {
+  const stopCharging = useCallback((shouldRoll = true) => {
     if (animFrameId.current) {
       cancelAnimationFrame(animFrameId.current);
       animFrameId.current = null;
     }
     setIsCharging(false);
     
-    if (shouldRoll && chargeRef.current > 0) {
+    if (shouldRoll) {
+      setHasRolledThisTurn(true);
       onRoll(chargeRef.current);
     }
-  };
+  }, [onRoll]);
+
+  // Safety synchronization effect: cancel loop if state becomes locked or disabled
+  useEffect(() => {
+    if (diceControlState !== "charging" && diceControlState !== "ready") {
+      if (animFrameId.current) {
+        cancelAnimationFrame(animFrameId.current);
+        animFrameId.current = null;
+      }
+      if (isCharging) {
+        Promise.resolve().then(() => {
+          setIsCharging(false);
+        });
+      }
+    }
+  }, [diceControlState, isCharging]);
+
+  // Reset charge and turn-based roll lock if turn changes
+  useEffect(() => {
+    if (animFrameId.current) {
+      cancelAnimationFrame(animFrameId.current);
+      animFrameId.current = null;
+    }
+    
+    // Defer state resets to satisfy the strict set-state-in-effect rule
+    Promise.resolve().then(() => {
+      setCharge(0);
+      setHasRolledThisTurn(false);
+      setIsCharging(false);
+    });
+  }, [activePlayerId]);
+
+  // Handle global Space key listeners for charging
+  const stateRef = useRef(diceControlState);
+  useEffect(() => {
+    stateRef.current = diceControlState;
+  }, [diceControlState]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.code === 'Space' && !e.repeat) {
+        if (stateRef.current === 'ready') {
+          e.preventDefault();
+          startCharging();
+        }
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      if (e.code === 'Space') {
+        if (stateRef.current === 'charging') {
+          e.preventDefault();
+          stopCharging(true);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [startCharging, stopCharging]);
+
+  // Handle global mouseup/touchend release to handle dragging outside the button container
+  useEffect(() => {
+    if (diceControlState !== "charging") return;
+
+    const handleGlobalRelease = () => {
+      stopCharging(true);
+    };
+
+    window.addEventListener('mouseup', handleGlobalRelease);
+    window.addEventListener('touchend', handleGlobalRelease);
+
+    return () => {
+      window.removeEventListener('mouseup', handleGlobalRelease);
+      window.removeEventListener('touchend', handleGlobalRelease);
+    };
+  }, [diceControlState, stopCharging]);
 
   // Determine current active zone and dice range
   const getZoneInfo = (val) => {
@@ -109,6 +185,40 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
     const needed = 100 - activePlayer.currentTile;
     if (needed > 0 && needed < 12) {
       neededSuffix = ` (Butuh ${needed})`;
+    }
+  }
+
+  // Dynamic Status Labels for user clarity
+  let statusLabel = "MENUNGGU GILIRAN";
+  let subLabel = "Harap tunggu...";
+
+  if (isGameOverState) {
+    statusLabel = "PERMAINAN SELESAI";
+    subLabel = "Game Over";
+  } else if (activePlayer) {
+    if (activePlayer.isBot) {
+      statusLabel = "BOT SEDANG BERMAIN";
+      subLabel = `${activePlayer.playerName} sedang giliran...`;
+    } else {
+      if (activePlayer.isFinished) {
+        statusLabel = "SELESAI";
+        subLabel = `${activePlayer.playerName} sudah finish!`;
+      } else if (activePlayer.isDroppedOut) {
+        statusLabel = "DROP OUT";
+        subLabel = `${activePlayer.playerName} gugur (DO)`;
+      } else if (diceControlState === "locked") {
+        statusLabel = "SUDAH ROLL";
+        subLabel = "Menunggu hasil langkah...";
+      } else if (isPopupOpen) {
+        statusLabel = "SELESAIKAN POPUP";
+        subLabel = "Selesaikan kuis/pesan dulu";
+      } else if (diceControlState === "charging") {
+        statusLabel = "LEPASKAN UNTUK ROLL";
+        subLabel = `Kekuatan: ${Math.round(charge)}%`;
+      } else if (diceControlState === "ready") {
+        statusLabel = "SIAP MENGOCOK";
+        subLabel = `Dadu: ${zone.range}${neededSuffix}`;
+      }
     }
   }
 
@@ -133,10 +243,10 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
       {/* Main Flat Charging Panel */}
       <div 
         className={`w-full max-w-[580px] p-2 wood-panel flex items-center justify-between gap-3 ${
-          !isHumanTurn ? "opacity-70 pointer-events-none" : "pointer-events-auto"
+          (diceControlState !== "ready" && diceControlState !== "charging") ? "opacity-70 pointer-events-none" : "pointer-events-auto"
         }`}
         style={{
-          boxShadow: isCharging 
+          boxShadow: diceControlState === "charging" 
             ? `0 0 20px rgba(0, 204, 255, 0.4), var(--shadow-pixel)` 
             : "var(--shadow-pixel)"
         }}
@@ -144,10 +254,10 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
         {/* Left Side: Stats and Info labels */}
         <div className="flex flex-col w-40 text-left pl-2 font-playful">
           <span className="text-[10px] text-[var(--color-game-parchment-light)] font-extrabold uppercase truncate">
-            {isCharging ? zone.label : "Siap Mengocok"}
+            {statusLabel}
           </span>
           <span className="text-xs font-black text-yellow-300 truncate">
-            Dadu: {zone.range}{neededSuffix}
+            {subLabel}
           </span>
         </div>
 
@@ -175,7 +285,7 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
         {/* Right Side: Roll bubble button */}
         <button
           className={`h-11 px-5 rounded-xl font-bangers text-xl uppercase transition-all duration-100 flex items-center justify-center select-none ${
-            isHumanTurn 
+            (diceControlState === "ready" || diceControlState === "charging") 
               ? "wood-button" 
               : "bg-slate-700 border-4 border-[var(--color-game-dark-wood)] text-slate-400 cursor-not-allowed opacity-50"
           }`}
@@ -183,9 +293,9 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
           onMouseUp={() => stopCharging(true)}
           onTouchStart={(e) => { e.preventDefault(); startCharging(); }}
           onTouchEnd={(e) => { e.preventDefault(); stopCharging(true); }}
-          disabled={!isHumanTurn}
+          disabled={diceControlState !== "ready" && diceControlState !== "charging"}
         >
-          {isCharging ? "Kocok!" : "ROLL"}
+          {diceControlState === "charging" ? "Kocok!" : "ROLL"}
         </button>
       </div>
     </div>

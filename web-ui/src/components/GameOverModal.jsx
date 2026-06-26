@@ -2,6 +2,20 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export default function GameOverModal({ winnerName, winnerColor, message, onPlayAgain, onReturnMenu }) {
+  React.useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        onPlayAgain();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onPlayAgain]);
+
   return (
     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 pointer-events-auto select-none font-playful">
       <motion.div

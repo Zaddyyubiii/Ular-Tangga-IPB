@@ -47,6 +47,7 @@ namespace Dice
 
         private void Update()
         {
+#if UNITY_EDITOR
             // Space bar hold support
             if (CanAcceptHumanInput())
             {
@@ -55,6 +56,7 @@ namespace Dice
                 if (Input.GetKeyUp(KeyCode.Space) && isCharging && holdRegistered)
                     EndCharge();
             }
+#endif
 
             if (isCharging)
             {

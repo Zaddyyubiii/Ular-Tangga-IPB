@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MainMenu = ({ onStartGame }) => {
@@ -48,7 +48,7 @@ const MainMenu = ({ onStartGame }) => {
         <div className="flex items-center justify-center gap-6 mb-8 w-full">
           <motion.button 
             whileTap={{ scale: 0.9 }}
-            onClick={() => setPlayerCount(Math.max(2, playerCount - 1))}
+            onClick={() => setPlayerCount(Math.max(1, playerCount - 1))}
             className="wood-button w-12 h-12 text-3xl font-black flex items-center justify-center pb-1"
           >
             -

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 export default function QuizModal({ quiz, onAnswer, onClose }) {
   const [selectedIdx, setSelectedIdx] = useState(null);
@@ -18,6 +18,23 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
       window.removeEventListener("UnityQuizAnswered", handleBotAnswer);
     };
   }, []);
+
+  // Enter key support to dismiss feedback
+  useEffect(() => {
+    if (!quiz || !hasAnswered) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [quiz, hasAnswered, onClose]);
 
   if (!quiz) return null;
 
