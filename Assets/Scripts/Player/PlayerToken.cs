@@ -5,6 +5,29 @@ using UnityEngine.UI;
 
 namespace Player
 {
+    public static class SpriteCache
+    {
+        private static Dictionary<string, Sprite> cache = new Dictionary<string, Sprite>();
+
+        public static Sprite GetSprite(int playerId, int row, int col)
+        {
+            int pId = ((playerId - 1) % 4) + 1;
+            string path = $"PlayerSprites/p{pId}_r{row}_c{col}";
+
+            if (cache.TryGetValue(path, out Sprite s)) return s;
+
+            Texture2D tex = Resources.Load<Texture2D>(path);
+            if (tex != null)
+            {
+                tex.filterMode = FilterMode.Point;
+                Sprite newSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+                cache[path] = newSprite;
+                return newSprite;
+            }
+            return null;
+        }
+    }
+
     public class PlayerToken : MonoBehaviour
     {
         public PlayerData data;
@@ -45,8 +68,14 @@ namespace Player
                 tokenImage.color = data.playerColor;
             }
 
-            // Apply evolution sprite if available, keeping sprite original colors
-            if (data.currentSprite != null && tokenImage != null)
+            // Get Idle Sprite (Row based on stage, Col 1 is idle)
+            Sprite idleSprite = SpriteCache.GetSprite(data.id, data.currentEvolutionStage, 1);
+            if (idleSprite != null && tokenImage != null)
+            {
+                tokenImage.sprite = idleSprite;
+                tokenImage.color = Color.white; // Keep sprite original colors
+            }
+            else if (data.currentSprite != null && tokenImage != null)
             {
                 tokenImage.sprite = data.currentSprite;
                 tokenImage.color = Color.white; // Keep sprite original colors
@@ -64,6 +93,9 @@ namespace Player
         {
             if (rectTransform == null) rectTransform = GetComponent<RectTransform>();
 
+            int row = data.currentEvolutionStage;
+            int[] walkFrames = { 2, 3, 4, 3 };
+
             for (int i = 0; i < pathPositions.Count; i++)
             {
                 Vector2 startPos = rectTransform.anchoredPosition;
@@ -73,6 +105,21 @@ namespace Player
                 // Cartoony animation metrics
                 float jumpHeight = 35f; // Bouncy pixel lift
                 float tiltDirection = targetPos.x > startPos.x ? -12f : 12f; // Tilt based on movement direction
+
+                bool isJump = Vector2.Distance(startPos, targetPos) > 100f;
+                bool isLadder = isJump && targetPos.y > startPos.y;
+                bool isSnake = isJump && targetPos.y < startPos.y;
+
+                if (isLadder) {
+                    Sprite happy = SpriteCache.GetSprite(data.id, 6, 1);
+                    if (happy != null) tokenImage.sprite = happy;
+                } else if (isSnake) {
+                    Sprite shocked = SpriteCache.GetSprite(data.id, 6, 2);
+                    if (shocked != null) tokenImage.sprite = shocked;
+                }
+
+                float frameTimer = 0f;
+                int frameIdx = 0;
 
                 // Play soft tick SFX safely
                 if (Audio.AudioManager.Instance != null)
@@ -84,6 +131,16 @@ namespace Player
                 {
                     elapsed += Time.deltaTime;
                     float t = elapsed / stepDuration;
+
+                    if (!isJump) {
+                        frameTimer += Time.deltaTime;
+                        if (frameTimer > 0.15f) {
+                            frameTimer = 0f;
+                            frameIdx = (frameIdx + 1) % 4;
+                            Sprite walkSp = SpriteCache.GetSprite(data.id, row, walkFrames[frameIdx]);
+                            if (walkSp != null) tokenImage.sprite = walkSp;
+                        }
+                    }
 
                     // 1. Horizontal/Vertical Interpolation with Ease-In-Out
                     float tEase = Mathf.SmoothStep(0f, 1f, t);
@@ -125,6 +182,9 @@ namespace Player
                 rectTransform.localScale = Vector3.one;
                 rectTransform.localRotation = Quaternion.identity;
             }
+
+            // Restore idle sprite
+            UpdateVisuals();
         }
     }
 }

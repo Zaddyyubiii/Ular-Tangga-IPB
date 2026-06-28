@@ -35,7 +35,7 @@ if (Test-Path $logPath) { Remove-Item $logPath -Force }
 Write-Host "Mendeteksi $cores CPU threads. Mengaktifkan kompilasi multi-core & efisiensi maksimal..." -ForegroundColor Cyan
 
 # Start Unity in batchmode without Wait so we can track progress
-$process = Start-Process -FilePath $unityPath -ArgumentList "-batchmode", "-nographics", "-projectPath `"$projectPath`"", "-executeMethod $buildMethod", "-job-worker-count", "$cores", "-logFile", "`"$logPath`"", "-quit" -PassThru
+$process = Start-Process -FilePath $unityPath -ArgumentList "-batchmode", "-projectPath `"$projectPath`"", "-executeMethod $buildMethod", "-job-worker-count", "$cores", "-logFile", "`"$logPath`"", "-quit" -PassThru
 
 # Progress tracking loop
 $startTime = Get-Date

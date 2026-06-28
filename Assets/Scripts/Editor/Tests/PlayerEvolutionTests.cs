@@ -87,11 +87,11 @@ namespace Editor.Tests
             Sprite s4 = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 1, 1), Vector2.zero);
             Sprite sWinner = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 1, 1), Vector2.zero);
 
-            set.stage1 = s1;
-            set.stage2 = s2;
-            set.stage3 = s3;
-            set.stage4 = s4;
-            set.winnerSprite = sWinner;
+            set.stage1 = new StageSpriteData { idle = s1 };
+            set.stage2 = new StageSpriteData { idle = s2 };
+            set.stage3 = new StageSpriteData { idle = s3 };
+            set.stage4 = new StageSpriteData { idle = s4 };
+            set.stage5 = new StageSpriteData { idle = sWinner };
 
             evolutionController.characterSets.Add(set);
 

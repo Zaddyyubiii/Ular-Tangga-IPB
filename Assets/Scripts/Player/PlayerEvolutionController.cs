@@ -55,11 +55,11 @@ namespace Player
                 {
                     switch (data.currentEvolutionStage)
                     {
-                        case 1: data.currentSprite = spriteSet.stage1; break;
-                        case 2: data.currentSprite = spriteSet.stage2; break;
-                        case 3: data.currentSprite = spriteSet.stage3; break;
-                        case 4: data.currentSprite = spriteSet.stage4; break;
-                        case 5: data.currentSprite = spriteSet.winnerSprite; break;
+                        case 1: data.currentSprite = spriteSet.stage1?.idle; break;
+                        case 2: data.currentSprite = spriteSet.stage2?.idle; break;
+                        case 3: data.currentSprite = spriteSet.stage3?.idle; break;
+                        case 4: data.currentSprite = spriteSet.stage4?.idle; break;
+                        case 5: data.currentSprite = spriteSet.stage5?.idle; break;
                     }
                 }
             }

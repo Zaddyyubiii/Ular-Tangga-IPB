@@ -3,16 +3,22 @@ import { useState, useEffect, useRef } from 'react';
 const getColorName = (hex) => {
   if (!hex) return 'blue';
   const h = hex.toLowerCase();
-  if (h.includes('f443') || h.includes('red') || h.startsWith('#f') || h.startsWith('#e')) return 'red';
-  if (h.includes('4caf') || h.includes('green') || h.startsWith('#4') || h.startsWith('#3')) return 'green';
-  if (h.includes('ffeb') || h.includes('yellow') || h.includes('#ffc') || h.includes('#ffd')) return 'yellow trans';
+  if (h.includes('9e2f2f') || h.includes('e84c4c')) return 'red';
+  if (h.includes('2f5da8') || h.includes('4f8cff')) return 'blue';
+  if (h.includes('2f8b57') || h.includes('38d27a')) return 'green';
+  if (h.includes('b87822') || h.includes('ffc247')) return 'yellow trans';
   return 'blue';
 };
 
 export default function PlayerSprite({ hexColor, stage, currentTile }) {
   const color = getColorName(hexColor);
-  const [pose, setPose] = useState('c1'); // c1=idle, c2=walkR, c3=walkMid, c4=walkL
-  const [currentRow, setCurrentRow] = useState(stage || 1);
+
+  // Mapping yg benar berdasarkan gambar referensi:
+  // Column (c1-c4) = Stage (1: Punk, 2: Mulai Belajar, 3: Tertib, 4: Teladan)
+  // Row (r1-r6) = Animasi (1: Idle, 2: Walk1, 3: Walk2, 4: Walk3, 5: Happy, 6: Surprised)
+  const col = Math.max(1, Math.min(stage || 1, 4));
+  const [row, setRow] = useState(1); // r1 = idle
+
   const prevTile = useRef(currentTile);
   const animTimer = useRef(null);
   const resetTimer = useRef(null);
@@ -25,58 +31,52 @@ export default function PlayerSprite({ hexColor, stage, currentTile }) {
     clearInterval(animTimer.current);
     clearTimeout(resetTimer.current);
 
-    const resetToIdle = () => {
-      setCurrentRow(stage || 1);
-      setPose('c1');
-    };
+    const resetToIdle = () => setRow(1);
 
-    if (diff > 6) { // Ladder (goes up)
-      setCurrentRow(6);
-      setPose('c1');
+    if (diff > 6) { // Naik Tangga -> Happy (r5)
+      setRow(5);
       resetTimer.current = setTimeout(resetToIdle, 2000);
       return;
     }
 
-    if (diff < 0) { // Snake (goes down)
-      setCurrentRow(6);
-      setPose('c2');
+    if (diff < 0) { // Kena Ular -> Shocked (r6)
+      setRow(6);
       resetTimer.current = setTimeout(resetToIdle, 2000);
       return;
     }
 
-    // Walking animation
-    setCurrentRow(stage || 1);
+    // Animasi Jalan -> r2, r3, r4
     let frame = 0;
-    const frames = ['c2', 'c3', 'c4', 'c3'];
+    const walkFrames = [2, 3, 4, 3];
     animTimer.current = setInterval(() => {
-      setPose(frames[frame % 4]);
+      setRow(walkFrames[frame % 4]);
       frame++;
     }, 200);
 
     resetTimer.current = setTimeout(() => {
       clearInterval(animTimer.current);
       resetToIdle();
-    }, Math.min(diff * 200, 1500)); // Walk duration scales with distance
+    }, Math.min(Math.abs(diff) * 200, 1500));
 
     return () => {
       clearInterval(animTimer.current);
       clearTimeout(resetTimer.current);
     };
-  }, [currentTile, stage]);
-
-  useEffect(() => {
-    if (currentRow !== 6) setCurrentRow(stage || 1);
-  }, [stage, currentRow]);
+  }, [currentTile]);
 
   const prefix = color === 'blue' ? 'blue__' : `${color}_`;
-  const src = `/sprites/${prefix}split_r${currentRow}_${pose}.png`;
+  const filename = `${prefix}split_r${row}_c${col}.png`;
+  const src = `./sprites/${filename.replace(' ', '%20')}`;
 
   return (
     <img
       src={src}
-      className="w-16 h-16 object-contain"
-      style={{ imageRendering: 'pixelated' }}
-      alt={`Player sprite - ${color}`}
+      className="w-[120%] h-[120%] object-contain"
+      style={{
+        imageRendering: 'pixelated',
+        transformOrigin: 'bottom center'
+      }}
+      alt={`Character Stage ${col}`}
     />
   );
 }
