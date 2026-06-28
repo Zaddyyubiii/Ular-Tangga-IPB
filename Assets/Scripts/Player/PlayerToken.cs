@@ -68,8 +68,9 @@ namespace Player
                 tokenImage.color = data.playerColor;
             }
 
-            // Get Idle Sprite (Row based on stage, Col 1 is idle)
-            Sprite idleSprite = SpriteCache.GetSprite(data.id, data.currentEvolutionStage, 1);
+            // Get Idle Sprite (Row 1 is idle, Col based on stage 1-4)
+            int stageCol = Mathf.Clamp(data.currentEvolutionStage, 1, 4);
+            Sprite idleSprite = SpriteCache.GetSprite(data.id, 1, stageCol);
             if (idleSprite != null && tokenImage != null)
             {
                 tokenImage.sprite = idleSprite;
@@ -93,8 +94,8 @@ namespace Player
         {
             if (rectTransform == null) rectTransform = GetComponent<RectTransform>();
 
-            int row = data.currentEvolutionStage;
-            int[] walkFrames = { 2, 3, 4, 3 };
+            int stageCol = Mathf.Clamp(data.currentEvolutionStage, 1, 4);
+            int[] walkFrames = { 3, 4, 2, 4 };
 
             for (int i = 0; i < pathPositions.Count; i++)
             {
@@ -111,10 +112,10 @@ namespace Player
                 bool isSnake = isJump && targetPos.y < startPos.y;
 
                 if (isLadder) {
-                    Sprite happy = SpriteCache.GetSprite(data.id, 6, 1);
+                    Sprite happy = SpriteCache.GetSprite(data.id, 5, stageCol);
                     if (happy != null) tokenImage.sprite = happy;
                 } else if (isSnake) {
-                    Sprite shocked = SpriteCache.GetSprite(data.id, 6, 2);
+                    Sprite shocked = SpriteCache.GetSprite(data.id, 6, stageCol);
                     if (shocked != null) tokenImage.sprite = shocked;
                 }
 
@@ -137,7 +138,7 @@ namespace Player
                         if (frameTimer > 0.15f) {
                             frameTimer = 0f;
                             frameIdx = (frameIdx + 1) % 4;
-                            Sprite walkSp = SpriteCache.GetSprite(data.id, row, walkFrames[frameIdx]);
+                            Sprite walkSp = SpriteCache.GetSprite(data.id, walkFrames[frameIdx], stageCol);
                             if (walkSp != null) tokenImage.sprite = walkSp;
                         }
                     }

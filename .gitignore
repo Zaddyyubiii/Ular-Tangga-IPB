@@ -62,3 +62,7 @@ package-lock.json
 # Web UI dev artifacts
 web-ui/node_modules/
 web-ui/.playwright-mcp/
+
+# Additional ignores
+web-ui/dist/
+sprites_folder/

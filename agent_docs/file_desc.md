@@ -10,7 +10,8 @@ Dokumen ini berisi pemetaan struktur direktori dan fungsi dari berkas-berkas uta
 Berisi seluruh gambar 2D, sprite, dan UI yang digunakan dalam game.
 *   **MainMenu/**: Aset visual untuk menu utama (background, tombol, dll).
 *   **Board/**: Gambar papan permainan ular tangga berukuran 10x10.
-*   **Characters/**: Sprite untuk karakter pemain (termasuk sprite evolusi: gaya Punk, reguler, teladan, kemeja rapi, dan Duta IPB).
+*   **Characters/**: Sprite lama untuk karakter pemain.
+*   **PlayerSprites/**: (Atau di dalam `Assets/Resources/PlayerSprites/`) Sprite dinamis karakter dengan format `p{id}_r{anim}_c{stage}.png` untuk 4 tingkat evolusi (idle, walk, happy, shocked).
 *   **UI/**: Aset untuk tombol, panel pop-up, meteran dadu, dan status bar.
 
 ### 2. `Assets/Audio/` (Aset Suara)

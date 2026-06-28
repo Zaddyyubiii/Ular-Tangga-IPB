@@ -1,23 +1,25 @@
 # Handover Notes: Ular Tangga IPB WebGL
 
 ## Context
-User mengeluhkan ular dan tangga selalu muncul lurus vertikal (menggunakan konfigurasi papan default), meskipun kode pengacakan (BoardRandomizer) sudah diperbaiki sebelumnya.
+Fitur PFP Sprite (Dynamic Avatar) pada UI React telah selesai diimplementasikan. Avatar pemain sekarang menyesuaikan dengan tingkat evolusi karakter di dalam game.
 
-## Akar Masalah
-1. **BoardRandomizer** sudah berhasil diatur untuk menghasilkan tepat **6 ular dan 6 tangga** dengan posisi miring/acak.
-2. **BoardValidator** ternyata membaca konfigurasi bawaan game (BoardConfig) yang isinya adalah **5 ular dan 5 tangga**.
-3. Saat papan acak selesai dibuat (berisi 6 ular/tangga), Validator menolaknya karena `snakeCount (6) != expectedSnakes (5)`.
-4. Akibat penolakan ini, sistem mencoba ulang 100 kali, gagal terus, lalu melakukan *fallback* ke papan default (yang lurus vertikal).
+## Status Saat Ini: Fitur Sprite PFP (SELESAI)
+Sistem Avatar PFP kini sudah mendeteksi warna pemain (Mahasiswa 1/2/3/4) dan me-load *sprite sheet* animasi yang sesuai dengan tingkat evolusi mereka. 
 
-## Perbaikan yang Telah Dilakukan
-1. Melakukan *bypass* sementara pada logika `expectedSnakes` di `Assets/Scripts/Board/BoardValidator.cs` agar menerima papan berisi 6 ular/tangga buatan randomizer.
-2. Menjalankan kompilasi ulang (WebGL Build) di background via *batchmode*. Kompilasi **SUKSES** (Exit Code 0).
-3. Me-restart Node.js server (`node server.js`).
+Daftar Link Sprite berdasarkan Tingkat (Misal untuk Mahasiswa 1/Merah `p1`):
+- **Tingkat 1 (Punk)**: `./sprites/p1_r1_c1.png?v=1` (Walk: `r2`, `r3`, `r4`)
+- **Tingkat 2 (Mulai Belajar)**: `./sprites/p1_r1_c2.png?v=1` 
+- **Tingkat 3 (Tertib)**: `./sprites/p1_r1_c3.png?v=1`
+- **Tingkat 4 (Teladan)**: `./sprites/p1_r1_c4.png?v=1`
+- **Tingkat 5 (Duta)**: `./sprites/p1_r1_c4.png?v=1` *(Menggunakan set sprite Teladan, karena kolom sprite dibatasi maksimal 4)*
 
-## Status Saat Ini
-Bug **TELAH DIPERBAIKI**. 
-- `BoardRandomizer.cs` telah diperbarui untuk menghormati aturan validasi radius 3 dari `BoardValidator.cs` pada saat penempatan ubin spesial (`specialTiles`), sehingga hasil acaknya selalu lolos validasi.
-- `BoardValidator.cs` telah diperbaiki agar mengizinkan tangga yang mendarat tepat di kotak 100, serta logika pengecekan `expectedSnakes` telah dikembalikan ke standar (wajib 6) tanpa *bypass* `if (false)`.
-- Saat ini papan game sukses di-render dengan konfigurasi acak (6 ular, 6 tangga, 3 tengkorak, 6 kuis) dengan tata letak yang proporsional.
+*Catatan: Semua file di atas telah disesuaikan namanya (p1, p2, p3, p4) dan cache browser 404 telah di-bypass menggunakan parameter `?v=1`.*
 
-Pekerjaan selanjutnya dapat fokus pada integrasi Web UI React atau penambahan fitur gameplay lainnya.
+## Pekerjaan Selanjutnya (To-Do List)
+1. **Perbaikan Proporsi PFP (Cropping)**
+   - Sprite saat ini mungkin ukurannya tidak konsisten atau kurang pas ketika diletakkan di dalam bingkai bundar (PFP).
+   - **Target**: Lakukan cropping/penyesuaian ukuran gambar sprite agar *fit* persis dan proporsional di dalam PFP (tidak kekecilan dan tidak kegedean).
+2. **Sprite Animatif untuk Token Ular Tangga di Papan (Tugas Berat)**
+   - Mengubah token pion kotak-kotak biasa di papan game (Unity) agar menjadi GameObject dengan Sprite Renderer / Animator yang menampilkan sprite 2D sesuai dengan yang ada di PFP.
+   - **Target**: Pion di atas papan bisa bergerak (animasi jalan), menampilkan status idle, kaget saat kena ular, dan senang saat naik tangga sesuai tingkat evolusinya.
+   - **PENTING:** Modifikasi untuk poin ini harus dikerjakan murni di dalam level/editor **Unity** (merombak logika `PlayerToken.cs` dan Prefab Pion), bukan di frontend React.

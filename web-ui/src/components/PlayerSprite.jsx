@@ -1,17 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 
-const getColorName = (hex) => {
-  if (!hex) return 'blue';
+const getPlayerId = (hex) => {
+  if (!hex) return 2;
   const h = hex.toLowerCase();
-  if (h.includes('9e2f2f') || h.includes('e84c4c')) return 'red';
-  if (h.includes('2f5da8') || h.includes('4f8cff')) return 'blue';
-  if (h.includes('2f8b57') || h.includes('38d27a')) return 'green';
-  if (h.includes('b87822') || h.includes('ffc247')) return 'yellow trans';
-  return 'blue';
+  if (h.includes('9e2f2f') || h.includes('e84c4c') || h.includes('e63333')) return 1; // red
+  if (h.includes('2f5da8') || h.includes('4f8cff') || h.includes('3366e6')) return 2; // blue
+  if (h.includes('2f8b57') || h.includes('38d27a') || h.includes('1ebb59')) return 3; // green
+  if (h.includes('b87822') || h.includes('ffc247') || h.includes('f2bf26')) return 4; // yellow
+  return 2;
 };
 
 export default function PlayerSprite({ hexColor, stage, currentTile }) {
-  const color = getColorName(hexColor);
+  const playerId = getPlayerId(hexColor);
 
   // Mapping yg benar berdasarkan gambar referensi:
   // Column (c1-c4) = Stage (1: Punk, 2: Mulai Belajar, 3: Tertib, 4: Teladan)
@@ -64,9 +64,8 @@ export default function PlayerSprite({ hexColor, stage, currentTile }) {
     };
   }, [currentTile]);
 
-  const prefix = color === 'blue' ? 'blue__' : `${color}_`;
-  const filename = `${prefix}split_r${row}_c${col}.png`;
-  const src = `./sprites/${filename.replace(' ', '%20')}`;
+  const filename = `p${playerId}_r${row}_c${col}.png`;
+  const src = `./sprites/${filename}?v=1`;
 
   return (
     <img
