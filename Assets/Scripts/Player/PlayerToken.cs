@@ -16,6 +16,7 @@ namespace Player
 
             if (cache.TryGetValue(path, out Sprite s)) return s;
 
+            // Load as Texture2D and create Sprite to guarantee it works (prevents Unity Sprite loading bugs)
             Texture2D tex = Resources.Load<Texture2D>(path);
             if (tex != null)
             {
@@ -48,6 +49,37 @@ namespace Player
         {
             this.data = playerData;
             name = "Token_" + data.playerName;
+            
+            // Fix prefab structure: swap tokenImage and borderImage if tokenImage is the root,
+            // because Unity Canvas renders children on top. We want the sprite (tokenImage) on top!
+            if (tokenImage != null && borderImage != null && tokenImage.gameObject == this.gameObject)
+            {
+                Image temp = tokenImage;
+                tokenImage = borderImage;
+                borderImage = temp;
+            }
+
+            if (tokenImage != null)
+            {
+                tokenImage.preserveAspect = true;
+                // tokenImage is now the child, so it's safe to adjust its anchors
+                RectTransform tokenRt = tokenImage.GetComponent<RectTransform>();
+                if (tokenRt != null)
+                {
+                    // Make it fill the 65x65 root container perfectly
+                    tokenRt.anchorMin = new Vector2(0f, 0f);
+                    tokenRt.anchorMax = new Vector2(1f, 1f);
+                    tokenRt.offsetMin = Vector2.zero;
+                    tokenRt.offsetMax = Vector2.zero;
+                }
+            }
+
+            if (borderImage != null)
+            {
+                // User requested NO BACKGROUND. Just disable it entirely.
+                borderImage.enabled = false;
+            }
+
             Debug.Log($"Token initialized for Player {playerData.id} with color: {playerData.playerColor}");
             UpdateVisuals();
         }
@@ -56,16 +88,16 @@ namespace Player
         {
             if (data == null) return;
 
-            // Apply player color to border/marker first
+            // Apply player color to shadow/marker
             if (borderImage != null)
             {
-                borderImage.color = data.playerColor;
+                borderImage.color = new Color(data.playerColor.r, data.playerColor.g, data.playerColor.b, 0.6f);
             }
 
-            // Apply player color to token background
+            // Keep sprite original colors, do NOT tint with playerColor
             if (tokenImage != null)
             {
-                tokenImage.color = data.playerColor;
+                tokenImage.color = Color.white;
             }
 
             // Get Idle Sprite (Row 1 is idle, Col based on stage 1-4)

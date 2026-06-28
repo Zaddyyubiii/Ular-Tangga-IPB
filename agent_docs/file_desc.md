@@ -33,7 +33,7 @@ Seluruh logika permainan diatur oleh skrip-skrip yang terbagi secara modular:
 *   **Board/**: Mengatur pembuatan petak papan permainan, posisi koordinat, dan jenis petak (`BoardManager.cs`, `Tile.cs`).
 *   **Core/**: Logika pusat alur permainan dan inisialisasi state (`GameManager.cs`).
 *   **Dice/**: Logika pengukur dadu interaktif (*Dice Gauge*) dan animasi dadu bergulir (`DiceController.cs`, `DiceGauge.cs`).
-*   **Player/**: Mengatur posisi bidak pemain, pergerakan petak demi petak, serta perubahan sprite evolusi berdasarkan skor (`PlayerController.cs`, `PlayerEvolutionController.cs`).
+*   **Player/**: Mengatur posisi bidak pemain, pergerakan petak demi petak, serta perubahan sprite evolusi berdasarkan skor (`PlayerController.cs`, `PlayerEvolutionController.cs`, `PlayerToken.cs`).
 *   **Quiz/**: Mengontrol jendela sembul kuis, membaca bank soal kuis, serta memvalidasi jawaban benar/salah (`QuizManager.cs`, `QuizUI.cs`).
 *   **Turn/**: Mengelola sistem giliran pemain, timer giliran 10 detik, dan bot AI (`TurnManager.cs`, `BotController.cs`).
 *   **UI/**: Mengatur pembaruan UI game (`MainMenuUI.cs`, `GameplayUI.cs`, `PlayerStatusView.cs`, `DiceRollPopupUI.cs`, `PopupController.cs`, `QuizPopup.cs`, `GameVisualTheme.cs`, `PrologueUI.cs`, `GameOverUI.cs`).

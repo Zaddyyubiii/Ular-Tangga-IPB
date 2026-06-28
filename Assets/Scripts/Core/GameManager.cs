@@ -197,8 +197,8 @@ namespace Core
                 }
 
                 RectTransform rTrans = tokenGo.GetComponent<RectTransform>();
-                // Adjust scale so 4 tokens can fit in a single tile together slightly offset
-                rTrans.sizeDelta = new Vector2(25f, 25f);
+                // Adjust scale so the token is full tile size
+                rTrans.sizeDelta = new Vector2(90f, 90f);
                 
                 PlayerToken token = tokenGo.GetComponent<PlayerToken>();
                 if (token == null) token = tokenGo.AddComponent<PlayerToken>();
@@ -257,14 +257,10 @@ namespace Core
 
         private Vector2 GetTokenOffset(int playerId)
         {
-            switch (playerId)
-            {
-                case 1: return new Vector2(-12f, 12f);
-                case 2: return new Vector2(12f, 12f);
-                case 3: return new Vector2(-12f, -12f);
-                case 4: return new Vector2(12f, -12f);
-                default: return Vector2.zero;
-            }
+            // The user requested the sprite to be full size and centered on the tile.
+            // If they are all centered, they will overlap perfectly when on the same tile.
+            // We return zero offset to fix the alignment issue.
+            return Vector2.zero;
         }
 
         private void HandleDiceResultRolled(DiceResult result)
@@ -736,6 +732,32 @@ namespace Core
         public bool AreAllActivePlayersFinished()
         {
             return ShouldEndGame();
+        }
+
+        private void Update()
+        {
+            // Dynamic Z-Sorting (Depth Sorting) for tokens
+            if (playerTokens != null && playerTokens.Count > 1)
+            {
+                // Sort tokens by Y position descending (higher Y = drawn first = goes behind)
+                var sortedTokens = new System.Collections.Generic.List<PlayerToken>(playerTokens.Values);
+                sortedTokens.Sort((a, b) => 
+                {
+                    if (a == null || b == null) return 0;
+                    RectTransform rtA = a.GetComponent<RectTransform>();
+                    RectTransform rtB = b.GetComponent<RectTransform>();
+                    if (rtA == null || rtB == null) return 0;
+                    return rtB.anchoredPosition.y.CompareTo(rtA.anchoredPosition.y);
+                });
+
+                foreach(var token in sortedTokens)
+                {
+                    if (token != null)
+                    {
+                        token.transform.SetAsLastSibling();
+                    }
+                }
+            }
         }
 
         private void RegisterPlayerFinish(PlayerData player)

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f39208edd0d726046a2cdc6da790aa93, type: 3}
   m_Name: BoardConfig
   m_EditorClassIdentifier: Assembly-CSharp::Board.BoardConfig
-  questionTiles: 0600000014000000220000002e0000004000000055000000
+  questionTiles: 0600000014000000220000002e00000040000000550000000c000000350000004d0000005c000000
   skullTiles: 0f0000003b00000048000000
   snakes:
   - tileIndex: 35

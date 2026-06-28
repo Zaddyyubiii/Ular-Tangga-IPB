@@ -8,7 +8,7 @@ namespace Board
     public class BoardConfig : ScriptableObject
     {
         [Header("Special Tile Indices")]
-        public List<int> questionTiles = new List<int>() { 6, 20, 34, 46, 64, 85 };
+        public List<int> questionTiles = new List<int>() { 6, 12, 20, 34, 46, 53, 64, 77, 85, 92 };
         public List<int> skullTiles = new List<int>() { 15, 59, 72 };
 
         [Header("Snakes Configurations")]

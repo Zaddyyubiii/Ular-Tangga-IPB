@@ -66,3 +66,6 @@ web-ui/.playwright-mcp/
 # Additional ignores
 web-ui/dist/
 sprites_folder/
+
+# Environment variables
+.env

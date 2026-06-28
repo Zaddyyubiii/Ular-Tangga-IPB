@@ -10,6 +10,8 @@ const getPlayerId = (hex) => {
   return 2;
 };
 
+const CACHE_BUST = Date.now();
+
 export default function PlayerSprite({ playerId, hexColor, stage, currentTile }) {
   const actualPlayerId = playerId || getPlayerId(hexColor);
 
@@ -64,18 +66,28 @@ export default function PlayerSprite({ playerId, hexColor, stage, currentTile })
     };
   }, [currentTile]);
 
-  const filename = `p${actualPlayerId}_r${row}_c${col}.png`;
-  const src = `./sprites/${filename}?v=1`;
-
   return (
-    <img
-      src={src}
-      className="w-[110%] h-[110%] object-contain"
-      style={{
-        imageRendering: 'pixelated',
-        transformOrigin: 'center'
-      }}
-      alt={`Character Stage ${col}`}
-    />
+    <div className="relative w-full h-full flex items-center justify-center">
+      {[1, 2, 3, 4, 5, 6].map(r => {
+        const filename = `p${actualPlayerId}_r${r}_c${col}.png`;
+        const src = `./sprites/${filename}?v=${CACHE_BUST}`;
+        const isVisible = r === row;
+        
+        return (
+          <img
+            key={r}
+            src={src}
+            className="absolute w-[110%] h-[110%] object-contain transition-opacity duration-75"
+            style={{
+              imageRendering: 'pixelated',
+              transformOrigin: 'center',
+              opacity: isVisible ? 1 : 0,
+              pointerEvents: isVisible ? 'auto' : 'none'
+            }}
+            alt={isVisible ? `Character Stage ${col}` : ""}
+          />
+        );
+      })}
+    </div>
   );
 }

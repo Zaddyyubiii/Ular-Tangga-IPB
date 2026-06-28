@@ -20,7 +20,15 @@ Daftar Link Sprite berdasarkan Tingkat (Misal untuk Mahasiswa 1/Merah `p1`):
    - Sprite PFP telah di-*crop* dan diletakkan pada kanvas persegi (1:1) yang konsisten.
    - *Pembaruan Aturan: Warna player telah dikunci mati berdasarkan urutan Player (1=Merah, 2=Biru, 3=Hijau, 4=Kuning).*
    - *Bugfix: Mapping sprite telah diubah dari pendeteksian string hex (yang rentan meleset akibat pembulatan) menjadi pengambilan parameter `playerId` absolut dari state Unity. (Player 3 kini menampilkan sprite hijau dengan benar).*
-2. **Sprite Animatif untuk Token Ular Tangga di Papan (Tugas Berat)**
-   - Mengubah token pion kotak-kotak biasa di papan game (Unity) agar menjadi GameObject dengan Sprite Renderer / Animator yang menampilkan sprite 2D sesuai dengan yang ada di PFP.
-   - **Target**: Pion di atas papan bisa bergerak (animasi jalan), menampilkan status idle, kaget saat kena ular, dan senang saat naik tangga sesuai tingkat evolusinya.
-   - **PENTING:** Modifikasi untuk poin ini harus dikerjakan murni di dalam level/editor **Unity** (merombak logika `PlayerToken.cs` dan Prefab Pion), bukan di frontend React.
+
+2. **Sprite Animatif untuk Token Ular Tangga di Papan** `[SELESAI]`
+   - Pion di atas papan sudah berupa Sprite 2D dan bisa bergerak (animasi jalan).
+   - *Bugfix UI React Blink/Hilang*: Sistem *React* diubah menggunakan metode **Preload Opacity Stack** (menumpuk 6 frame `<img/>` sekaligus dan menggeser *opacity*) dengan tambahan dinamis `Date.now()` untuk mengatasi kedipan *(flickering)* dan error *browser caching*.
+   - *Bugfix Ilusi Depth 2D (Naik Level)*: Menambahkan logika **Dynamic Z-Sorting** di `GameManager.cs` yang memaksa karakter dengan nilai-Y lebih rendah (bawah) agar di-render di paling depan. Memecahkan ilusi visual kepala karakter yang memakan petak di atasnya.
+   - *Penambahan Fitur Board*: Mengubah jumlah kotak kuis dari 6 menjadi **10 kotak kuis** di dalam `BoardConfig`.
+
+3. **Animasi Idle Tambahan untuk Pion (Tugas Mendatang)**
+   - Saat pion sedang diam *(idle)* di atas petak papan, buat agar karakternya terasa lebih "hidup".
+   - **Target Implementasi**:
+     - Tambahkan sesekali animasi tengok kiri dan kanan (misal dengan memutar balik atau *invert* scale horizontal sesekali).
+     - Tambahkan animasi pantulan melompat kecil secara acak *(occasional small jump)* agar pion tidak kaku seperti patung.
