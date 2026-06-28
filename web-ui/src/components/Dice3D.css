@@ -1,0 +1,100 @@
+/* ── Dice Container ── */
+.dice-container {
+  perspective: 600px;
+  width: 70px;
+  height: 70px;
+  position: relative;
+}
+
+/* ── 3D Cube ── */
+.dice-3d {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Only apply transition when snapping to a face (not during rolling) */
+.dice-3d[class*="show-"] {
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Rolling: pure rotation, no scale/translate jank, GPU composited */
+.dice-3d.rolling {
+  animation: roll3D 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transition: none;
+}
+
+/* ── Face (shared) ── */
+.dice-face {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 50%, #e0e0e0 100%);
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+  backface-visibility: hidden;
+}
+
+/* ── Face Placement (standard die: opposite faces sum to 7) ── */
+/*    Front=1, Back=6, Right=2, Left=5, Top=3, Bottom=4        */
+.face-1 { transform: rotateY(0deg)    translateZ(35px); }
+.face-6 { transform: rotateY(180deg)  translateZ(35px); }
+.face-2 { transform: rotateY(90deg)   translateZ(35px); }
+.face-5 { transform: rotateY(-90deg)  translateZ(35px); }
+.face-3 { transform: rotateX(90deg)   translateZ(35px); }
+.face-4 { transform: rotateX(-90deg)  translateZ(35px); }
+
+/* ── Dots (absolute positioned within each 70×70 face) ── */
+.dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #2d2d2d;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.5),
+    0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Named positions — 10px padding from edges */
+.dot-top-left     { top: 10px;  left: 10px;  }
+.dot-top-right    { top: 10px;  right: 10px; }
+.dot-mid-left     { top: 50%;   left: 10px;  transform: translateY(-50%); }
+.dot-mid-right    { top: 50%;   right: 10px; transform: translateY(-50%); }
+.dot-bottom-left  { bottom: 10px; left: 10px;  }
+.dot-bottom-right { bottom: 10px; right: 10px; }
+.dot-center       { top: 50%;  left: 50%;  transform: translate(-50%, -50%); }
+
+/* Face 1: Big red center dot */
+.face-1 .dot {
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(circle at 40% 35%, #ff6b6b, #c0392b);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Show Classes (rotate cube to reveal target face) ── */
+.show-1 { transform: rotateX(0deg)    rotateY(0deg); }
+.show-2 { transform: rotateX(0deg)    rotateY(-90deg); }
+.show-3 { transform: rotateX(-90deg)  rotateY(0deg); }
+.show-4 { transform: rotateX(90deg)   rotateY(0deg); }
+.show-5 { transform: rotateX(0deg)    rotateY(90deg); }
+.show-6 { transform: rotateX(180deg)  rotateY(0deg); }
+
+/* ── Rolling Keyframes ──
+   Pure rotation only — no scale/translateY.
+   Smooth continuous spin on all 3 axes.
+   1.2s duration avoids the stutter of a fast 0.45s loop. */
+@keyframes roll3D {
+  0%   { transform: rotateX(0deg)   rotateY(0deg)   rotateZ(0deg); }
+  100% { transform: rotateX(360deg) rotateY(720deg) rotateZ(-360deg); }
+}

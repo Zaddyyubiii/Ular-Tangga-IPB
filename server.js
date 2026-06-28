@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PUBLIC_DIR = path.join(__dirname, 'docs');
+const PORT = parseInt(process.env.PORT, 10) || 3000;
 
 const MIME_TYPES = {
     '.html': 'text/html',
@@ -15,13 +16,15 @@ const MIME_TYPES = {
     '.svg': 'image/svg+xml',
     '.ico': 'image/x-icon',
     '.wasm': 'application/wasm',
-    '.data': 'application/octet-stream'
+    '.data': 'application/octet-stream',
+    '.br': 'application/octet-stream',
+    '.gz': 'application/octet-stream'
 };
 
 const server = http.createServer((req, res) => {
     // Clean URL query or hash params
     let reqPath = req.url.split('?')[0].split('#')[0];
-    
+
     // Default to index.html if root is requested
     if (reqPath === '/' || reqPath === '') {
         reqPath = '/index.html';
@@ -38,7 +41,6 @@ const server = http.createServer((req, res) => {
 
     fs.access(filePath, fs.constants.F_OK, (err) => {
         if (err) {
-            // File not found
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end('404 Not Found');
             return;
@@ -46,18 +48,15 @@ const server = http.createServer((req, res) => {
 
         fs.readFile(filePath, (readErr, data) => {
             if (readErr) {
-                // Internal server error
                 res.writeHead(500, { 'Content-Type': 'text/plain' });
                 res.end('500 Internal Server Error');
                 return;
             }
 
-            // Get MIME type based on file extension
             const ext = path.extname(filePath).toLowerCase();
             const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-            // IMPORTANT: Prevent browser from caching old WebGL builds
-            res.writeHead(200, { 
+            res.writeHead(200, {
                 'Content-Type': contentType,
                 'Access-Control-Allow-Origin': '*',
                 'X-Content-Type-Options': 'nosniff',
@@ -70,24 +69,57 @@ const server = http.createServer((req, res) => {
     });
 });
 
-let PORT = process.env.PORT || 3000;
+// Kill whatever is on the port first, then listen
+const { execSync } = require('child_process');
 
-server.on('error', (e) => {
-    if (e.code === 'EADDRINUSE') {
-        console.log(`[Warning] Port ${PORT} sedang dipakai. Mencoba port ${PORT + 1}...`);
-        PORT++;
-        server.listen(PORT);
-    } else {
-        console.error(e);
+function killPort(port) {
+    try {
+        // Windows: find PID on the port and kill it
+        const result = execSync(
+            `netstat -ano | findstr :${port} | findstr LISTENING`,
+            { encoding: 'utf-8', timeout: 3000 }
+        );
+        const lines = result.trim().split('\n');
+        const pids = new Set();
+        for (const line of lines) {
+            const parts = line.trim().split(/\s+/);
+            const pid = parts[parts.length - 1];
+            if (pid && pid !== '0' && !isNaN(pid)) {
+                pids.add(pid);
+            }
+        }
+        for (const pid of pids) {
+            try {
+                execSync(`taskkill /F /PID ${pid}`, { timeout: 3000 });
+                console.log(`[Port] Killed stale process PID ${pid} on port ${port}`);
+            } catch { /* already dead */ }
+        }
+    } catch {
+        // Nothing on that port — good
     }
-});
+}
 
-server.listen(PORT, () => {
-    console.log('\x1b[32m%s\x1b[0m', '==================================================');
-    console.log('\x1b[36m%s\x1b[0m', '  Ular Tangga IPB WebGL Local Server (Node.js)');
-    console.log('\x1b[32m%s\x1b[0m', '==================================================');
-    console.log(`Server is running at: http://localhost:${PORT}`);
-    console.log(`Serving files from: ${PUBLIC_DIR}`);
-    console.log('Press Ctrl+C to stop the server.');
-    console.log('--------------------------------------------------');
-});
+killPort(PORT);
+
+// Small delay to let OS release the port
+setTimeout(() => {
+    server.listen(PORT, () => {
+        console.log('\x1b[32m%s\x1b[0m', '==================================================');
+        console.log('\x1b[36m%s\x1b[0m', '  Ular Tangga IPB WebGL Local Server (Node.js)');
+        console.log('\x1b[32m%s\x1b[0m', '==================================================');
+        console.log(`Server is running at: \x1b[33mhttp://localhost:${PORT}\x1b[0m`);
+        console.log(`Serving files from: ${PUBLIC_DIR}`);
+        console.log('Press Ctrl+C to stop the server.');
+        console.log('--------------------------------------------------');
+    });
+
+    server.on('error', (e) => {
+        if (e.code === 'EADDRINUSE') {
+            console.error(`\x1b[31m[Error] Port ${PORT} still in use after cleanup. Try: taskkill /F /IM node.exe\x1b[0m`);
+            process.exit(1);
+        } else {
+            console.error(e);
+            process.exit(1);
+        }
+    });
+}, 500);

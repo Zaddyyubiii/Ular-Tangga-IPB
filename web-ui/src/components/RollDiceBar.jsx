@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function RollDiceBar({ players, activePlayerId, instruction, onRoll, gameState, isPopupOpen }) {
+export default function RollDiceBar({ players, activePlayerId, instruction, onRoll, onChargingChange, gameState, isPopupOpen }) {
   const [charge, setCharge] = useState(0);
   const [isCharging, setIsCharging] = useState(false);
   const [hasRolledThisTurn, setHasRolledThisTurn] = useState(false);
@@ -68,11 +68,12 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
   const startCharging = useCallback(() => {
     if (diceControlState !== "ready") return;
     setIsCharging(true);
+    if (onChargingChange) onChargingChange(true);
     chargeRef.current = 0;
     directionRef.current = 1;
     lastTimeRef.current = null;
     animFrameId.current = requestAnimationFrame(chargeLoopRef.current);
-  }, [diceControlState]);
+  }, [diceControlState, onChargingChange]);
 
   const stopCharging = useCallback((shouldRoll = true) => {
     if (animFrameId.current) {
@@ -80,12 +81,16 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
       animFrameId.current = null;
     }
     setIsCharging(false);
-    
+    // Don't call onChargingChange(false) here — App clears it when dice result arrives
+
     if (shouldRoll) {
       setHasRolledThisTurn(true);
       onRoll(chargeRef.current);
+    } else {
+      // Cancelled without rolling — clear charging state
+      if (onChargingChange) onChargingChange(false);
     }
-  }, [onRoll]);
+  }, [onRoll, onChargingChange]);
 
   // Safety synchronization effect: cancel loop if state becomes locked or disabled
   useEffect(() => {
