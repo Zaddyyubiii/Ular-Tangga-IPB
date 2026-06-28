@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +18,8 @@ namespace UI
 
     public class QuizPopup : MonoBehaviour
     {
+    private static readonly Color FALLBACK_GREEN = new Color(0.12f, 0.73f, 0.35f);
+    private static readonly Color FALLBACK_RED = Color.red;
         public static QuizPopup Instance;
 
         #if UNITY_WEBGL && !UNITY_EDITOR
@@ -109,7 +111,7 @@ namespace UI
                 autoCloseCoroutine = null;
             }
 
-            Debug.Log($"Showing quiz question: {question.id}.");
+
 
             labelQuestion.text = question.questionText;
 
@@ -202,12 +204,12 @@ namespace UI
             var curPlayer = Core.GameManager.Instance != null ? Core.GameManager.Instance.GetCurrentPlayer() : null;
             if (curPlayer != null && !curPlayer.isBot)
             {
-                Debug.Log($"Player selected answer index: {selectedIndex}.");
+
             }
-            Debug.Log($"Correct answer index: {currentQuestion.correctAnswerIndex}.");
+
 
             bool isCorrect = (selectedIndex == currentQuestion.correctAnswerIndex);
-            Debug.Log($"Quiz answered correctly: {isCorrect.ToString().ToLower()}.");
+
 
             // Apply correct/wrong dynamic colors using theme
             var theme = Resources.Load<GameVisualTheme>("GameVisualTheme");
@@ -265,27 +267,41 @@ namespace UI
             if (isCorrect)
             {
                 labelFeedbackResult.text = "BENAR! *";
-                labelFeedbackResult.color = theme != null ? theme.successGreen : new Color(0.12f, 0.73f, 0.35f); // Beautiful green
+                labelFeedbackResult.color = theme != null ? theme.successGreen : FALLBACK_GREEN;
                 labelFeedbackExplanations.text = currentQuestion.correctFeedback;
 
                 if (Audio.AudioManager.Instance != null)
                 {
                     Audio.AudioManager.Instance.PlaySFX(Audio.AudioManager.Instance.quizCorrectClip);
                 }
+
+                // ADDED RULE REWARD: +20 points (2 rows up) for correct quiz answers
+                if (curPlayer != null) {
+                    int targetTile = Mathf.Min(100, curPlayer.currentTile + 20);
+
+                    curPlayer.currentTile = targetTile;
+                }
             }
             else
             {
                 labelFeedbackResult.text = "KURANG TEPAT. *";
-                labelFeedbackResult.color = theme != null ? theme.dangerRed : Color.red;
+                labelFeedbackResult.color = theme != null ? theme.dangerRed : FALLBACK_RED;
                 labelFeedbackExplanations.text = currentQuestion.incorrectFeedback;
 
                 if (Audio.AudioManager.Instance != null)
                 {
                     Audio.AudioManager.Instance.PlaySFX(Audio.AudioManager.Instance.quizWrongClip);
                 }
+
+                // ADDED RULE PENALTY: -10 points (1 row down) for incorrect quiz answers
+                if (curPlayer != null) {
+                    int targetTile = Mathf.Max(0, curPlayer.currentTile - 10);
+
+                    curPlayer.currentTile = targetTile;
+                }
             }
 
-            Debug.Log($"[Quiz] Answered correct: {isCorrect}");
+
 
             // Start auto close timer for human players
             bool isBot = curPlayer != null && curPlayer.isBot;
@@ -298,15 +314,15 @@ namespace UI
 
         private IEnumerator AutoCloseQuizCo(float delay)
         {
-            Debug.Log($"Quiz feedback opened. Auto close in {delay} seconds.");
+
             yield return new WaitForSeconds(delay);
-            Debug.Log("Quiz feedback auto closed after 5 seconds.");
+
             CloseQuiz();
         }
 
         private void OnCloseQuizClicked()
         {
-            Debug.Log("Popup closed manually before auto close.");
+
             if (Audio.AudioManager.Instance != null)
             {
                 Audio.AudioManager.Instance.PlaySFX(Audio.AudioManager.Instance.clickClip);
@@ -333,7 +349,7 @@ namespace UI
             Action callback = onQuizFinishedCallback;
             onQuizFinishedCallback = null;
 
-            Debug.Log("Popup onClose callback executed.");
+
             callback?.Invoke();
         }
 
@@ -392,8 +408,8 @@ namespace UI
 
             // Trigger visual feedback and SFX via option selection
             string choiceChar = ((char)('A' + chosenIndex)).ToString();
-            Debug.Log($"Bot Player {botName} quiz answered: {choiceChar}.");
-            Debug.Log($"Bot selected answer index: {chosenIndex}.");
+
+
             OnOptionSelected(chosenIndex);
 
             // Wait for feedback to be displayed for exactly 5 seconds
@@ -401,8 +417,9 @@ namespace UI
 
             // Enable close button and close the quiz automatically
             if (btnCloseQuiz != null) btnCloseQuiz.interactable = true;
-            Debug.Log($"Bot Player {botName} quiz feedback auto closed.");
+
             CloseQuiz();
         }
     }
 }
+

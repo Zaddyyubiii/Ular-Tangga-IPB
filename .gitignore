@@ -51,3 +51,14 @@ Desktop.ini
 
 # Build log
 build.log
+
+# Node.js
+node_modules/
+package-lock.json
+
+# Playwright MCP artifacts
+.playwright-mcp/
+
+# Web UI dev artifacts
+web-ui/node_modules/
+web-ui/.playwright-mcp/

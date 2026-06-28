@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace Dice
@@ -7,8 +7,8 @@ namespace Dice
     {
         public static DiceResult ResolveRoll(float chargePercent, int currentTile)
         {
-            // 1. Calculate timing quality based on target points: 25%, 50%, 75%, 95%
-            float[] targets = new float[] { 25f, 50f, 75f, 95f };
+            // 1. Calculate timing quality based on target points: 12.5%, 37.5%, 62.5%, 87.5% (centers of the 4 zones)
+            float[] targets = new float[] { 12.5f, 37.5f, 62.5f, 87.5f };
             float minDiff = float.MaxValue;
             foreach (float target in targets)
             {
@@ -34,33 +34,27 @@ namespace Dice
             int[] mainList;
             int[] neighborList;
 
-            if (chargePercent <= 20f)
+            if (chargePercent <= 25f)
             {
                 zoneName = "Zona 1";
-                mainList = new int[] { 1, 2, 3 };
+                mainList = new int[] { 2, 3 };
                 neighborList = new int[] { 4, 5 };
             }
-            else if (chargePercent <= 40f)
+            else if (chargePercent <= 50f)
             {
                 zoneName = "Zona 2";
-                mainList = new int[] { 3, 4, 5 };
-                neighborList = new int[] { 1, 2, 6, 7 };
+                mainList = new int[] { 4, 5, 6 };
+                neighborList = new int[] { 2, 3, 7 };
             }
-            else if (chargePercent <= 60f)
+            else if (chargePercent <= 75f)
             {
                 zoneName = "Zona 3";
-                mainList = new int[] { 5, 6, 7, 8 };
-                neighborList = new int[] { 3, 4, 9, 10 };
-            }
-            else if (chargePercent <= 80f)
-            {
-                zoneName = "Zona 4";
-                mainList = new int[] { 8, 9, 10 };
-                neighborList = new int[] { 6, 7, 11, 12 };
+                mainList = new int[] { 7, 8, 9 };
+                neighborList = new int[] { 6, 10 };
             }
             else
             {
-                zoneName = "Zona 5";
+                zoneName = "Zona 4";
                 mainList = new int[] { 10, 11, 12 };
                 neighborList = new int[] { 8, 9 };
             }
@@ -81,8 +75,8 @@ namespace Dice
             }
             else
             {
-                // Absolute random 1-12
-                diceValue = UnityEngine.Random.Range(1, 13);
+                // Absolute random 2-12
+                diceValue = UnityEngine.Random.Range(2, 13);
             }
 
             // 4. Near-Finish Strategy (Tile >= 88)
@@ -96,7 +90,7 @@ namespace Dice
                     if (UnityEngine.Random.value < 0.35f)
                     {
                         diceValue = UnityEngine.Random.Range(1, needed + 1);
-                        Debug.Log($"[Near Finish Strategy] Overriding roll to {diceValue} (needed <= {needed})");
+
                     }
                 }
             }
@@ -112,29 +106,23 @@ namespace Dice
         {
             switch (targetValue)
             {
-                case 1:
                 case 2:
-                    return UnityEngine.Random.Range(5f, 15f); // Zona 1
                 case 3:
-                    return UnityEngine.Random.Range(15f, 25f); // Border Zona 1/2
+                    return UnityEngine.Random.Range(5f, 20f); // Zona 1
                 case 4:
-                    return UnityEngine.Random.Range(25f, 35f); // Zona 2
                 case 5:
-                    return UnityEngine.Random.Range(35f, 45f); // Border Zona 2/3
                 case 6:
+                    return UnityEngine.Random.Range(30f, 45f); // Zona 2
                 case 7:
-                    return UnityEngine.Random.Range(45f, 55f); // Zona 3
                 case 8:
-                    return UnityEngine.Random.Range(55f, 65f); // Border Zona 3/4
                 case 9:
-                    return UnityEngine.Random.Range(65f, 75f); // Zona 4
+                    return UnityEngine.Random.Range(55f, 70f); // Zona 3
                 case 10:
-                    return UnityEngine.Random.Range(75f, 85f); // Border Zona 4/5
                 case 11:
                 case 12:
-                    return UnityEngine.Random.Range(85f, 95f); // Zona 5
+                    return UnityEngine.Random.Range(80f, 95f); // Zona 4
                 default:
-                    return UnityEngine.Random.Range(50f, 90f);
+                    return UnityEngine.Random.Range(30f, 70f);
             }
         }
     }

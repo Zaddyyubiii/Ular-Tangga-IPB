@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Board
 {
     public static class BoardValidator
     {
-        public static bool ValidateBoard(RuntimeBoardConfig config, BoardConfig originalConfig = null) { return true;
+        public static bool ValidateBoard(RuntimeBoardConfig config, BoardConfig originalConfig = null) {
             if (config == null) return false;
 
             int questionCount = 0;
@@ -48,11 +48,11 @@ namespace Board
             if (questionCount != 6) return false;
             if (skullCount != 3) return false;
 
-            int expectedSnakes = 6;
-            int expectedLadders = 6;
+            
+            
 
-            if (snakeCount != expectedSnakes) return false;
-            if (ladderCount != expectedLadders) return false;
+            if (snakeCount != 6) return false;
+            if (ladderCount != 6) return false;
 
             // Check snakes
             foreach (var snake in config.snakes)
