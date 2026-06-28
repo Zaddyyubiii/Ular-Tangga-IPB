@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -81,7 +81,7 @@ namespace Core
 
         public void InitializeGame()
         {
-            Debug.Log("[GameManager] Initializing Game Scene...");
+
             if (DiceRollPopupUI.Instance != null) DiceRollPopupUI.Instance.ForceHide();
             else if (GameplayUI.Instance != null) GameplayUI.Instance.ClearDiceResult();
             
@@ -173,7 +173,7 @@ namespace Core
                     }
                 }
                 p.playerColor = pColor;
-                Debug.Log($"Player {p.id} ({p.playerName}) assigned color: {p.playerColor}");
+
 
                 // Initial evolution evaluation
                 if (PlayerEvolutionController.Instance != null)
@@ -298,7 +298,7 @@ namespace Core
         {
             if (currentState != GameState.WaitingForInput) return;
             
-            Debug.Log("[GameManager] Turn timer expired! Triggering auto-roll.");
+
             
             // Auto roll with random charge
             if (DiceGaugeController.Instance != null)
@@ -314,7 +314,7 @@ namespace Core
 
             if (curPlayer.isBot)
             {
-                Debug.Log($"Bot Player {curPlayer.playerName} rolled {diceValue}");
+
             }
 
             int startTile = curPlayer.currentTile;
@@ -324,13 +324,11 @@ namespace Core
 
             if (isBounce)
             {
-                int overflow = targetTile - 100;
-                bouncedTarget = 100 - overflow;
-                if (bouncedTarget < 1) bouncedTarget = 1;
-                Debug.Log($"Bounce back triggered: rawTarget={targetTile}, bouncedTarget={bouncedTarget}");
+                bouncedTarget = startTile; // Stay put if exceeding 100 as per rules
+
             }
 
-            Debug.Log("Dice popup shown for " + curPlayer.playerName);
+
             if (DiceRollPopupUI.Instance != null)
             {
                 yield return DiceRollPopupUI.Instance.ShowDiceResult(curPlayer, lastDiceResult.value, lastDiceResult.timingQuality, lastDiceResult.chargePercent);
@@ -348,8 +346,8 @@ namespace Core
                     GameplayUI.Instance.ClearDiceResult();
                 }
             }
-            Debug.Log("Dice popup finished and hidden.");
-            Debug.Log("Movement started after dice popup hidden.");
+
+
 
             // Normal & Bounce Movement
             currentState = GameState.Moving;
@@ -413,8 +411,8 @@ namespace Core
                 {
                     bool showContinue = !curPlayer.isBot;
                     PopupController.Instance.ShowPopup(
-                        "Dadu Terlalu Besar!",
-                        $"{curPlayer.playerName} melewati petak 100, lalu mundur ke petak {bouncedTarget}.",
+                        "Langkah Melebihi Batas!",
+                        $"{curPlayer.playerName} mendapat dadu {diceValue} tapi melewati petak 100. Sisa langkah hangus dan tetap diam di petak {bouncedTarget}.",
                         () => { ResolveTileEffect(curPlayer, bouncedTarget, diceValue); },
                         showContinueButton: showContinue,
                         autoCloseDelay: PopupController.POPUP_AUTO_CLOSE_DELAY
@@ -437,11 +435,11 @@ namespace Core
                 ? BoardManager.Instance.runtimeBoardConfig.GetTileDefinition(tile)
                 : boardConfig.GetTileDefinition(tile);
             
-            Debug.Log($"[Tile Resolution] Player {player.playerName} landed on Tile {tile} (Type: {def.type})");
+
 
             if (player.isBot)
             {
-                Debug.Log($"Bot Player {player.playerName} landed on {def.type} Tile.");
+
             }
 
             switch (def.type)
@@ -494,7 +492,7 @@ namespace Core
                     if (player.skullHitCount >= 3)
                     {
                         player.isDroppedOut = true;
-                        Debug.Log($"[Skull] Player {player.playerName} hit skull 3 times. DROP OUT!");
+
                         
                         if (PopupController.Instance != null)
                         {
@@ -677,7 +675,7 @@ namespace Core
             }
             else
             {
-                Debug.LogWarning($"[GameOver] GAME OVER! Winner declared: {winner.playerName}");
+
             }
         }
 
@@ -686,7 +684,7 @@ namespace Core
             PlayerData curPlayer = GetCurrentPlayer();
             if (curPlayer != null && curPlayer.isBot)
             {
-                Debug.Log($"Bot Player {curPlayer.playerName} turn ended.");
+
             }
 
             currentState = GameState.ChangingTurn;
@@ -731,7 +729,7 @@ namespace Core
         {
             if (finishOrder.Count >= 3)
             {
-                Debug.Log("Finish count >= 3. Ending game.");
+
                 return true;
             }
 
@@ -740,7 +738,7 @@ namespace Core
             // If the number of finished players + remaining active players is less than 3, the game should end
             if (finishOrder.Count + remainingActivePlayers < 3)
             {
-                Debug.Log($"Ending game because only {finishOrder.Count} players finished and {remainingActivePlayers} active remaining (cannot reach 3 ranking slots).");
+
                 return true;
             }
 
@@ -769,9 +767,9 @@ namespace Core
             player.currentTile = 100;
 
             // Logs
-            Debug.Log($"Player {player.playerName} reached tile 100.");
-            Debug.Log($"Player {player.playerName} registered as rank {player.finishRank}.");
-            Debug.Log($"Player {player.playerName} is finished and removed from turn queue.");
+
+
+
 
             // Sync token visual to show exactly on tile 100
             if (playerTokens.TryGetValue(player.id, out PlayerToken token))
@@ -812,7 +810,7 @@ namespace Core
 
         private void OnFinishPopupClosed()
         {
-            Debug.Log($"Checking if game should end: {ShouldEndGame()}");
+
             if (ShouldEndGame())
             {
                 ShowFinalRanking();
@@ -828,7 +826,7 @@ namespace Core
             currentState = GameState.GameOver;
 
             // Log
-            Debug.Log("Final ranking displayed.");
+
 
             if (GameOverUI.Instance != null)
             {
@@ -836,7 +834,7 @@ namespace Core
             }
             else
             {
-                Debug.LogWarning("[GameManager] GameOverUI.Instance is null, could not display final ranking.");
+
             }
         }
     }

@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import PlayerSprite from './PlayerSprite';
 
 const EVOLUTION_STAGES = [
   { name: "MABA 🌱", style: "wood-panel text-[var(--color-game-cream-text)]" },
@@ -63,15 +64,20 @@ export default function PlayerCards({ players, activePlayerId }) {
 
             {/* Header info: Name and Bot tag */}
             <div className={`flex justify-between items-center mb-2 ${isSelfActive ? 'mt-4' : ''}`}>
-              <span 
-                className="font-black text-xl truncate drop-shadow-sm font-playful tracking-wide"
-                style={{ 
-                  color: player.playerColorHex,
-                  WebkitTextStroke: '1px var(--color-game-dark-wood)'
-                }}
-              >
-                {player.playerName}
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-12 h-12 rounded-full wood-bg border-2 flex items-center justify-center overflow-hidden" style={{ borderColor: player.playerColorHex }}>
+                  <PlayerSprite hexColor={player.playerColorHex} stage={player.currentEvolutionStage} currentTile={player.currentTile} />
+                </div>
+                <span
+                  className="font-black text-xl truncate drop-shadow-sm font-playful tracking-wide"
+                  style={{
+                    color: player.playerColorHex,
+                    WebkitTextStroke: '1px var(--color-game-dark-wood)'
+                  }}
+                >
+                  {player.playerName}
+                </span>
+              </div>
               <div className="flex gap-1.5 items-center">
                 {player.isBot && (
                   <span className="text-[10px] font-bangers px-2 py-0.5 rounded border border-[var(--color-game-dark-wood)] wood-bg text-[var(--color-game-cream-text)]">
