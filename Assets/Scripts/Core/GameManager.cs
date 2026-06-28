@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -158,20 +158,8 @@ namespace Core
                 }
                 p.playerName = customName;
 
-                // Set color from selected character set if available, otherwise fall back
+                // Player colors are strictly hardcoded based on ID to maintain theme consistency
                 Color pColor = colors[i - 1];
-                if (PlayerEvolutionController.Instance != null && PlayerEvolutionController.Instance.characterSets != null && PlayerEvolutionController.Instance.characterSets.Count > 0)
-                {
-                    int setIndex = (i - 1) % PlayerEvolutionController.Instance.characterSets.Count;
-                    if (setIndex >= 0 && setIndex < PlayerEvolutionController.Instance.characterSets.Count)
-                    {
-                        var spriteSet = PlayerEvolutionController.Instance.characterSets[setIndex];
-                        if (spriteSet != null && spriteSet.identityColor != Color.clear && spriteSet.identityColor != new Color(0, 0, 0, 0))
-                        {
-                            pColor = spriteSet.identityColor;
-                        }
-                    }
-                }
                 p.playerColor = pColor;
 
 

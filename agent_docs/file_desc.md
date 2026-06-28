@@ -11,7 +11,12 @@ Berisi seluruh gambar 2D, sprite, dan UI yang digunakan dalam game.
 *   **MainMenu/**: Aset visual untuk menu utama (background, tombol, dll).
 *   **Board/**: Gambar papan permainan ular tangga berukuran 10x10.
 *   **Characters/**: Sprite lama untuk karakter pemain.
-*   **PlayerSprites/**: (Atau di dalam `Assets/Resources/PlayerSprites/`) Sprite dinamis karakter dengan format `p{id}_r{anim}_c{stage}.png` untuk 4 tingkat evolusi (idle, walk, happy, shocked).
+*   **PlayerSprites/**: (Atau di dalam `Assets/Resources/PlayerSprites/` & folder `web-ui/public/sprites/`) Berisi total **96 file** sprite dinamis karakter dengan format penamaan `p{id}_r{anim}_c{stage}.png`. 
+    *   Rincian 96 varian tersebut berasal dari kombinasi:
+        *   **4 Karakter (Player ID `p1` - `p4`)**: Merah (`p1`), Biru (`p2`), Hijau (`p3`), Kuning (`p4`).
+        *   **6 Animasi/Posisi (Row `r1` - `r6`)**: `r1` (Idle/Depan), `r2` (Jalan Kanan), `r3` (Jalan Kiri), `r4` (Jalan Belakang), `r5` (Senang/Naik Tangga), `r6` (Kaget/Turun Ular).
+        *   **4 Tingkat Evolusi (Col `c1` - `c4`)**: `c1` (Punk/MABA), `c2` (Mulai Belajar), `c3` (Tertib), `c4` (Teladan/Duta).
+    *   *Catatan Edge Case & Pola*: ID player pada penamaan sprite mengikat pasti pada tema warna utama (`p1` = Merah, `p2` = Biru, `p3` = Hijau, `p4` = Kuning). Hindari melakukan pencocokan (*mapping*) ID hanya berdasarkan deteksi string *hex color* (karena rentan meleset akibat pembulatan Float ke Hex dari Unity ke frontend yang berujung pada fallback sprite yang salah). Gunakan langsung properti `playerId` bertipe integer dari *state game* secara absolut.
 *   **UI/**: Aset untuk tombol, panel pop-up, meteran dadu, dan status bar.
 
 ### 2. `Assets/Audio/` (Aset Suara)

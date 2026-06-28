@@ -16,9 +16,10 @@ Daftar Link Sprite berdasarkan Tingkat (Misal untuk Mahasiswa 1/Merah `p1`):
 *Catatan: Semua file di atas telah disesuaikan namanya (p1, p2, p3, p4) dan cache browser 404 telah di-bypass menggunakan parameter `?v=1`.*
 
 ## Pekerjaan Selanjutnya (To-Do List)
-1. **Perbaikan Proporsi PFP (Cropping)**
-   - Sprite saat ini mungkin ukurannya tidak konsisten atau kurang pas ketika diletakkan di dalam bingkai bundar (PFP).
-   - **Target**: Lakukan cropping/penyesuaian ukuran gambar sprite agar *fit* persis dan proporsional di dalam PFP (tidak kekecilan dan tidak kegedean).
+1. **Perbaikan Proporsi PFP (Cropping) & Mapping Sprite** `[SELESAI]`
+   - Sprite PFP telah di-*crop* dan diletakkan pada kanvas persegi (1:1) yang konsisten.
+   - *Pembaruan Aturan: Warna player telah dikunci mati berdasarkan urutan Player (1=Merah, 2=Biru, 3=Hijau, 4=Kuning).*
+   - *Bugfix: Mapping sprite telah diubah dari pendeteksian string hex (yang rentan meleset akibat pembulatan) menjadi pengambilan parameter `playerId` absolut dari state Unity. (Player 3 kini menampilkan sprite hijau dengan benar).*
 2. **Sprite Animatif untuk Token Ular Tangga di Papan (Tugas Berat)**
    - Mengubah token pion kotak-kotak biasa di papan game (Unity) agar menjadi GameObject dengan Sprite Renderer / Animator yang menampilkan sprite 2D sesuai dengan yang ada di PFP.
    - **Target**: Pion di atas papan bisa bergerak (animasi jalan), menampilkan status idle, kaget saat kena ular, dan senang saat naik tangga sesuai tingkat evolusinya.

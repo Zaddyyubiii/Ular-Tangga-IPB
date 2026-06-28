@@ -24,7 +24,10 @@ Sebelum mulai membuat atau mengubah kode, AI Agent wajib membaca file penting be
 3. `agent_docs/file_desc.md`
    Untuk memahami fungsi file/folder yang sudah ada.
 
-4. Semua dokumen relevan di folder `agent_docs/`.
+4. `agent_docs/edge_cases.md`
+   Untuk mempelajari edge cases, masalah caching, dan error build yang pernah terjadi.
+
+5. Semua dokumen relevan di folder `agent_docs/`.
 
 5. `README.md` jika tersedia.
 
@@ -265,7 +268,13 @@ Player harus punya identitas konsisten sepanjang game:
 
 Scoreboard, token, popup, dice UI, dan ranking harus membaca data dari sumber yang sama, misalnya `PlayerData`.
 
-Jangan mengganti warna player secara random setelah game dimulai.
+Warna tema player di-hardcode berdasarkan ID player untuk memastikan konsistensi:
+- Player 1 = Merah
+- Player 2 = Biru
+- Player 3 = Hijau
+- Player 4 = Kuning
+
+Jangan mengganti warna player secara random atau berdasarkan character set setelah game dimulai.
 
 ---
 

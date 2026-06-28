@@ -66,7 +66,7 @@ export default function PlayerCards({ players, activePlayerId }) {
             <div className={`flex justify-between items-center mb-2 ${isSelfActive ? 'mt-4' : ''}`}>
               <div className="flex items-center gap-2">
                 <div className="w-12 h-12 rounded-full wood-bg border-2 flex items-center justify-center overflow-hidden" style={{ borderColor: player.playerColorHex }}>
-                  <PlayerSprite hexColor={player.playerColorHex} stage={player.currentEvolutionStage} currentTile={player.currentTile} />
+                  <PlayerSprite playerId={player.id} hexColor={player.playerColorHex} stage={player.currentEvolutionStage} currentTile={player.currentTile} />
                 </div>
                 <span
                   className="font-black text-xl truncate drop-shadow-sm font-playful tracking-wide"

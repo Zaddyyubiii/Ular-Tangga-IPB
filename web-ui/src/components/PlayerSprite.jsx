@@ -10,8 +10,8 @@ const getPlayerId = (hex) => {
   return 2;
 };
 
-export default function PlayerSprite({ hexColor, stage, currentTile }) {
-  const playerId = getPlayerId(hexColor);
+export default function PlayerSprite({ playerId, hexColor, stage, currentTile }) {
+  const actualPlayerId = playerId || getPlayerId(hexColor);
 
   // Mapping yg benar berdasarkan gambar referensi:
   // Column (c1-c4) = Stage (1: Punk, 2: Mulai Belajar, 3: Tertib, 4: Teladan)
@@ -64,16 +64,16 @@ export default function PlayerSprite({ hexColor, stage, currentTile }) {
     };
   }, [currentTile]);
 
-  const filename = `p${playerId}_r${row}_c${col}.png`;
+  const filename = `p${actualPlayerId}_r${row}_c${col}.png`;
   const src = `./sprites/${filename}?v=1`;
 
   return (
     <img
       src={src}
-      className="w-[120%] h-[120%] object-contain"
+      className="w-[110%] h-[110%] object-contain"
       style={{
         imageRendering: 'pixelated',
-        transformOrigin: 'bottom center'
+        transformOrigin: 'center'
       }}
       alt={`Character Stage ${col}`}
     />
