@@ -239,12 +239,8 @@ namespace Board
         {
             if (occupied.Contains(tile)) return false;
 
-            // Radius check 1: no special tiles allowed within [tile-1, tile+1]
-            // This prevents snakes/ladders from starting exactly right next to each other
-            for (int i = -1; i <= 1; i++)
-            {
-                if (occupied.Contains(tile + i)) return false;
-            }
+            // Radius check 1: allow special tiles to be adjacent if needed, but not on the same tile
+            // Removed the strict [tile-1, tile+1] check because 37 special tiles in 98 spaces makes it too restrictive
 
             // Radius check 2: no more than 2 special tiles in radius 3
             // This aligns with BoardValidator's radius rule.
@@ -257,7 +253,7 @@ namespace Board
                     {
                         if (k == tile || specialTiles.Contains(k)) count++;
                     }
-                    if (count > 2) return false;
+                    if (count > 4) return false;
                 }
             }
 

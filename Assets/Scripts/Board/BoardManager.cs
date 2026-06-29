@@ -540,7 +540,7 @@ namespace Board
                 // Linear base position
                 Vector2 basePt = Vector2.Lerp(start, end, t);
                 // Winding sine-wave perpendicular offset (tapered towards the tail)
-                float wave = Mathf.Sin(t * Mathf.PI * 3f) * 16f * (1f - t * 0.45f);
+                float wave = Mathf.Sin(t * Mathf.PI * 3f) * 6f * (1f - t * 0.45f);
                 Vector2 pt = basePt + perp * wave;
 
                 // Tapered body thickness from head (11f) to tail (3.5f)

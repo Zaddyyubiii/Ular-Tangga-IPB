@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Board
@@ -45,7 +45,8 @@ namespace Board
             }
 
             // Verify Question/Skull counts
-            if (questionCount != 6) return false;
+            int expectedQuestionCount = originalConfig != null && originalConfig.questionTiles != null ? originalConfig.questionTiles.Count : 6;
+            if (questionCount != expectedQuestionCount) return false;
             if (skullCount != 3) return false;
 
             
@@ -99,7 +100,7 @@ namespace Board
                         countInRange++;
                     }
                 }
-                if (countInRange > 2) return false;
+                if (countInRange > 4) return false;
             }
 
             // Check zones distribution
