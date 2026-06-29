@@ -32,10 +32,13 @@ const server = http.createServer((req, res) => {
 
     const filePath = path.join(PUBLIC_DIR, reqPath);
 
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
     // Security check to avoid directory traversal outside of PUBLIC_DIR
     if (!filePath.startsWith(PUBLIC_DIR)) {
         res.writeHead(403, { 'Content-Type': 'text/plain' });
         res.end('Forbidden');
+        console.log(`\x1b[90m[${timestamp}]\x1b[0m \x1b[41m\x1b[37m 403 \x1b[0m ${req.method.padEnd(4)} \x1b[31m${reqPath}\x1b[0m`);
         return;
     }
 
@@ -43,6 +46,7 @@ const server = http.createServer((req, res) => {
         if (err) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end('404 Not Found');
+            console.log(`\x1b[90m[${timestamp}]\x1b[0m \x1b[43m\x1b[30m 404 \x1b[0m ${req.method.padEnd(4)} \x1b[33m${reqPath}\x1b[0m`);
             return;
         }
 
@@ -50,6 +54,7 @@ const server = http.createServer((req, res) => {
             if (readErr) {
                 res.writeHead(500, { 'Content-Type': 'text/plain' });
                 res.end('500 Internal Server Error');
+                console.log(`\x1b[90m[${timestamp}]\x1b[0m \x1b[41m\x1b[37m 500 \x1b[0m ${req.method.padEnd(4)} \x1b[31m${reqPath}\x1b[0m`);
                 return;
             }
 
@@ -65,6 +70,22 @@ const server = http.createServer((req, res) => {
                 'Expires': '0'
             });
             res.end(data);
+            
+            // Beautiful console logs
+            let statusColor = '\x1b[42m\x1b[30m'; // Default Green bg for OK
+            let pathColor = '\x1b[37m';           // Default White
+            
+            if (ext === '.wasm' || ext === '.data') {
+                statusColor = '\x1b[46m\x1b[30m'; // Cyan bg for heavy Unity files
+                pathColor = '\x1b[36m';
+            } else if (ext.match(/\.(png|jpg|gif|svg)$/)) {
+                statusColor = '\x1b[45m\x1b[30m'; // Magenta bg for images
+                pathColor = '\x1b[35m';
+            } else if (ext === '.js' || ext === '.json') {
+                statusColor = '\x1b[44m\x1b[37m'; // Blue bg for scripts
+            }
+            
+            console.log(`\x1b[90m[${timestamp}]\x1b[0m ${statusColor} 200 \x1b[0m ${req.method.padEnd(4)} ${pathColor}${reqPath}\x1b[0m`);
         });
     });
 });
@@ -104,21 +125,23 @@ killPort(PORT);
 // Small delay to let OS release the port
 setTimeout(() => {
     server.listen(PORT, () => {
-        console.log('\x1b[32m%s\x1b[0m', '==================================================');
-        console.log('\x1b[36m%s\x1b[0m', '  Ular Tangga IPB WebGL Local Server (Node.js)');
-        console.log('\x1b[32m%s\x1b[0m', '==================================================');
-        console.log(`Server is running at: \x1b[33mhttp://localhost:${PORT}\x1b[0m`);
-        console.log(`Serving files from: ${PUBLIC_DIR}`);
-        console.log('Press Ctrl+C to stop the server.');
-        console.log('--------------------------------------------------');
+        console.log('\n\x1b[36m=================================================================\x1b[0m');
+        console.log('\x1b[1m\x1b[32m🚀  ULAR TANGGA IPB - LOCAL DEVELOPMENT SERVER IS LIVE  🚀\x1b[0m');
+        console.log('\x1b[36m=================================================================\x1b[0m');
+        console.log(`\n\x1b[1m🌍  Game URL:\x1b[0m        \x1b[4m\x1b[33mhttp://localhost:${PORT}\x1b[0m`);
+        console.log(`\x1b[1m📂  Serving From:\x1b[0m    \x1b[37m${PUBLIC_DIR}\x1b[0m`);
+        console.log(`\x1b[1m💡  Status:\x1b[0m          \x1b[42m\x1b[30m ONLINE \x1b[0m \x1b[32mReady for presentation\x1b[0m\n`);
+        console.log('\x1b[90mPress Ctrl+C to stop the server. Live request logs will appear below:\x1b[0m');
+        console.log('\x1b[36m-----------------------------------------------------------------\x1b[0m\n');
     });
 
     server.on('error', (e) => {
         if (e.code === 'EADDRINUSE') {
-            console.error(`\x1b[31m[Error] Port ${PORT} still in use after cleanup. Try: taskkill /F /IM node.exe\x1b[0m`);
+            console.error(`\n\x1b[41m\x1b[37m ERROR \x1b[0m \x1b[31mPort ${PORT} is still in use after cleanup.\x1b[0m`);
+            console.error(`\x1b[33mTip: Try running: taskkill /F /IM node.exe\x1b[0m\n`);
             process.exit(1);
         } else {
-            console.error(e);
+            console.error(`\n\x1b[41m\x1b[37m FATAL \x1b[0m`, e);
             process.exit(1);
         }
     });
