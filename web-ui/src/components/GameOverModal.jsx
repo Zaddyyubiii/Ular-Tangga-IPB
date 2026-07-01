@@ -1,11 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useAudio } from '../hooks/useAudio';
 
 export default function GameOverModal({ winnerName, winnerColor, message, onPlayAgain, onReturnMenu }) {
+  const { playSfx } = useAudio();
   React.useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
+        playSfx('click');
         onPlayAgain();
       }
     };
@@ -14,7 +17,7 @@ export default function GameOverModal({ winnerName, winnerColor, message, onPlay
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onPlayAgain]);
+  }, [onPlayAgain, playSfx]);
 
   return (
     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 pointer-events-auto select-none font-playful">
@@ -70,7 +73,10 @@ export default function GameOverModal({ winnerName, winnerColor, message, onPlay
         {/* Bubbly actions row */}
         <div className="flex gap-3">
           <button
-            onClick={onPlayAgain}
+            onClick={() => {
+              playSfx('click');
+              onPlayAgain();
+            }}
             className="flex-1 py-3 px-4 rounded-xl wood-button bg-[var(--color-game-grass)] hover:bg-[var(--color-game-soft-grass)] text-xl transition-all duration-100"
             style={{ borderColor: 'var(--color-game-deep-grass)', backgroundColor: 'var(--color-game-grass)' }}
           >
@@ -78,7 +84,10 @@ export default function GameOverModal({ winnerName, winnerColor, message, onPlay
           </button>
           
           <button
-            onClick={onReturnMenu}
+            onClick={() => {
+              playSfx('click');
+              onReturnMenu();
+            }}
             className="flex-1 py-3 px-4 rounded-xl wood-button bg-[var(--color-game-wood)] hover:bg-[var(--color-game-light-dirt)] text-[var(--color-game-dark-text)] text-xl transition-all duration-100"
             style={{ borderColor: 'var(--color-game-dark-wood)', backgroundColor: 'var(--color-game-dirt)' }}
           >

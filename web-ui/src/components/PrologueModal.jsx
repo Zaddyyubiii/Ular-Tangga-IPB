@@ -1,13 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useAudio } from '../hooks/useAudio';
 
 export default function PrologueModal({ text, onStart }) {
+  const { playSfx } = useAudio();
   React.useEffect(() => {
     if (!text) return;
 
     const handleKeyDown = (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
+        playSfx('click');
         onStart();
       }
     };
@@ -16,7 +19,7 @@ export default function PrologueModal({ text, onStart }) {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [text, onStart]);
+  }, [text, onStart, playSfx]);
 
   if (!text) return null;
 
@@ -59,7 +62,10 @@ export default function PrologueModal({ text, onStart }) {
 
         {/* Start Button */}
         <button
-          onClick={onStart}
+          onClick={() => {
+            playSfx('click');
+            onStart();
+          }}
           className="w-full py-4 px-6 rounded-xl wood-button text-[var(--color-game-cream-text)] font-pixel text-xl uppercase tracking-widest hover:scale-[1.02] transition-transform duration-150"
         >
           Mulai Perjalanan 🚀

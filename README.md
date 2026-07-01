@@ -83,7 +83,31 @@ Edit:
 
 ## Audio
 
-Masukkan BGM ke `Assets/Audio/BGM/` dan SFX ke `Assets/Audio/SFX/`, lalu isi field pada `AudioManager`. Semua clip aman dibiarkan kosong.
+Audio runtime untuk build web diprioritaskan di React/Web. File asli tetap disimpan di `Assets/Audio/`, lalu salinan browser-friendly berada di:
+
+- `web-ui/public/audio/bgm/Superhero_violin_no_intro.ogg`
+- `web-ui/public/audio/sfx/Click.wav`
+- `web-ui/public/audio/sfx/Dice.mp3`
+- `web-ui/public/audio/sfx/MovePetak.wav`
+- `web-ui/public/audio/sfx/PetakBonus.wav`
+- `web-ui/public/audio/sfx/PetakPunishment.wav`
+- `web-ui/public/audio/sfx/Victory_pake_yang_ini_aja.wav`
+- `web-ui/public/audio/sfx/win_sound_2_1.wav`
+- `web-ui/public/audio/sfx/win_sound_2_3.wav`
+
+React menggunakan `web-ui/src/audio/AudioManager.js`, `AudioProvider`, dan `useAudio`. BGM mulai setelah gesture pertama user karena kebijakan autoplay browser, lalu loop tanpa membuat instance ganda. Mute dan volume tersimpan di `localStorage` (`game_audio_muted`, `game_bgm_volume`, `game_sfx_volume`).
+
+Mapping SFX utama:
+
+- `click`: tombol UI.
+- `dice`: mulai roll atau indikator rolling.
+- `movePetak`: setiap token pindah satu petak.
+- `petakBonus`: tile positif, ladder, quiz benar, finish individual.
+- `petakPunishment`: snake, skull, quiz salah, drop out, bounce back.
+- `victory`: final ranking/game over.
+- `winAlt1` dan `winAlt2`: fallback/alternative saja.
+
+File `.meta` Unity tidak dipakai oleh runtime browser.
 
 ## Build WebGL
 

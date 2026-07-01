@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'node:fs';
 const file = '../Assets/Scripts/Player/PlayerEvolutionController.cs';
 let content = fs.readFileSync(file, 'utf8');
 

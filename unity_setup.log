@@ -1,0 +1,466 @@
+[Licensing::Module] Trying to connect to existing licensing client channel...
+Built from '6000.4/staging' branch; Version is '6000.4.8f1 (f8b72d3d7343) revision 16299821'; Using compiler version '194234433'; Build Type 'Release'
+[Licensing::IpcConnector] Channel LicenseClient-Ayubi doesn't exist
+OS: 'Windows 11  (10.0.26200) CoreSingleLanguage' Language: 'en' Physical Memory: 15989 MB
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
+System  architecture: x64
+Process architecture: x64
+Date: 2026-06-24T12:49:53Z
+[Licensing::Module] Successfully launched the LicensingClient (PId: 27224)
+
+COMMAND LINE ARGUMENTS:
+C:\Program Files\Unity\Hub\Editor\6000.4.8f1\Editor\Unity.exe
+-batchmode
+-projectPath
+c:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB
+-executeMethod
+UlarTangga.EditorSetup.SceneSetupHelper.SetupPlayableScenes
+-logFile
+unity_setup.log
+-quit
+Successfully changed project path to: c:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB
+C:/Users/Ayubi/Documents/GitHub/Ular-Tangga-IPB
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-gfx=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+Player connection [26804]  Target information:
+
+Player connection [26804]  * "[IP] 10.32.117.226 [Port] 55504 [Flags] 2 [Guid] 4089310630 [EditorId] 4089310630 [Version] 1048832 [Id] WindowsEditor(7,LAPTOP-RP3KH31I) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [26804] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [26804] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-Ayubi" at "2026-06-24T12:49:54.213301Z"
+[Licensing::Client] Code 10 while verifying Licensing Client signature (process Id: 27224, path: "C:/Program Files/Unity/Hub/Editor/6000.4.8f1/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client.exe")
+[Licensing::Module] LicensingClient has failed validation; ignoring
+[Package Manager] Connected to IPC stream "Upm-22260" after 0.2 seconds.
+[Licensing::Module] Licensing is not yet initialized.
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.1+9fbee8e
+  Session Id:              d8c5f3205dcb4558807cae877ee720d0
+  Correlation Id:          ba6a44be309e9013854a93c6fe4db77d
+  External correlation Id: 235527095738144339
+  Machine Id:              tylee/XVYWQUD83OeLa8AA+6wSE=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-Ayubi" (connect: 0.38s, validation: 0.09s, handshake: 0.12s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-Ayubi-notifications" at "2026-06-24T12:49:54.4273926Z"
+[Licensing::Module] Connected to LicensingClient (PId: 27224, launch time: 0.00, total connection time: 0.59s)
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 18968439974105-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.01
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 0.65s
+[Licensing::Module] Licensing is initialized (took 0.13s).
+[Licensing::Client] Successfully resolved entitlement details
+Library Redirect Path: Library/
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Initialize engine version: 6000.4.8f1 (f8b72d3d7343)
+[Subsystems] Discovering subsystems at path C:/Program Files/Unity/Hub/Editor/6000.4.8f1/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path C:/Users/Ayubi/Documents/GitHub/Ular-Tangga-IPB/Assets
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+d3d12: failed to query info queue interface (0x80004002).
+Direct3D:
+    Version:         Direct3D 12 [level 12.2]
+    Renderer:        Intel(R) Arc(TM) Graphics (ID=0x7d55)
+    Vendor:          Intel
+    VRAM:            9113 MB
+    App VRAM Budget: 8402 MB
+    Driver:          32.0.101.8531
+    Unified Memory Architecture
+Initialize mono
+Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/6000.4.8f1/Editor/Data/Managed'
+Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/6000.4.8f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
+Mono config path = 'C:/Program Files/Unity/Hub/Editor/6000.4.8f1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56260
+CodeReloadManager initialized
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: C:/Program Files/Unity/Hub/Editor/6000.4.8f1/Editor/Data/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: C:/Program Files/Unity/Hub/Editor/6000.4.8f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Registered in 0.021625 seconds.
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Package Manager log level set to [2]
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:False
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.408 seconds
+Domain Reload Profiling: 908ms
+	BeginReloadAssembly (129ms)
+		CreateAndSetChildDomain (5ms)
+	RebuildCommonClasses (31ms)
+	RebuildNativeTypeToScriptingClass (11ms)
+	initialDomainReloadingComplete (84ms)
+	LoadAllAssembliesAndSetupDomain (242ms)
+		LoadAssemblies (121ms)
+		AnalyzeDomain (232ms)
+			TypeCache.Refresh (230ms)
+				TypeCache.ScanAssembly (217ms)
+	FinalizeReload (410ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (44ms)
+			BeforeProcessingInitializeOnLoad (80ms)
+			ProcessInitializeOnLoadAttributes (109ms)
+			ProcessInitializeOnLoadMethodAttributes (114ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 57 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.ai.navigation@2.0.12 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.ai.navigation@734c2c4c5591)
+    com.unity.collab-proxy@2.12.4 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.collab-proxy@0b1559bcd34e)
+    com.unity.ide.rider@3.0.40 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.ide.rider@e4950c6d131b)
+    com.unity.ide.visualstudio@2.0.27 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.ide.visualstudio@dc1ddd4f09b6)
+    com.unity.inputsystem@1.19.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.inputsystem@21a28c3a6c83)
+    com.unity.timeline@1.8.12 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.timeline@8cd8509afae5)
+    com.unity.visualscripting@1.9.11 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.visualscripting@8bed5ad90189)
+    com.unity.searcher@4.9.4 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.searcher@d45a78918735)
+    com.unity.burst@1.8.29 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.burst@6bb9aca3ef38)
+    com.unity.mathematics@1.3.3 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.mathematics@19a9377c4ffa)
+    com.unity.nuget.mono-cecil@1.11.6 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff)
+    com.unity.test-framework.performance@3.4.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.test-framework.performance@aa81a99c4a75)
+  Built-in packages:
+    com.unity.multiplayer.center@1.0.1 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.multiplayer.center@f01f4ba8d00a)
+    com.unity.render-pipelines.universal@17.4.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.render-pipelines.universal@13e5115b98bf)
+    com.unity.test-framework@1.6.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.test-framework@76560ee600cb)
+    com.unity.ugui@2.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.ugui@a9ea81766fbd)
+    com.unity.modules.accessibility@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.accessibility)
+    com.unity.modules.adaptiveperformance@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.adaptiveperformance)
+    com.unity.modules.ai@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.ai)
+    com.unity.modules.androidjni@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.androidjni)
+    com.unity.modules.animation@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.animation)
+    com.unity.modules.assetbundle@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.assetbundle)
+    com.unity.modules.audio@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.audio)
+    com.unity.modules.cloth@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.cloth)
+    com.unity.modules.director@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.director)
+    com.unity.modules.imageconversion@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.imageconversion)
+    com.unity.modules.imgui@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.imgui)
+    com.unity.modules.jsonserialize@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.jsonserialize)
+    com.unity.modules.particlesystem@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.particlesystem)
+    com.unity.modules.physics@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.physics)
+    com.unity.modules.physics2d@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.physics2d)
+    com.unity.modules.screencapture@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.screencapture)
+    com.unity.modules.terrain@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.terrain)
+    com.unity.modules.terrainphysics@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.terrainphysics)
+    com.unity.modules.tilemap@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.tilemap)
+    com.unity.modules.ui@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.ui)
+    com.unity.modules.uielements@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.uielements)
+    com.unity.modules.umbra@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.umbra)
+    com.unity.modules.unityanalytics@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.unityanalytics)
+    com.unity.modules.unitywebrequest@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.unitywebrequest)
+    com.unity.modules.unitywebrequestassetbundle@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.unitywebrequestassetbundle)
+    com.unity.modules.unitywebrequestaudio@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.unitywebrequestaudio)
+    com.unity.modules.unitywebrequesttexture@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.unitywebrequesttexture)
+    com.unity.modules.unitywebrequestwww@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.unitywebrequestwww)
+    com.unity.modules.vectorgraphics@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.vectorgraphics)
+    com.unity.modules.vehicles@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.vehicles)
+    com.unity.modules.video@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.video)
+    com.unity.modules.vr@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.vr)
+    com.unity.modules.wind@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.wind)
+    com.unity.modules.xr@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.xr)
+    com.unity.modules.subsystems@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.subsystems)
+    com.unity.modules.hierarchycore@1.0.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.modules.hierarchycore)
+    com.unity.ext.nunit@2.0.5 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.ext.nunit@d8c07649098d)
+    com.unity.render-pipelines.core@17.4.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.render-pipelines.core@6f62546dd936)
+    com.unity.shadergraph@17.4.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.shadergraph@33f3b0a71b9a)
+    com.unity.render-pipelines.universal-config@17.4.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.render-pipelines.universal-config@0db4263b9e6b)
+    com.unity.collections@6.4.0 (location: C:\Users\Ayubi\Documents\GitHub\Ular-Tangga-IPB\Library\PackageCache\com.unity.collections@5b6ebd78ccc0)
+[Subsystems] No new subsystems found in resolved package list.
+[Package Manager] Done registering packages in 0.02 seconds
+[ScriptCompilation] Requested script compilation because: AssetDatabase observed changes in script compilation related files
+Starting: C:\Program Files\Unity\Hub\Editor\6000.4.8f1\Editor\Data\Tools\BuildPipeline\bee_backend.exe --ipc --defer-dag-verification --dagfile="Library/Bee/1900b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: C:/Users/Ayubi/Documents/GitHub/Ular-Tangga-IPB
+DisplayProgressbar: Compiling Scripts
+ExitCode: 0 Duration: 3s543ms
+[712/906    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+[902/906    1s] Csc Library/Bee/artifacts/1900b0aE.dag/Assembly-CSharp-Editor.dll (+2 others)
+Assets\Scripts\Editor\SceneSetupHelper.cs(424,13): warning CS0618: 'TMP_Text.enableWordWrapping' is obsolete: 'The enabledWordWrapping property is now obsolete. Please use the textWrappingMode property instead.'
+
+Assets\Scripts\Editor\SceneSetupHelper.cs(968,13): warning CS0618: 'TMP_Text.enableWordWrapping' is obsolete: 'The enabledWordWrapping property is now obsolete. Please use the textWrappingMode property instead.'
+
+Assets\Scripts\Editor\SceneSetupHelper.cs(1010,13): warning CS0618: 'TMP_Text.enableWordWrapping' is obsolete: 'The enabledWordWrapping property is now obsolete. Please use the textWrappingMode property instead.'
+[903/906    1s] ILPostProcess Library/Bee/artifacts/1900b0aE.dag/post-processed/Assembly-CSharp-Editor.dll (+pdb)
+Processing assembly Library/Bee/artifacts/1900b0aE.dag/Assembly-CSharp-Editor.dll, with 138 defines and 343 references
+
+processors: Unity.Jobs.CodeGen.JobsILPostProcessor, zzzUnity.Burst.CodeGen.BurstILPostProcessor
+
+running Unity.Jobs.CodeGen.JobsILPostProcessor
+
+running zzzUnity.Burst.CodeGen.BurstILPostProcessor
+[904/906    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.pdb
+[905/906    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.dll
+*** Tundra build success (3.50 seconds), 5 items updated, 906 evaluated
+Assets\Scripts\Editor\SceneSetupHelper.cs(424,13): warning CS0618: 'TMP_Text.enableWordWrapping' is obsolete: 'The enabledWordWrapping property is now obsolete. Please use the textWrappingMode property instead.'
+Assets\Scripts\Editor\SceneSetupHelper.cs(968,13): warning CS0618: 'TMP_Text.enableWordWrapping' is obsolete: 'The enabledWordWrapping property is now obsolete. Please use the textWrappingMode property instead.'
+Assets\Scripts\Editor\SceneSetupHelper.cs(1010,13): warning CS0618: 'TMP_Text.enableWordWrapping' is obsolete: 'The enabledWordWrapping property is now obsolete. Please use the textWrappingMode property instead.'
+AssetDatabase: script compilation time: 4.054934s
+Begin MonoManager ReloadAssembly
+Assembly Assembly-CSharp-Editor-firstpass.dll at Library/ScriptAssemblies/Assembly-CSharp-Editor-firstpass.dll not valid. Loading of assembly skipped.
+Assembly Assembly-CSharp-firstpass.dll at Library/ScriptAssemblies/Assembly-CSharp-firstpass.dll not valid. Loading of assembly skipped.
+Assembly DocCodeExamples.dll at Library/ScriptAssemblies/DocCodeExamples.dll not valid. Loading of assembly skipped.
+Assembly TestNewCustomAssembly.dll at Library/ScriptAssemblies/TestNewCustomAssembly.dll not valid. Loading of assembly skipped.
+Assembly Unity.Collections.BurstCompatibilityGen.dll at Library/ScriptAssemblies/Unity.Collections.BurstCompatibilityGen.dll not valid. Loading of assembly skipped.
+Assembly Unity.Collections.DocCodeSamples.dll at Library/ScriptAssemblies/Unity.Collections.DocCodeSamples.dll not valid. Loading of assembly skipped.
+Assembly Unity.Collections.PerformanceTests.dll at Library/ScriptAssemblies/Unity.Collections.PerformanceTests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Collections.Tests.dll at Library/ScriptAssemblies/Unity.Collections.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Collections.Tests.Playmode.dll at Library/ScriptAssemblies/Unity.Collections.Tests.Playmode.dll not valid. Loading of assembly skipped.
+Assembly Unity.InputSystem.IntegrationTests.dll at Library/ScriptAssemblies/Unity.InputSystem.IntegrationTests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Mathematics.Tests.dll at Library/ScriptAssemblies/Unity.Mathematics.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Multiplayer.Center.Editor.Tests.dll at Library/ScriptAssemblies/Unity.Multiplayer.Center.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Multiplayer.Center.Tests.dll at Library/ScriptAssemblies/Unity.Multiplayer.Center.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Nuget.Mono-Cecil.dll at Library/ScriptAssemblies/Unity.Nuget.Mono-Cecil.dll not valid. Loading of assembly skipped.
+Assembly Unity.PathTracing.Editor.Tests.dll at Library/ScriptAssemblies/Unity.PathTracing.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.PathTracing.Runtime.Tests.dll at Library/ScriptAssemblies/Unity.PathTracing.Runtime.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.RenderPipelines.Core.Editor.Tests.dll at Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.RenderPipelines.Core.Runtime.Tests.dll at Library/ScriptAssemblies/Unity.RenderPipelines.Core.Runtime.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.RenderPipelines.Universal.Config.Editor.Tests.dll at Library/ScriptAssemblies/Unity.RenderPipelines.Universal.Config.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.RenderPipelines.Universal.Editor.Tests.dll at Library/ScriptAssemblies/Unity.RenderPipelines.Universal.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.RenderPipelines.Universal.Runtime.Tests.dll at Library/ScriptAssemblies/Unity.RenderPipelines.Universal.Runtime.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Searcher.EditorTests.dll at Library/ScriptAssemblies/Unity.Searcher.EditorTests.dll not valid. Loading of assembly skipped.
+Assembly Unity.ShaderGraph.Editor.Tests.dll at Library/ScriptAssemblies/Unity.ShaderGraph.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.TextMeshPro.Editor.Tests.dll at Library/ScriptAssemblies/Unity.TextMeshPro.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.TextMeshPro.Tests.dll at Library/ScriptAssemblies/Unity.TextMeshPro.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.UnifiedRayTracing.Editor.Tests.dll at Library/ScriptAssemblies/Unity.UnifiedRayTracing.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly UnityEditor.UI.Common.Tests.dll at Library/ScriptAssemblies/UnityEditor.UI.Common.Tests.dll not valid. Loading of assembly skipped.
+Assembly UnityEditor.UI.EditorTests.dll at Library/ScriptAssemblies/UnityEditor.UI.EditorTests.dll not valid. Loading of assembly skipped.
+Assembly UnityEngine.UI.Tests.dll at Library/ScriptAssemblies/UnityEngine.UI.Tests.dll not valid. Loading of assembly skipped.
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 2.60 ms, found 4 plugins.
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  2.735 seconds
+Domain Reload Profiling: 4550ms
+	BeginReloadAssembly (309ms)
+		DisableScriptedObjects (23ms)
+		CreateAndSetChildDomain (157ms)
+	RebuildCommonClasses (34ms)
+	RebuildNativeTypeToScriptingClass (11ms)
+	initialDomainReloadingComplete (544ms)
+	LoadAllAssembliesAndSetupDomain (916ms)
+		LoadAssemblies (760ms)
+		AnalyzeDomain (242ms)
+			TypeCache.Refresh (165ms)
+				TypeCache.ScanAssembly (154ms)
+			BuildScriptInfoCaches (65ms)
+			ResolveRequiredComponents (10ms)
+	FinalizeReload (2736ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (26ms)
+			BeforeProcessingInitializeOnLoad (164ms)
+			ProcessInitializeOnLoadAttributes (2026ms)
+			ProcessInitializeOnLoadMethodAttributes (127ms)
+			AfterProcessingInitializeOnLoad (8ms)
+		AwakeInstancesAfterBackupRestoration (23ms)
+(Values over 0.050ms)
+Asset Pipeline Refresh (id=9cb587c615180384c9c29e4fcc4b4af3): Total: 10.527 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=4243 ms
+		Asset DB Callback time: managed=286 ms, native=69 ms
+		Scripting: domain reloads=1, domain reload time=1820 ms, compile time=4057 ms, other=49 ms
+		Project Asset Count: scripts=1336, non-scripts=2414
+		Asset File Changes: new=0, changed=1, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokePackagesCallback: 61.425ms
+	ApplyChangesToAssetFolders: 0.700ms
+	Scan: 174.499ms
+	OnSourceAssetsModified: 0.933ms
+	CategorizeScriptCompilationAssets: 1035.542ms
+	ProcessAssetsWithTransientArtifactChanges: 70.868ms
+	CategorizeAssets: 52.684ms
+	CompileScripts: 4057.203ms
+	ImportOutOfDateAssets: 2746.855ms (2744.727ms without children)
+		UnloadImportedAssets: 1.006ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.517ms
+		OnDemandSchedulerStart: 0.558ms
+	PostProcessAllAssets: 289.435ms
+		VCAutoAddAssetPostprocess 2.620ms
+		XRBuildSystem.XRAssetImported 0.830ms
+		PostProcessCallbackCreateDeferredMaterials 0.066ms
+		MonoPostProcessAllAssets: 285.319ms
+			AssetPostprocessor.OnPostprocessAllAssets 152.513ms
+			StyleCatalogPostProcessor.OnPostprocessAllAssets 45.668ms
+			UniversalRenderPipelineGlobalSettingsPostprocessor.OnPostprocessAllAssets 18.765ms
+			BuilderAssetPostprocessor.OnPostprocessAllAssets 13.034ms
+			SyncVS.PostprocessSyncProject 6.560ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 2.809ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 2.670ms
+			ShaderGraphAssetPostProcessor.OnPostprocessAllAssets 2.212ms
+			AssetChangedListener.OnPostprocessAllAssets 2.088ms
+			RetainedModeAssetPostprocessor.OnPostprocessAllAssets 1.250ms
+			MaterialPostprocessor.OnPostprocessAllAssets 1.194ms
+			RenderPipelineGlobalSettingsPostprocessor.OnPostprocessAllAssets 1.119ms
+			UVCSAssetPostprocessor.OnPostprocessAllAssets 0.636ms
+			ArtifactBrowserPostProcessor.OnPostprocessAllAssets 0.615ms
+			TMPro_TexturePostProcessor.OnPostprocessAllAssets 0.527ms
+			TextAssetPostProcessor.OnPostprocessAllAssets 0.525ms
+			PostProcessor.OnPostprocessAllAssets 0.497ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.461ms
+			InputActionAssetPostprocessor.OnPostprocessAllAssets 0.440ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.385ms
+			AudioMixerPostprocessor.OnPostprocessAllAssets 0.382ms
+			AssetEvents.OnPostprocessAllAssets 0.371ms
+			InputActionJsonNameModifierAssetProcessor.OnPostprocessAllAssets 0.327ms
+			ProjectSettingsPostprocessor.OnPostprocessAllAssets 0.253ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.229ms
+			SpeedTreePostProcessor.OnPostprocessAllAssets 0.194ms
+			SamplePostprocessor.OnPostprocessAllAssets 0.166ms
+			ConfigAssetsTracker.OnPostprocessAllAssets 0.160ms
+			AudioContainerPostProcessor.OnPostprocessAllAssets 0.135ms
+			ScenarioDriftAssetsTracker.OnPostprocessAllAssets 0.133ms
+	PostAssetChangesProfiler: 6.595ms
+	UnloadStreamsBegin: 1.231ms
+	PersistCurrentRevisions: 0.112ms
+	GenerateScriptTypeHashes: 2.785ms
+	GenerateScriptTypeSerializationHashes: 4.904ms
+	Untracked: 2021.155ms
+
+Application.AssetDatabase Initial Refresh End
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.02 seconds
+Scanning for USB devices : 2.076ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-Ular Tangga Tata Tertib IPB University
+Unloading 85 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6644 unused Assets / (16.4 MB). Loaded Objects now: 7399.
+Memory consumption went from 222.7 MB to 206.3 MB.
+Total: 18.821100 ms (FindLiveObjects: 0.516800 ms CreateObjectMapping: 0.352700 ms MarkObjects: 7.465100 ms  DeleteObjects: 10.483100 ms)
+
+[SceneSetup] Beginning scene auto-setup...
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UlarTangga.EditorSetup.SceneSetupHelper:SetupPlayableScenes () (at Assets/Scripts/Editor/SceneSetupHelper.cs:21)
+
+(Filename: Assets/Scripts/Editor/SceneSetupHelper.cs Line: 21)
+
+Quiz bank loaded: 21 questions.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+Quiz.QuizBank:OnEnable () (at Assets/Scripts/Quiz/QuizBank.cs:270)
+UnityEditor.AssetDatabase:LoadAssetAtPath (string,System.Type)
+UnityEditor.AssetDatabase:LoadAssetAtPath<Quiz.QuizBank> (string)
+UlarTangga.EditorSetup.SceneSetupHelper:SetupPlayableScenes () (at Assets/Scripts/Editor/SceneSetupHelper.cs:57)
+
+(Filename: Assets/Scripts/Quiz/QuizBank.cs Line: 270)
+
+Unloading 13 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 58 unused Assets / (21.3 KB). Loaded Objects now: 7417.
+Memory consumption went from 191.4 MB to 191.4 MB.
+Total: 7.614100 ms (FindLiveObjects: 0.611700 ms CreateObjectMapping: 0.357400 ms MarkObjects: 6.550500 ms  DeleteObjects: 0.092500 ms)
+
+Start importing Assets/Scenes/MainMenuScene.unity using Guid(861eb3a68504f7141bad5bc56e7e380f) (DefaultImporter) -> (Import Result ID: 'c3c5ea6cdf8d9ecabb6f727e66b908cc') in 0.011242 seconds [static dependencies only]. Details - ImportResultOutputID=8dc7690f449f40612cfe55f7804015aa DependenciesID=1dcb4655c4e1971c7d28b01b9da79b5b StaticDependenciesID=3af44eb05cca8aaa55f2528100b5f38f 
+Refreshing native plugins compatible for Editor in 2.29 ms, found 4 plugins.
+Asset Pipeline Refresh (id=4c40eed281d8cee419f7749641326b16): Total: 0.105 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Unloading 24 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 158 unused Assets / (80.0 KB). Loaded Objects now: 7431.
+Memory consumption went from 207.5 MB to 207.4 MB.
+Total: 12.625900 ms (FindLiveObjects: 0.635500 ms CreateObjectMapping: 0.502800 ms MarkObjects: 10.329100 ms  DeleteObjects: 1.156800 ms)
+
+Start importing Assets/Scenes/GameScene.unity using Guid(272ef1d65dbf9cf4d9254e8c08b53eda) (DefaultImporter) -> (Import Result ID: '38b7280ddf42863a612013a4afd081d0') in 0.0042195 seconds [static dependencies only]. Details - ImportResultOutputID=e7f5159fe22b478d6213a10a814295f9 DependenciesID=749fc005b191d1f2ab9c4dfc59ccc931 StaticDependenciesID=989d003d353959f8cdac4d4a37ad7e42 
+Refreshing native plugins compatible for Editor in 2.68 ms, found 4 plugins.
+Asset Pipeline Refresh (id=be0944aba65150a429eba5b90bdf1f82): Total: 0.077 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Opening scene 'Assets/Scenes/MainMenuScene.unity'
+Unloading 23 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/MainMenuScene.unity'
+	Deserialize:            33.155 ms
+	Integration:            226.907 ms
+	Integration of assets:  0.087 ms
+	Thread Wait Time:       0.350 ms
+	Total Operation Time:   260.500 ms
+Unloading 212 unused Assets / (62.0 KB). Loaded Objects now: 7623.
+Memory consumption went from 197.0 MB to 196.9 MB.
+Total: 7.130500 ms (FindLiveObjects: 0.360800 ms CreateObjectMapping: 0.104000 ms MarkObjects: 6.182400 ms  DeleteObjects: 0.482300 ms)
+
+DisplayDialog: Sukses! Kedua Scene (MainMenuScene & GameScene) berhasil dibuat, dikonfigurasi, dan dimasukkan ke Build Settings! Tekan Play untuk langsung mencoba game.
+This should not be called in batch mode.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEditor.EditorDialog:DisplayAlertDialogNative (string,UnityEditor.DialogIconType,string,string)
+UnityEditor.EditorDialog:DisplayAlertDialog (string,string,string,UnityEditor.DialogIconType)
+UnityEditor.EditorUtility:DisplayDialog (string,string,string)
+UlarTangga.EditorSetup.SceneSetupHelper:SetupPlayableScenes () (at Assets/Scripts/Editor/SceneSetupHelper.cs:96)
+
+[Assets/Scripts/Editor/SceneSetupHelper.cs line 96]
+
+[SceneSetup] Scenes generated and linked successfully!
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UlarTangga.EditorSetup.SceneSetupHelper:SetupPlayableScenes () (at Assets/Scripts/Editor/SceneSetupHelper.cs:97)
+
+(Filename: Assets/Scripts/Editor/SceneSetupHelper.cs Line: 97)
+
+Batchmode quit successfully invoked - shutting down!
+Curl error 42: Callback aborted
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+Input System module state changed to: ShutdownInProgress.
+Input Polling Thread exited.
+Input System module state changed to: Shutdown.
+[Licensing::IpcConnector] LicenseClient-Ayubi-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-Ayubi channel disconnected successfully.
+AcceleratorClientConnectionCallback - disconnected - :0
+Cleanup mono
+CodeReloadManager destroyed
+Exiting batchmode successfully now!
+Exiting without the bug reporter. Application will terminate with return code 0

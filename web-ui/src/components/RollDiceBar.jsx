@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAudio } from '../hooks/useAudio';
 
 export default function RollDiceBar({ players, activePlayerId, instruction, onRoll, onChargingChange, gameState, isPopupOpen }) {
+  const { playSfx } = useAudio();
   const [charge, setCharge] = useState(0);
   const [isCharging, setIsCharging] = useState(false);
   const [hasRolledThisTurn, setHasRolledThisTurn] = useState(false);
@@ -67,13 +69,14 @@ export default function RollDiceBar({ players, activePlayerId, instruction, onRo
   // startCharging and stopCharging callbacks
   const startCharging = useCallback(() => {
     if (diceControlState !== "ready") return;
+    playSfx('click');
     setIsCharging(true);
     if (onChargingChange) onChargingChange(true);
     chargeRef.current = 0;
     directionRef.current = 1;
     lastTimeRef.current = null;
     animFrameId.current = requestAnimationFrame(chargeLoopRef.current);
-  }, [diceControlState, onChargingChange]);
+  }, [diceControlState, onChargingChange, playSfx]);
 
   const stopCharging = useCallback((shouldRoll = true) => {
     if (animFrameId.current) {

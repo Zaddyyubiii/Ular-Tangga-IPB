@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useAudio } from '../hooks/useAudio';
 
 export default function QuizModal({ quiz, onAnswer, onClose }) {
+  const { playSfx } = useAudio();
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [hasAnswered, setHasAnswered] = useState(false);
 
@@ -19,6 +21,14 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
     };
   }, []);
 
+  // Play correct/incorrect sound when hasAnswered changes to true
+  useEffect(() => {
+    if (hasAnswered && selectedIdx !== null && quiz) {
+      const correct = selectedIdx === quiz.correctAnswerIndex;
+      playSfx(correct ? 'petakBonus' : 'petakPunishment');
+    }
+  }, [hasAnswered, selectedIdx, quiz, playSfx]);
+
   // Enter key support to dismiss feedback
   useEffect(() => {
     if (!quiz || !hasAnswered) return;
@@ -26,6 +36,7 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
     const handleKeyDown = (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
+        playSfx('click');
         onClose();
       }
     };
@@ -34,12 +45,13 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [quiz, hasAnswered, onClose]);
+  }, [quiz, hasAnswered, onClose, playSfx]);
 
   if (!quiz) return null;
 
   const handleOptionClick = (idx) => {
     if (hasAnswered) return;
+    playSfx('click');
     setSelectedIdx(idx);
     setHasAnswered(true);
     
@@ -118,7 +130,10 @@ export default function QuizModal({ quiz, onAnswer, onClose }) {
 
             {/* Bubbly dismiss button */}
             <button
-              onClick={onClose}
+              onClick={() => {
+                playSfx('click');
+                onClose();
+              }}
               className={`wood-button mt-2 py-3 px-8 text-xl font-bangers uppercase transition-all duration-100 ${
                 isCorrect 
                   ? "bg-[var(--color-game-grass)] border-[var(--color-game-deep-grass)]" 

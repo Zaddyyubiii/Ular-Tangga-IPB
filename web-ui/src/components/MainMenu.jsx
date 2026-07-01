@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAudio } from '../hooks/useAudio';
 
 const MainMenu = ({ onStartGame }) => {
+  const { playSfx } = useAudio();
   const [playerCount, setPlayerCount] = useState(4);
   const [playerNames, setPlayerNames] = useState(["", "", "", ""]);
 
@@ -19,6 +21,7 @@ const MainMenu = ({ onStartGame }) => {
   };
 
   const handleStart = () => {
+    playSfx('click');
     onStartGame({ playerCount, playerNames });
   };
 
@@ -48,7 +51,10 @@ const MainMenu = ({ onStartGame }) => {
         <div className="flex items-center justify-center gap-6 mb-8 w-full">
           <motion.button 
             whileTap={{ scale: 0.9 }}
-            onClick={() => setPlayerCount(Math.max(1, playerCount - 1))}
+            onClick={() => {
+              playSfx('click');
+              setPlayerCount(Math.max(1, playerCount - 1));
+            }}
             className="wood-button w-12 h-12 text-3xl font-black flex items-center justify-center pb-1"
           >
             -
@@ -59,7 +65,10 @@ const MainMenu = ({ onStartGame }) => {
           </div>
           <motion.button 
             whileTap={{ scale: 0.9 }}
-            onClick={() => setPlayerCount(Math.min(4, playerCount + 1))}
+            onClick={() => {
+              playSfx('click');
+              setPlayerCount(Math.min(4, playerCount + 1));
+            }}
             className="wood-button w-12 h-12 text-3xl font-black flex items-center justify-center pb-1"
           >
             +

@@ -1,17 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAudio } from '../hooks/useAudio';
 
-const PopupModal = ({ popupData, triggerUnityAction }) => {
-  const [prevPopupData, setPrevPopupData] = useState(popupData);
-  const [isVisible, setIsVisible] = useState(!!popupData);
-
-  if (popupData !== prevPopupData) {
-    setPrevPopupData(popupData);
-    setIsVisible(!!popupData);
+function getPopupSfxName(title = "") {
+  const lowerTitle = title.toLowerCase();
+  if (
+    lowerTitle.includes("pelanggaran") ||
+    lowerTitle.includes("skors") ||
+    lowerTitle.includes("sanksi") ||
+    lowerTitle.includes("ular") ||
+    lowerTitle.includes("drop out") ||
+    lowerTitle.includes("melebihi batas")
+  ) {
+    return "petakPunishment";
   }
 
+  if (
+    lowerTitle.includes("prestasi") ||
+    lowerTitle.includes("kegiatan positif") ||
+    lowerTitle.includes("finish") ||
+    lowerTitle.includes("selamat") ||
+    lowerTitle.includes("duta")
+  ) {
+    return "petakBonus";
+  }
+
+  return null;
+}
+
+const PopupModal = ({ popupData, triggerUnityAction }) => {
+  const { playSfx } = useAudio();
+
   const handleContinue = () => {
-    setIsVisible(false);
+    playSfx('click');
     triggerUnityAction("OnPopupClosedFromReact", "");
   };
 
@@ -21,7 +42,7 @@ const PopupModal = ({ popupData, triggerUnityAction }) => {
     const handleKeyDown = (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        setIsVisible(false);
+        playSfx('click');
         triggerUnityAction("OnPopupClosedFromReact", "");
       }
     };
@@ -30,7 +51,17 @@ const PopupModal = ({ popupData, triggerUnityAction }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [popupData, triggerUnityAction]);
+  }, [popupData, triggerUnityAction, playSfx]);
+
+  // Play category-based popup sound on popup load
+  useEffect(() => {
+    if (!popupData) return;
+
+    const popupSfx = getPopupSfxName(popupData.title || "");
+    if (popupSfx) {
+      playSfx(popupSfx);
+    }
+  }, [popupData, playSfx]);
 
   if (!popupData) return null;
 
@@ -61,7 +92,7 @@ const PopupModal = ({ popupData, triggerUnityAction }) => {
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm pointer-events-auto">
       <AnimatePresence>
-        {isVisible && (
+        {popupData && (
           <motion.div
             initial={{ scale: 0, rotate: -5 }}
             animate={{ scale: 1, rotate: 0 }}

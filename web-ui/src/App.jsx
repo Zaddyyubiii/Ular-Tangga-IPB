@@ -10,8 +10,51 @@ import GameOverModal from './components/GameOverModal';
 import MainMenu from './components/MainMenu';
 import PopupModal from './components/PopupModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAudio } from './hooks/useAudio';
+
+
+function getStepDelay(pathLength) {
+  if (pathLength > 40) return 55;
+  if (pathLength > 20) return 80;
+  return 140;
+}
+
+// Helper to build the step-by-step movement path (including bounce-back and snake/ladder teleports)
+function buildMovementPath(startTile, targetTile, diceValue) {
+  if (startTile === targetTile) return [];
+
+  // Bounce back check
+  if (diceValue && startTile + diceValue > 100) {
+    const path = [];
+    // Forward to 100
+    for (let t = startTile + 1; t <= 100; t++) {
+      path.push(t);
+    }
+    // Backward from 99
+    const remaining = diceValue - (100 - startTile);
+    for (let i = 1; i <= remaining; i++) {
+      path.push(100 - i);
+    }
+    return path;
+  }
+
+  const path = [];
+  if (targetTile > startTile) {
+    for (let t = startTile + 1; t <= targetTile; t++) {
+      path.push(t);
+    }
+  } else {
+    for (let t = startTile - 1; t >= targetTile; t--) {
+      path.push(t);
+    }
+  }
+  return path;
+}
+
+
 
 function App() {
+  const { muted, toggleMute, playSfx } = useAudio();
   const [gameState, setGameState] = useState(null);
   const [quiz, setQuiz] = useState(null);
   const [prologue, setPrologue] = useState(null);
@@ -23,11 +66,111 @@ function App() {
   const prevShowDiceRef = useRef(false);
   const prevDiceValueRef = useRef(0);
 
+  const gameStateRef = useRef(gameState);
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
+
+  // Keep track of the raw Unity states and animation step to handle high-frequency timer updates
+  const prevUnityStateRef = useRef(null);
+  const latestUnityStateRef = useRef(null);
+  const animationStateRef = useRef(null); // format: { playerId: number, currentTile: number }
+
   // Listen to native Unity WebGL CustomEvents
   useEffect(() => {
-    const handleStateUpdate = (e) => {
+    const handleStateUpdate = async (e) => {
       console.log("React received state update:", e.detail);
-      setGameState(e.detail);
+      const newState = e.detail;
+      const prevUnityState = prevUnityStateRef.current;
+      latestUnityStateRef.current = newState;
+
+      // Helper to merge Unity state and active step-by-step animation state
+      const getDisplayState = (unityState, animationState) => {
+        if (!unityState) return null;
+        if (!animationState) return unityState;
+        return {
+          ...unityState,
+          players: unityState.players.map(p =>
+            p.id === animationState.playerId
+              ? { ...p, currentTile: animationState.currentTile }
+              : p
+          )
+        };
+      };
+
+      if (!prevUnityState || !prevUnityState.players || !newState || !newState.players) {
+        prevUnityStateRef.current = newState;
+        if (!animationStateRef.current) {
+          setGameState(newState);
+        } else {
+          setGameState(getDisplayState(newState, animationStateRef.current));
+        }
+        return;
+      }
+
+      // Find if any player tile changed in the Unity state
+      let movingPlayerId = null;
+      let startTile = 0;
+      let targetTile = 0;
+
+      for (let i = 0; i < newState.players.length; i++) {
+        const oldP = prevUnityState.players.find(p => p.id === newState.players[i].id);
+        const newP = newState.players[i];
+        if (oldP && oldP.currentTile !== newP.currentTile) {
+          movingPlayerId = newP.id;
+          startTile = oldP.currentTile;
+          targetTile = newP.currentTile;
+          break;
+        }
+      }
+
+      const movedPlayerCount = newState.players.filter(newPlayer => {
+        const oldPlayer = prevUnityState.players.find(p => p.id === newPlayer.id);
+        return oldPlayer && oldPlayer.currentTile !== newPlayer.currentTile;
+      }).length;
+
+      // Update prevUnityStateRef for the next event check
+      prevUnityStateRef.current = newState;
+
+      // If no player moved, or multiple players changed, treat it as setup/reset/status update.
+      if (movingPlayerId === null || movedPlayerCount !== 1) {
+        if (!animationStateRef.current) {
+          setGameState(newState);
+        } else {
+          setGameState(getDisplayState(newState, animationStateRef.current));
+        }
+        return;
+      }
+
+      // Generate path
+      const diceValue = newState.diceValue || prevUnityState.diceValue || 0;
+      const path = buildMovementPath(startTile, targetTile, diceValue);
+
+      if (path.length === 0) {
+        if (!animationStateRef.current) {
+          setGameState(newState);
+        } else {
+          setGameState(getDisplayState(newState, animationStateRef.current));
+        }
+        return;
+      }
+
+      // Animating the tiles in local state step-by-step
+      for (let i = 0; i < path.length; i++) {
+        const currentStepTile = path[i];
+
+        animationStateRef.current = { playerId: movingPlayerId, currentTile: currentStepTile };
+        setGameState(getDisplayState(latestUnityStateRef.current, animationStateRef.current));
+
+        playSfx('movePetak');
+
+        const stepDelay = getStepDelay(path.length);
+        await new Promise(resolve => setTimeout(resolve, stepDelay));
+      }
+
+      // Sync final state
+      animationStateRef.current = null;
+      setGameState(latestUnityStateRef.current);
     };
 
     const handleShowQuiz = (e) => {
@@ -68,6 +211,9 @@ function App() {
       setGameOver(null);
       setPopupData(null);
       setIsMainMenu(true);
+      prevUnityStateRef.current = null;
+      latestUnityStateRef.current = null;
+      animationStateRef.current = null;
     };
 
     window.addEventListener("UnityStateUpdated", handleStateUpdate);
@@ -89,11 +235,8 @@ function App() {
       window.removeEventListener("UnityClosePopup", handleClosePopup);
       window.removeEventListener("UnityMainMenuLoaded", handleMainMenuLoaded);
     };
-  }, []);
+  }, [playSfx]);
 
-  // Detect dice result arrival — triggers board throw animation.
-  // Works for both human (no diceValue=0 phase) and bot (has diceValue=0 phase).
-  // Fires when showDiceResult flips to true AND diceValue > 0.
   useEffect(() => {
     const showNow = gameState?.showDiceResult ?? false;
     const valNow = gameState?.diceValue ?? 0;
@@ -119,6 +262,20 @@ function App() {
     prevDiceValueRef.current = valNow;
   }, [gameState?.showDiceResult, gameState?.diceValue]);
 
+  // Victory sound trigger
+  const lastVictoryPlayedRef = useRef(false);
+  useEffect(() => {
+    if (gameOver && !lastVictoryPlayedRef.current) {
+      playSfx("victory");
+      lastVictoryPlayedRef.current = true;
+    }
+    if (!gameOver) {
+      lastVictoryPlayedRef.current = false;
+    }
+  }, [gameOver, playSfx]);
+
+
+
   const triggerUnityAction = (methodName, parameter) => {
     if (window.unityInstance) {
       console.log(`React calling C# Receiver: ${methodName}(${parameter})`);
@@ -137,6 +294,16 @@ function App() {
   // - Bot is rolling (Unity sends diceValue === 0)
   const isUnityRolling = gameState && gameState.showDiceResult && gameState.diceValue === 0;
   const showRollingBanner = (isLocalCharging || isUnityRolling) && !isPopupOpen;
+
+  // Dice roll sound trigger
+  const prevShowRollingBannerRef = useRef(false);
+  useEffect(() => {
+    if (showRollingBanner && !prevShowRollingBannerRef.current) {
+      playSfx('dice');
+    }
+    prevShowRollingBannerRef.current = showRollingBanner;
+  }, [showRollingBanner, playSfx]);
+
   // Who is rolling — use diceRollerName if available, else active player
   const rollerName = gameState?.diceRollerName || activePlayerName;
   const rollerColor = gameState?.players?.find(p => p.playerName === rollerName)?.playerColorHex || "rgba(100, 116, 139, 0.6)";
@@ -146,6 +313,21 @@ function App() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden pointer-events-none flex flex-col items-center justify-between">
+      {/* Floating Audio Toggle Button */}
+      <div className="absolute top-4 right-4 z-50 pointer-events-auto">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => {
+            playSfx('click');
+            toggleMute();
+          }}
+          className="wood-button flex items-center justify-center p-3 text-lg focus:outline-none min-w-[50px] min-h-[50px]"
+          title={muted ? "Unmute Audio" : "Mute Audio"}
+        >
+          {muted ? "🔇" : "🔊"}
+        </motion.button>
+      </div>
+
       {/* 0. Main Menu */}
       <AnimatePresence>
         {isMainMenu && (

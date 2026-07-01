@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Dice3D.css';
 
 /**
@@ -90,7 +90,9 @@ export default function Dice3D({ value, isRolling }) {
 
   useEffect(() => {
     if (!isRolling && value && value > 0) {
-      setFaces(splitDiceValue(value));
+      Promise.resolve().then(() => {
+        setFaces(splitDiceValue(value));
+      });
     }
   }, [isRolling, value]);
 

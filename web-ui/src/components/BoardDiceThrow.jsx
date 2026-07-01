@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Dice3D.css';
 
@@ -44,10 +44,10 @@ function ThrownDie({ face, index, onComplete }) {
   const landX = isLeft ? -45 : 45;
   const landY = 0;
 
-  // Random extra spins before landing (multiples of 360 + final rotation)
-  const extraSpinsX = (2 + Math.floor(Math.random() * 2)) * 360;
-  const extraSpinsY = (1 + Math.floor(Math.random() * 2)) * 360;
-  const extraSpinsZ = (1 + Math.floor(Math.random() * 2)) * 360;
+  // Slightly varied extra spins before landing (multiples of 360 + final rotation)
+  const extraSpinsX = (2 + ((face + index) % 2)) * 360;
+  const extraSpinsY = (1 + ((face + index + 1) % 2)) * 360;
+  const extraSpinsZ = (1 + ((face + index + 2) % 2)) * 360;
 
   return (
     <motion.div
@@ -172,13 +172,15 @@ export default function BoardDiceThrow({ value, visible, onDone }) {
   const doneCount = useRef(0);
 
   useEffect(() => {
-    if (visible && value && value >= 2) {
-      setFaces(splitIntoDice(value));
-      setShow(true);
-      doneCount.current = 0;
-    } else {
-      setShow(false);
-    }
+    Promise.resolve().then(() => {
+      if (visible && value && value >= 2) {
+        setFaces(splitIntoDice(value));
+        setShow(true);
+        doneCount.current = 0;
+      } else {
+        setShow(false);
+      }
+    });
   }, [visible, value]);
 
   const handleDieComplete = () => {

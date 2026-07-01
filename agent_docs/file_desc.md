@@ -65,9 +65,17 @@ Penyimpanan data statis berbasis ScriptableObject untuk memudahkan penyeimbangan
     *   `GameOverModal.jsx`: Pop-up penobatan Duta Tata Tertib IPB University dan tombol navigasi akhir.
     *   `MainMenu.jsx`: Menu awal game untuk memilih jumlah pemain (1-4) dan memasukkan nama pemain secara dinamis.
     *   `PopupModal.jsx`: Pop-up sembul interaktif untuk pesan ubin biasa, sanksi tengkorak, ular, tangga, dan bounce-back.
+*   `src/App.jsx`: Akar logika React Overlay yang mendengarkan event Unity CustomEvents, mengelola state lokal, menyinkronkan data, dan melakukan simulasi gerakan ubin asinkron untuk menyinkronkan suara `moveStep` per petak.
 *   `index.html`: Pembungkus terpadu yang memuat Canvas WebGL Unity dan menumpangkan React Overlay `#root` di atasnya.
 *   `vite.config.js`: Konfigurasi build Vite yang otomatis mengekspor bundle produksi ke folder `/docs/` tanpa mengganggu file `.wasm` Unity.
 *   `src/index.css`: Konfigurasi theme modern Tailwind v4 `@theme` (font Outfit, game-dark/blue/cyan palette, rounded-cartoon, shadow-bubble).
+*   **public/audio/**: Berkas audio web runtime yang merupakan salinan dari `Assets/Audio/` tanpa file `.meta`. BGM berada di `public/audio/bgm/Superhero_violin_no_intro.ogg`; SFX berada di `public/audio/sfx/` dengan nama browser-friendly seperti `Victory_pake_yang_ini_aja.wav`.
+*   **src/audio/AudioManager.js**: Manajer audio murni JavaScript untuk React/Web. Fitur: preload BGM/SFX, BGM loop satu instance, pooling SFX overlap (max 5 instans simultan), cooldown kecil untuk `movePetak`, fallback victory ke `winAlt1/winAlt2`, volume BGM/SFX, mute, cleanup, dan sinkronisasi preferensi ke `localStorage`.
+    *   Mapping BGM: `bgmMain` memakai `Superhero_violin_no_intro.ogg` lewat `playBgm()`.
+    *   Mapping SFX utama: `click` = `Click.wav`, `dice` = `Dice.mp3`, `movePetak` = `MovePetak.wav`, `petakBonus` = `PetakBonus.wav`, `petakPunishment` = `PetakPunishment.wav`, `victory` = `Victory_pake_yang_ini_aja.wav`, `winAlt1` = `win_sound_2_1.wav`, `winAlt2` = `win_sound_2_3.wav`.
+    *   Alias kompatibilitas lama tetap tersedia: `moveStep`, `ladderBonus`, `punishment`, `quizCorrect`, dan `winAlt`.
+*   **src/context/AudioContext.js & AudioProvider.jsx**: Provider React untuk preload audio, menangkap gesture pertama di capture phase untuk memenuhi autoplay policy browser, memulai BGM setelah unlock, serta mengontrol mute dan volume global.
+*   **src/hooks/useAudio.js**: Custom hook untuk memicu `playSfx`, `playBgm`, `stopBgm`, `unlockAudio`, `toggleMute`, `setBgmVolume`, dan `setSfxVolume`.
 
 ### 8. `agent_docs/` (Dokumentasi Agent)
 *   `file_desc.md`: Dokumen deskripsi file ini (wajib di-update berkala).
